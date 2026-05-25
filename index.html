@@ -3,106 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Głosowy dart</title>
+    <title>Apka Darterska</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="min-h-screen p-4 md:p-8 bg-[#0f172a] text-white flex flex-col justify-start items-center">
+<body class="p-4 md:p-8 relative">
+
+    <div id="toast-container" class="fixed top-4 z-50 w-full max-w-xs pointer-events-none left-1/2 -translate-x-1/2 flex flex-col gap-2"></div>
 
     <div id="lobby" class="w-full max-w-2xl space-y-6">
-        <header class="text-center py-4">
-            <h1 class="text-4xl md:text-5xl font-black text-sky-400 italic uppercase">Apka darterska</h1>
-            <p class="text-slate-400 tracking-[0.2em] text-[10px] uppercase">Głosowy system liczenia</p>
+        <header class="text-center py-6">
+            <h1 class="text-5xl font-black text-sky-400 italic uppercase tracking-tighter">Apka Darterska</h1>
+            <p class="text-slate-400 tracking-[0.2em] text-[10px] uppercase font-bold mt-1">Głosowy system liczenia</p>
         </header>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="space-y-4">
-                <section class="glass p-5 rounded-2xl border border-slate-700">
-                    <h2 class="text-sm font-bold mb-3 text-sky-400 uppercase tracking-tight">1. Wybierz Tryb</h2>
-                    <div class="grid grid-cols-3 gap-2">
-                        <button onclick="selectGameMode('X01')" id="btn-X01" class="game-opt p-3 rounded-lg bg-slate-800 border border-slate-600 hover:bg-sky-900 transition font-bold text-sm">X01</button>
-                        <button onclick="selectGameMode('ATC')" id="btn-ATC" class="game-opt p-3 rounded-lg bg-slate-800 border border-slate-600 hover:bg-sky-900 transition font-bold text-[11px]">A-T-C</button>
-                        <button onclick="selectGameMode('121')" id="btn-121" class="game-opt p-3 rounded-lg bg-slate-800 border border-slate-600 hover:bg-sky-900 transition font-bold text-sm">121</button>
+                <section class="glass p-5 border border-slate-700/50">
+                    <h2 class="text-xs font-bold mb-3 text-sky-400 uppercase tracking-widest">1. Tryb Gry</h2>
+                    <div class="grid grid-cols-4 gap-2">
+                        <button onclick="selectGameMode('X01')" id="btn-X01" class="game-opt p-3 rounded-xl bg-slate-800 border border-slate-700 hover:bg-slate-700 transition font-black text-sm">X01</button>
+                        <button onclick="selectGameMode('ATC')" id="btn-ATC" class="game-opt p-3 rounded-xl bg-slate-800 border border-slate-700 hover:bg-slate-700 transition font-black text-xs">A-T-C</button>
+                        <button onclick="selectGameMode('121')" id="btn-121" class="game-opt p-3 rounded-xl bg-slate-800 border border-slate-700 hover:bg-slate-700 transition font-black text-sm">121</button>
+                        <button onclick="selectGameMode('RND')" id="btn-RND" class="game-opt p-3 rounded-xl bg-slate-800 border border-slate-700 hover:bg-slate-700 transition font-black text-sm text-amber-400">RND</button>
                     </div>
                 </section>
 
-                <section id="x01-options" class="hidden glass p-5 rounded-2xl border border-slate-700">
-                    <h2 class="text-sm font-bold mb-3 uppercase tracking-tight">Ustawienie X01</h2>
-                    <div class="grid grid-cols-4 gap-2 text-xs">
-                        <button onclick="setX01Points(301)" id="btn-p301" class="x01-pts p-2 bg-slate-800 border border-slate-600 rounded-lg">301</button>
-                        <button onclick="setX01Points(501)" id="btn-p501" class="x01-pts p-2 bg-slate-800 border border-slate-600 rounded-lg neon-border">501</button>
-                        <button onclick="setX01Points(701)" id="btn-p701" class="x01-pts p-2 bg-slate-800 border border-slate-600 rounded-lg">701</button>
-                        <button onclick="setX01Points(1001)" id="btn-p1001" class="x01-pts p-2 bg-slate-800 border border-slate-600 rounded-lg">1001</button>
+                <section id="x01-options" class="hidden glass p-5 border border-slate-700/50">
+                    <h2 class="text-xs font-bold mb-3 text-slate-400 uppercase tracking-widest">Ustawienie X01</h2>
+                    <div class="grid grid-cols-4 gap-2 text-xs font-bold">
+                        <button onclick="setX01Points(301)" id="btn-p301" class="x01-pts p-2 bg-slate-800 border border-slate-700 rounded-lg">301</button>
+                        <button onclick="setX01Points(501)" id="btn-p501" class="x01-pts p-2 bg-slate-800 border border-slate-700 rounded-lg neon-border-cyan">501</button>
+                        <button onclick="setX01Points(701)" id="btn-p701" class="x01-pts p-2 bg-slate-800 border border-slate-700 rounded-lg">701</button>
+                        <button onclick="setX01Points(1001)" id="btn-p1001" class="x01-pts p-2 bg-slate-800 border border-slate-700 rounded-lg">1001</button>
                     </div>
                 </section>
 
-                <section class="glass p-5 rounded-2xl border border-slate-700">
-                    <h2 class="text-sm font-bold mb-3 text-sky-400 uppercase tracking-tight">2. Format Meczowy</h2>
-                    <div class="grid grid-cols-2 gap-3 mb-3 text-xs">
-                        <button onclick="setLegFormat('firstTo')" id="btn-fmt-firstTo" class="leg-fmt p-2.5 rounded-lg bg-sky-900 border neon-border font-bold">First to</button>
-                        <button onclick="setLegFormat('bestOf')" id="btn-fmt-bestOf" class="leg-fmt p-2.5 rounded-lg bg-slate-800 border border-slate-600 font-bold">Best of</button>
+                <section id="format-options" class="glass p-5 border border-slate-700/50">
+                    <h2 class="text-xs font-bold mb-3 text-sky-400 uppercase tracking-widest">2. Format Meczowy</h2>
+                    <div class="grid grid-cols-2 gap-3 mb-3 text-xs font-bold">
+                        <button onclick="setLegFormat('firstTo')" id="btn-fmt-firstTo" class="leg-fmt p-2.5 rounded-lg bg-slate-800 border neon-border-cyan">First to</button>
+                        <button onclick="setLegFormat('bestOf')" id="btn-fmt-bestOf" class="leg-fmt p-2.5 rounded-lg bg-slate-800 border border-slate-700">Best of</button>
                     </div>
-                    <div id="leg-options-container" class="grid grid-cols-4 gap-2"></div>
+                    <div id="leg-options-container" class="grid grid-cols-4 gap-2 font-bold"></div>
                 </section>
             </div>
 
             <div class="flex flex-col">
-                <section class="glass p-5 rounded-2xl border border-slate-700 h-full flex flex-col justify-between">
+                <section class="glass p-5 border border-slate-700/50 h-full flex flex-col justify-between">
                     <div>
-                        <h2 class="text-sm font-bold mb-3 uppercase tracking-tight text-sky-400">3. Skład</h2>
+                        <h2 class="text-xs font-bold mb-3 uppercase tracking-widest text-sky-400">3. Zawodnicy</h2>
                         <div id="player-inputs" class="space-y-2">
-                            <input type="text" placeholder="Gracz 1" class="p-name w-full bg-slate-900 border border-slate-700 p-2.5 rounded-lg focus:border-sky-500 outline-none text-sm">
+                            <input type="text" placeholder="Gracz 1" class="p-name w-full bg-slate-900 border border-slate-700 p-3 rounded-xl focus:border-sky-500 outline-none text-sm font-semibold text-white">
                         </div>
                     </div>
-                    <button onclick="addPlayerInput()" class="mt-3 text-sky-400 text-xs font-medium text-left hover:text-sky-300 transition">+ Dodaj gracza</button>
+                    <button onclick="addPlayerInput()" class="mt-4 text-sky-400 text-xs font-bold text-left hover:text-sky-300 transition-all">+ DODAJ GRACZA</button>
                 </section>
             </div>
         </div>
 
-        <button onclick="startGame()" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-black py-4 rounded-2xl shadow-lg shadow-sky-500/20 transition-all text-xl uppercase italic tracking-tighter">
+        <button onclick="startGame()" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-black py-4 rounded-2xl shadow-lg transition-all text-xl uppercase italic tracking-tighter border border-sky-400/20">
             GRAJ <span id="start-game-name" class="ml-1 text-sky-200"></span>
         </button>
-
-        <div class="text-center">
-            <a href="instrukcja.html" class="text-slate-500 hover:text-sky-400 text-xs font-bold uppercase tracking-widest transition">📖 Instrukcja</a>
-        </div>
     </div>
 
-    <div id="game-board" class="hidden w-full max-w-md space-y-4">
-        <div class="flex justify-between items-center py-2">
-            <button onclick="exitGame()" class="text-slate-500 font-bold hover:text-white text-sm">← EXIT</button>
-            <div id="game-info" class="font-black text-sky-400 italic text-lg">X01</div>
-            <button onclick="resetCurrentGame()" class="text-slate-500 font-bold text-xs uppercase hover:text-white">Reset</button>
+    <div id="game-board" class="hidden w-full max-w-xl space-y-4">
+        <div class="flex justify-between items-center py-2 text-sm font-bold">
+            <button onclick="exitGame()" class="text-slate-400 hover:text-white tracking-widest">← WYJDŹ</button>
+            <div id="game-info" class="font-black text-sky-400 italic text-xl tracking-tight">X01</div>
+            <button onclick="resetCurrentGame()" class="text-slate-400 hover:text-white tracking-widest">RESET</button>
         </div>
 
-        <div id="players-display" class="grid grid-cols-1 gap-3">
-            </div>
+        <div id="players-display" class="grid grid-cols-1 gap-4"></div>
 
-        <div class="glass p-5 rounded-2xl border border-slate-800 flex items-center justify-between px-6 shadow-xl">
+        <div class="glass p-5 border border-slate-700/50 flex items-center justify-between px-6 relative overflow-hidden">
             <div class="text-left">
-                <div id="voice-status" class="text-emerald-400 text-xs font-black uppercase animate-pulse-soft">Słucham...</div>
-                <div id="current-player-label" class="text-slate-400 text-[10px] uppercase font-bold tracking-widest mt-1 italic">Tura: </div>
+                <div id="voice-status" class="text-emerald-400 text-sm font-black uppercase tracking-widest animate-pulse-soft">Słucham...</div>
+                <div id="current-player-label" class="text-slate-400 text-[11px] uppercase font-bold tracking-wider mt-1">TURA: GRACZ 1</div>
             </div>
             <div class="text-right">
-                <span class="text-slate-500 text-[9px] block uppercase font-bold tracking-wider">Ostatni rzut</span>
-                <span id="voice-display" class="text-4xl font-black text-white italic leading-none">---</span>
+                <span id="last-shot-label" class="text-slate-500 text-[10px] block uppercase font-bold tracking-widest">RZUT</span>
+                <span id="voice-display" class="text-4xl font-black text-white italic tracking-tighter">---</span>
             </div>
         </div>
 
-        <div id="checkout-container" class="glass p-4 rounded-2xl border border-slate-800 text-center shadow-lg">
-            <div class="text-slate-500 text-[9px] uppercase font-bold tracking-wider mb-1">Sugerowany Checkout</div>
-            <div id="checkout-suggestion" class="text-amber-400 font-black text-xl italic">---</div>
+        <div id="checkout-container" class="glass p-5 border border-slate-700/50 text-center">
+            <div id="checkout-title" class="text-slate-400 text-[11px] uppercase font-bold tracking-widest mb-1">CELUJ W:</div>
+            <div id="checkout-suggestion" class="text-amber-400 font-black text-3xl italic tracking-tight">---</div>
+            <div id="rnd-buttons" class="hidden grid grid-cols-2 gap-3 mt-3">
+                <button onclick="handleRndVoiceCommand(true)" class="bg-emerald-600/20 border border-emerald-500/40 hover:bg-emerald-600 text-emerald-400 hover:text-white p-2.5 rounded-xl text-xs font-black uppercase transition-all">Trafione (Tak)</button>
+                <button onclick="handleRndVoiceCommand(false)" class="bg-rose-600/20 border border-rose-500/40 hover:bg-rose-600 text-rose-400 hover:text-white p-2.5 rounded-xl text-xs font-black uppercase transition-all">Pudło (Nie)</button>
+            </div>
         </div>
 
         <div class="space-y-1">
-            <div class="text-slate-500 text-[9px] uppercase font-bold tracking-wider pl-1 mb-1">Ostatnie rzuty:</div>
-            <div id="game-log" class="space-y-1 text-[11px] text-slate-400 h-28 overflow-y-auto bg-slate-900/40 p-4 rounded-xl font-mono border border-slate-800/60 shadow-inner"></div>
+            <div id="game-log" class="space-y-1 text-[11px] text-slate-400 h-24 overflow-y-auto bg-slate-900/60 p-4 rounded-xl font-mono border border-slate-800"></div>
+            <div class="text-right pt-1">
+                <button onclick="undoLastMove()" id="btn-undo-ui" class="text-rose-400 font-bold text-[10px] uppercase hover:text-rose-300 tracking-wider">↶ Cofnij ostatni rzut</button>
+            </div>
         </div>
     </div>
 
     <script>
-        // --- LOGIKA JAVASCRIPT ---
-        let gameMode = '';
+        let gameMode = 'X01';
         let x01TargetPoints = 501;
         let players = [];
         let currentPlayerIndex = 0;
@@ -111,33 +114,46 @@
         let legTargetCount = 3;    
         let selectedLegValue = 3;  
         let legStartingPlayerIndex = 0; 
+        let turnHistory = [];
+        let currentRndTarget = '';
 
-        const checkoutTable = { 2: "D1", 4: "D2", 6: "D3", 8: "D4", 10: "D5", 12: "D6", 14: "D7", 16: "D8", 18: "D9", 20: "D10", 22: "D11", 24: "D12", 26: "D13", 28: "D14", 30: "D15", 32: "D16", 34: "D17", 36: "D18", 38: "D19", 40: "D20", 41: "9, D16", 42: "10, D16", 43: "3, D20", 44: "4, D20", 45: "13, D16", 46: "6, D20", 47: "15, D16", 48: "16, D16", 49: "17, D16", 50: "10, D20", 51: "19, D16", 52: "12, D20", 53: "13, D20", 54: "14, D20", 55: "15, D20", 56: "16, D20", 57: "17, D20", 58: "18, D20", 59: "19, D20", 60: "20, D20", 61: "T15, D8", 62: "T10, D16", 63: "T13, D12", 64: "T16, D8", 65: "T11, D16", 66: "T14, D12", 67: "T17, D8", 68: "T16, D10", 69: "T19, D6", 70: "T10, D20", 71: "T13, D16", 72: "T16, D12", 73: "T19, D8", 74: "T14, D16", 75: "T17, D12", 76: "T20, D8", 77: "T19, D10", 78: "T18, D12", 79: "T13, D20", 80: "T20, D10", 81: "T19, D12", 82: "T14, D20", 83: "T17, D16", 84: "T20, D12", 85: "T15, D20", 86: "T18, D16", 87: "T17, D18", 88: "T16, D20", 89: "T19, D16", 90: "T20, D15", 91: "T17, D20", 92: "T20, D16", 93: "T19, D18", 94: "T18, D20", 95: "T19, D19", 96: "T20, D18", 97: "T19, D20", 98: "T20, D19", 99: "T19, Bull", 100: "T20, D20", 141: "T20, T19, D12", 170: "T20, T20, Bull" };
+        const checkoutTable = { 2: "D1", 4: "D2", 6: "D3", 8: "D4", 10: "D5", 12: "D6", 14: "D7", 16: "D8", 18: "D9", 20: "D10", 22: "D11", 24: "D12", 26: "D13", 28: "D14", 30: "D15", 32: "D16", 34: "D17", 36: "D18", 38: "D19", 40: "D20", 41: "9, D16", 42: "10, D16", 43: "3, D20", 44: "4, D20", 45: "13, D16", 46: "6, D20", 47: "15, D16", 48: "16, D16", 49: "17, D16", 50: "10, D20", 51: "19, D16", 52: "12, D20", 53: "13, D20", 54: "14, D20", 55: "15, D20", 56: "16, D20", 57: "17, D20", 58: "18, D20", 59: "19, D20", 60: "20, D20", 141: "T20, T19, D12", 170: "T20, T20, Bull" };
 
         const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
         recognition.lang = 'pl-PL';
         recognition.continuous = false;
 
+        function showNotification(message) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast-notification p-4 rounded-xl text-center font-bold bg-slate-800 text-white border border-slate-700 shadow-2xl text-xs tracking-wide`;
+            toast.innerText = message;
+            container.appendChild(toast);
+            setTimeout(() => { toast.remove(); }, 3500);
+        }
+
         function selectGameMode(mode) {
             gameMode = mode;
-            document.querySelectorAll('.game-opt').forEach(btn => btn.classList.remove('neon-border', 'bg-sky-900'));
-            document.getElementById(`btn-${mode}`).classList.add('neon-border', 'bg-sky-900');
+            document.querySelectorAll('.game-opt').forEach(btn => btn.classList.remove('neon-border-cyan', 'neon-border-amber', 'bg-slate-700'));
+            const activeClass = mode === 'RND' ? 'neon-border-amber' : 'neon-border-cyan';
+            document.getElementById(`btn-${mode}`).classList.add(activeClass, 'bg-slate-700');
             document.getElementById('x01-options').classList.toggle('hidden', mode !== 'X01');
+            document.getElementById('format-options').classList.toggle('hidden', mode === 'RND');
             updateLegOptionsDisplay();
             updateStartButtonText();
         }
 
         function setX01Points(pts) {
             x01TargetPoints = pts;
-            document.querySelectorAll('.x01-pts').forEach(btn => btn.classList.remove('neon-border'));
-            document.getElementById(`btn-p${pts}`).classList.add('neon-border');
+            document.querySelectorAll('.x01-pts').forEach(btn => btn.classList.remove('neon-border-cyan', 'bg-slate-700'));
+            document.getElementById(`btn-p${pts}`).classList.add('neon-border-cyan', 'bg-slate-700');
             updateStartButtonText();
         }
 
         function setLegFormat(format) {
             legFormat = format;
-            document.querySelectorAll('.leg-fmt').forEach(btn => btn.classList.remove('neon-border', 'bg-sky-900'));
-            document.getElementById(`btn-fmt-${format}`).classList.add('neon-border', 'bg-sky-900');
+            document.querySelectorAll('.leg-fmt').forEach(btn => btn.classList.remove('neon-border-cyan', 'bg-slate-700'));
+            document.getElementById(`btn-fmt-${format}`).classList.add('neon-border-cyan', 'bg-slate-700');
             selectedLegValue = (format === 'firstTo') ? 3 : 5; 
             updateLegOptionsDisplay();
             updateStartButtonText();
@@ -146,19 +162,20 @@
         function setLegValue(val) {
             selectedLegValue = val;
             legTargetCount = (legFormat === 'firstTo') ? val : Math.ceil(val / 2);
-            document.querySelectorAll('.leg-val-btn').forEach(btn => btn.classList.remove('neon-border', 'bg-slate-700'));
-            document.getElementById(`btn-legval-${val}`).classList.add('neon-border', 'bg-slate-700');
+            document.querySelectorAll('.leg-val-btn').forEach(btn => btn.classList.remove('neon-border-cyan', 'bg-slate-700'));
+            document.getElementById(`btn-legval-${val}`).classList.add('neon-border-cyan', 'bg-slate-700');
             updateStartButtonText();
         }
 
         function updateLegOptionsDisplay() {
             const container = document.getElementById('leg-options-container');
             container.innerHTML = '';
+            if (gameMode === 'RND') return;
             let options = legFormat === 'firstTo' ? [1, 3, 5, 7] : [3, 5, 7, 9];
             options.forEach(val => {
                 const btn = document.createElement('button');
                 btn.id = `btn-legval-${val}`;
-                btn.className = `leg-val-btn p-2 bg-slate-800 border border-slate-600 rounded-lg hover:bg-slate-700 font-bold text-xs transition ${val === selectedLegValue ? 'neon-border bg-slate-700' : ''}`;
+                btn.className = `leg-val-btn p-2 bg-slate-800 border border-slate-700 rounded-lg hover:bg-slate-700 transition-all ${val === selectedLegValue ? 'neon-border-cyan bg-slate-700' : ''}`;
                 btn.innerText = val;
                 btn.onclick = () => setLegValue(val);
                 container.appendChild(btn);
@@ -166,86 +183,102 @@
         }
 
         function updateStartButtonText() {
+            if (gameMode === 'RND') {
+                document.getElementById('start-game-name').innerText = `RND (DOUBLE TRAINING)`;
+                return;
+            }
             let label = gameMode === 'X01' ? `${x01TargetPoints}` : gameMode;
-            document.getElementById('start-game-name').innerText = `${label} (${legFormat === 'firstTo' ? 'DO' : 'Z'} ${selectedLegValue})`;
+            document.getElementById('start-game-name').innerText = `${label} (DO ${selectedLegValue})`;
         }
 
         function addPlayerInput() {
             const container = document.getElementById('player-inputs');
             if(container.querySelectorAll('input').length >= 4) return;
             const input = document.createElement('input');
-            input.className = "p-name w-full bg-slate-900 border border-slate-700 p-2.5 rounded-lg focus:border-sky-500 outline-none text-sm mt-2";
+            input.className = "p-name w-full bg-slate-900 border border-slate-700 p-3 rounded-xl focus:border-sky-500 outline-none text-sm font-semibold text-white mt-2";
             input.placeholder = `Gracz ${container.querySelectorAll('input').length + 1}`;
             container.appendChild(input);
         }
 
-        // POPRAWIONA FUNKCJA STARTU: Ignoruje puste inputy, akceptuje grę solo
         function startGame() {
             const nameInputs = document.querySelectorAll('.p-name');
             players = [];
-            
+            turnHistory = [];
             nameInputs.forEach((input, index) => {
                 const name = input.value.trim();
-                // Dodaj gracza jeśli pole nie jest puste, lub jeśli to pierwszy gracz (gwarantuje tryb solo)
                 if (name !== "" || index === 0) {
                     players.push({ 
                         name: name || `Gracz ${index + 1}`, 
-                        score: gameMode === 'X01' ? x01TargetPoints : (gameMode === '121' ? 121 : 1), 
+                        score: gameMode === 'X01' ? x01TargetPoints : (gameMode === '121' ? 121 : (gameMode === 'ATC' ? 1 : 0)),
                         legsWon: 0, 
                         history: [], 
                         avg: 0 
                     });
                 }
             });
-            
             currentPlayerIndex = 0;
             legStartingPlayerIndex = 0;
-            
             document.getElementById('lobby').classList.add('hidden');
             document.getElementById('game-board').classList.remove('hidden');
-            document.getElementById('game-info').innerText = gameMode === 'X01' ? `X01 (${x01TargetPoints})` : gameMode;
+            document.getElementById('game-info').innerText = gameMode === 'RND' ? `RND DOUBLE OUT` : `${gameMode} (${gameMode === 'X01' ? x01TargetPoints : ''})`;
             document.getElementById('game-log').innerHTML = "";
             document.getElementById('voice-display').innerText = "---";
             
+            if (gameMode === 'RND') {
+                document.getElementById('checkout-title').innerText = "CELUJ W DEBLA:";
+                document.getElementById('last-shot-label').innerText = "WYNIK";
+                document.getElementById('rnd-buttons').classList.remove('hidden');
+                document.getElementById('btn-undo-ui').classList.add('hidden');
+                generateRandomCheckoutTarget();
+            } else {
+                document.getElementById('checkout-title').innerText = "CELUJ W:";
+                document.getElementById('last-shot-label').innerText = "WYNIK";
+                document.getElementById('rnd-buttons').classList.add('hidden');
+                document.getElementById('btn-undo-ui').classList.remove('hidden');
+            }
             renderPlayers();
             shouldBeListening = true;
             startVoiceEngine();
         }
 
+        function generateRandomCheckoutTarget() {
+            const targets = ['D1','D2','D3','D4','D5','D6','D7','D8','D9','D10','D11','D12','D13','D14','D15','D16','D17','D18','D19','D20','BULLSEYE'];
+            currentRndTarget = targets[Math.floor(Math.random() * targets.length)];
+            document.getElementById('checkout-suggestion').innerText = currentRndTarget;
+        }
+
         function renderPlayers() {
             const container = document.getElementById('players-display');
             container.innerHTML = '';
+            container.className = players.length === 1 ? "grid grid-cols-1 gap-4" : "grid grid-cols-2 gap-4";
             
-            // Jeśli gra 1 osoba, karta zajmuje pełną szerokość. Jeśli więcej – robi się siatka dwukolumnowa.
-            container.className = players.length === 1 ? "grid grid-cols-1 gap-3" : "grid grid-cols-2 gap-3";
-
             players.forEach((p, i) => {
                 const isActive = (i === currentPlayerIndex);
                 const div = document.createElement('div');
-                div.className = `glass rounded-2xl p-4 flex flex-col items-center transition-all duration-300 ${isActive ? 'active-player' : 'opacity-30'}`;
+                div.className = `glass rounded-2xl p-6 flex flex-col items-center transition-all ${isActive ? 'active-player' : 'opacity-40'}`;
                 
-                // Dla trybu ATC wyświetlamy np. cel, dla X01 punkty
-                let scoreDisplay = p.score;
-                
+                let subStat = gameMode === 'RND' ? `SKUTECZNOŚĆ: ${p.avg.toFixed(0)}%` : `AVG: ${p.avg.toFixed(1)}`;
+                let legLabel = gameMode === 'RND' ? '' : `<div class="text-amber-500 font-bold text-xs mt-1">LEGI: ${p.legsWon}</div>`;
+
                 div.innerHTML = `
-                    <div class="text-[10px] font-black uppercase text-slate-400 tracking-wider truncate max-w-full">${p.name}</div>
-                    <div class="text-amber-400 font-bold text-[10px] mt-0.5">LEGI: ${p.legsWon}</div>
-                    <div class="text-4xl font-black my-2 leading-none">${scoreDisplay}</div>
-                    <div class="w-full border-t border-slate-800/60 pt-2 text-center">
-                        <div class="text-[9px] uppercase font-bold text-slate-500">AVG: <span class="text-sky-400 font-mono">${p.avg.toFixed(1)}</span></div>
-                    </div>`;
+                    <div class="text-xs font-bold text-slate-400 tracking-wider uppercase">${p.name}</div>
+                    ${legLabel}
+                    <div class="text-6xl font-black my-2 text-white">${p.score}</div>
+                    <div class="text-xs font-bold text-sky-400">${subStat}</div>`;
                 container.appendChild(div);
             });
-            
-            document.getElementById('current-player-label').innerText = `Tura: ${players[currentPlayerIndex].name}`;
-            
-            // Ukrywanie/Pokazywanie sekcji checkoutów w zależności od trybu i wyniku
-            const currentScore = players[currentPlayerIndex].score;
-            if (gameMode === 'X01' && checkoutTable[currentScore]) {
-                document.getElementById('checkout-container').classList.remove('hidden');
-                document.getElementById('checkout-suggestion').innerText = checkoutTable[currentScore];
-            } else {
-                document.getElementById('checkout-container').classList.add('hidden');
+            document.getElementById('current-player-label').innerText = `TURA: ${players[currentPlayerIndex].name.toUpperCase()}`;
+
+            if (gameMode === 'X01') {
+                const currentScore = players[currentPlayerIndex].score;
+                if (checkoutTable[currentScore]) {
+                    document.getElementById('checkout-container').classList.remove('hidden');
+                    document.getElementById('checkout-suggestion').innerText = checkoutTable[currentScore];
+                } else {
+                    document.getElementById('checkout-suggestion').innerText = "- - -";
+                }
+            } else if (gameMode !== 'RND') {
+                document.getElementById('checkout-suggestion').innerText = "- - -";
             }
         }
 
@@ -254,8 +287,47 @@
             try { recognition.start(); } catch (e) {}
         }
 
+        function undoLastMove() {
+            if (gameMode === 'RND' || turnHistory.length === 0) return;
+            const lastState = turnHistory.pop();
+            players = JSON.parse(JSON.stringify(lastState.players));
+            currentPlayerIndex = lastState.currentPlayerIndex;
+            const log = document.getElementById('game-log');
+            if (log.firstChild) log.removeChild(log.firstChild);
+            document.getElementById('voice-display').innerText = "---";
+            renderPlayers();
+        }
+
+        function handleRndVoiceCommand(isHit) {
+            const p = players[currentPlayerIndex];
+            const log = document.getElementById('game-log');
+            if (isHit) {
+                p.score += 1;
+                p.history.push(1);
+                document.getElementById('voice-display').innerText = "TRAFIONY";
+                log.innerHTML = `<div class="border-b border-slate-800 pb-1 font-mono text-emerald-400">Trafiono debla ${currentRndTarget}</div>` + log.innerHTML;
+            } else {
+                p.history.push(0);
+                document.getElementById('voice-display').innerText = "PUDŁO";
+                log.innerHTML = `<div class="border-b border-slate-800 pb-1 font-mono text-rose-400">Pudło na ${currentRndTarget}</div>` + log.innerHTML;
+            }
+            p.avg = (p.history.filter(x => x === 1).length / p.history.length) * 100;
+            if (players.length > 1) currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+            generateRandomCheckoutTarget();
+            renderPlayers();
+        }
+
         recognition.onresult = (event) => {
             const transcript = event.results[0][0].transcript.toLowerCase().trim();
+            if (gameMode === 'RND') {
+                if (["trafiony", "tak", "yes", "siedzi", "było", "weszło"].some(kw => transcript.includes(kw))) handleRndVoiceCommand(true);
+                else if (["pudło", "nie", "no", "obok", "skucha"].some(kw => transcript.includes(kw))) handleRndVoiceCommand(false);
+                return;
+            }
+            if (["cofnij", "popraw", "błąd", "źle"].some(kw => transcript.includes(kw))) {
+                undoLastMove();
+                return;
+            }
             if (transcript.includes("buja") || transcript.includes("check")) {
                 handleScore(players[currentPlayerIndex].score);
                 return;
@@ -264,71 +336,63 @@
             if (!isNaN(num) && num <= 180) handleScore(num);
         };
 
-        recognition.onend = () => { if (shouldBeListening) setTimeout(startVoiceEngine, 300); };
+        recognition.onend = () => { if (shouldBeListening) setTimeout(startVoiceEngine, 250); };
 
         function handleScore(points) {
+            turnHistory.push({ players: JSON.parse(JSON.stringify(players)), currentPlayerIndex: currentPlayerIndex });
             const p = players[currentPlayerIndex];
             let finished = false;
+            const log = document.getElementById('game-log');
 
             if (gameMode === 'X01') {
                 if (p.score - points >= 0) {
                     p.score -= points;
                     p.history.push(points);
                     if (p.score === 0) finished = true;
-                    
-                    const log = document.getElementById('game-log');
-                    log.innerHTML = `<div class="border-b border-slate-800/40 pb-1 font-mono text-slate-300"><span class="font-bold text-sky-400">${p.name}:</span> ${points} pkt (zostało: ${p.score})</div>` + log.innerHTML;
+                    log.innerHTML = `<div class="border-b border-slate-800 pb-1 font-mono">${p.name}: ${points} pkt (zostaje ${p.score})</div>` + log.innerHTML;
                 } else {
-                    // Fura
                     p.history.push(0);
-                    const log = document.getElementById('game-log');
-                    log.innerHTML = `<div class="border-b border-slate-800/40 pb-1 font-mono text-rose-500"><span class="font-bold">${p.name}:</span> FURA (0)</div>` + log.innerHTML;
+                    log.innerHTML = `<div class="border-b border-slate-800 pb-1 font-mono text-rose-500">${p.name}: FURA (0)</div>` + log.innerHTML;
                 }
             } else if (gameMode === 'ATC') {
-                // W Around the Clock wpisujemy punkty jako zaliczenie sektorów
-                if (points <= 20 && points > 0) {
-                    p.score += 1; // kolejny cel
+                if (points === p.score) {
                     p.history.push(points);
+                    p.score += 1;
                     if (p.score > 20) finished = true;
-                    
-                    const log = document.getElementById('game-log');
-                    log.innerHTML = `<div class="border-b border-slate-800/40 pb-1 font-mono text-slate-300"><span class="font-bold text-sky-400">${p.name}:</span> Trafił ${points} (Cel: ${p.score})</div>` + log.innerHTML;
+                    log.innerHTML = `<div class="border-b border-slate-800 pb-1 font-mono">Trafiono singiel: ${points}</div>` + log.innerHTML;
                 }
             } else if (gameMode === '121') {
                 if (p.score - points >= 0) {
                     p.score -= points;
                     p.history.push(points);
                     if (p.score === 0) finished = true;
-                    
-                    const log = document.getElementById('game-log');
-                    log.innerHTML = `<div class="border-b border-slate-800/40 pb-1 font-mono text-slate-300"><span class="font-bold text-sky-400">${p.name}:</span> ${points} pkt (zostało: ${p.score})</div>` + log.innerHTML;
+                    log.innerHTML = `<div class="border-b border-slate-800 pb-1 font-mono">${p.name}: ${points} pkt</div>` + log.innerHTML;
                 }
             }
 
-            p.avg = p.history.reduce((a, b) => a + b, 0) / p.history.length;
+            p.avg = p.history.length > 0 ? p.history.reduce((a, b) => a + b, 0) / p.history.length : 0;
 
             if (finished) {
                 p.legsWon++;
-                if (p.legsWon === legTargetCount) { 
-                    alert(`Mecz zakończony! Wygrywa ${p.name}!`); 
-                    exitGame(); 
-                    return; 
+                showNotification(`Leg zdobyty przez ${p.name}!`);
+                if (p.legsWon === legTargetCount) {
+                    showNotification(`Mecz wygrywa ${p.name}!`);
+                    setTimeout(exitGame, 2500);
+                    return;
                 }
-                alert(`Leg zdobyty przez ${p.name}!`);
                 resetLeg();
             } else {
-                // Przełącz gracza tylko, jeśli gra więcej niż jedna osoba
-                if (players.length > 1) {
-                    currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
-                }
+                if (players.length > 1) currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
             }
-            
             document.getElementById('voice-display').innerText = points;
             renderPlayers();
         }
 
         function resetLeg() {
-            players.forEach(p => p.score = gameMode === 'X01' ? x01TargetPoints : (gameMode === '121' ? 121 : 1));
+            players.forEach(p => {
+                p.score = gameMode === 'X01' ? x01TargetPoints : (gameMode === '121' ? 121 : (gameMode === 'ATC' ? 1 : 0));
+                p.history = [];
+            });
             if (players.length > 1) {
                 legStartingPlayerIndex = (legStartingPlayerIndex + 1) % players.length;
                 currentPlayerIndex = legStartingPlayerIndex;
@@ -344,10 +408,10 @@
             document.getElementById('game-board').classList.add('hidden');
         }
 
-        function resetCurrentGame() { 
-            if(confirm("Czy na pewno chcesz zresetować mecz?")) startGame(); 
+        function resetCurrentGame() {
+            if(confirm("Zresetować mecz?")) startGame();
         }
-        
+
         selectGameMode('X01');
     </script>
 </body>
