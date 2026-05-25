@@ -1,6 +1,6 @@
 /* --- GŁÓWNE TŁO I TYPOGRAFIA --- */
 body {
-    background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+    background-color: #0f172a; /* Oryginalne, jednolite ciemne tło darta */
     font-family: 'ui-sans-serif', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     min-height: 100vh;
     color: white;
@@ -10,52 +10,48 @@ body {
     align-items: center;
 }
 
-/* --- SZKLANE PANELE (GLASSMORPHISM) --- */
+/* --- PANEL DO GRY (ZGODNIE ZE SCREENEM) --- */
 .glass {
-    background: rgba(30, 41, 59, 0.7);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    background: #1e293b; /* Ciemne panele jak na zrzucie */
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
-/* --- NEONOWE RAMKI I AKCENTY --- */
+/* --- AKTYWNY GRACZ (ŻÓŁTA RAMKA NEONOWA ZE SCREENA) --- */
+.active-player {
+    border: 3px solid #f59e0b !important; /* Charakterystyczny żółto-pomarańczowy deweloperski border */
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+    background: #1e293b;
+}
+
 .neon-border-cyan {
-    border-color: #06b6d4 !important;
-    box-shadow: 0 0 15px rgba(6, 182, 212, 0.4);
+    border-color: #38bdf8 !important;
 }
 
 .neon-border-amber {
     border-color: #f59e0b !important;
-    box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
 }
 
-/* --- STAN GRY I ANIMACJE --- */
-.active-player {
-    border: 2px solid #06b6d4;
-    box-shadow: 0 0 25px rgba(6, 182, 212, 0.25);
-    background: rgba(15, 23, 42, 0.85);
-}
-
+/* --- ANIMACJA DIODY MIKROFONU --- */
 @keyframes neon-pulse {
     0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.6; transform: scale(0.95); }
+    50% { opacity: 0.5; transform: scale(0.98); }
 }
 
 .animate-pulse-soft {
     animation: neon-pulse 2s infinite ease-in-out;
 }
 
-/* --- POWIADOMIENIA (TOASTS) --- */
+/* --- POWIADOMIENIA (TOASTS ZAMIAST ALERTÓW PRZEGLĄDARKI) --- */
 .toast-notification {
-    animation: slideIn 0.3s ease-out forwards;
+    animation: slideIn 0.25s ease-out forwards;
 }
 
 @keyframes slideIn {
-    from { transform: translateY(-20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+    from { transform: translate(-50%, -20px); opacity: 0; }
+    to { transform: translate(-50%, 0); opacity: 1; }
 }
 
-/* --- CUSTOM SCROLLBAR DLA LOGÓW --- */
 #game-log::-webkit-scrollbar {
     width: 4px;
 }
@@ -63,6 +59,6 @@ body {
     background: transparent;
 }
 #game-log::-webkit-scrollbar-thumb {
-    background: #334155;
+    background: #475569;
     border-radius: 10px;
 }
