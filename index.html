@@ -54,10 +54,13 @@
                     <div>
                         <h2 class="text-xs font-bold mb-3 uppercase tracking-widest text-sky-400">3. Zawodnicy</h2>
                         <div id="player-inputs" class="space-y-2">
-                            <input type="text" placeholder="Gracz 1" class="p-name w-full bg-slate-900 border border-slate-700 p-3 rounded-xl focus:border-sky-500 outline-none text-sm font-semibold text-white">
+                            <input type="text" placeholder="Twój nick" class="p-name w-full bg-slate-900 border border-slate-700 p-3 rounded-xl focus:border-sky-500 outline-none text-sm font-semibold text-white">
                         </div>
                     </div>
-                    <button onclick="addPlayerInput()" class="mt-4 text-sky-400 text-xs font-bold text-left hover:text-sky-300 transition-all">+ DODAJ GRACZA</button>
+                    <div class="flex gap-2 mt-4">
+                        <button onclick="addPlayerInput()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-sky-400 text-[10px] py-2 font-bold rounded-lg border border-slate-700 uppercase">+ Gracz</button>
+                        <button onclick="addBotInput()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-amber-500 text-[10px] py-2 font-bold rounded-lg border border-slate-700 uppercase">+ BOT</button>
+                    </div>
                 </section>
             </div>
         </div>
@@ -117,7 +120,7 @@
         let turnHistory = [];
         let currentRndTarget = '';
 
-        const checkoutTable = { 2: "D1", 4: "D2", 6: "D3", 8: "D4", 10: "D5", 12: "D6", 14: "D7", 16: "D8", 18: "D9", 20: "D10", 22: "D11", 24: "D12", 26: "D13", 28: "D14", 30: "D15", 32: "D16", 34: "D17", 36: "D18", 38: "D19", 40: "D20", 41: "9, D16", 42: "10, D16", 43: "3, D20", 44: "4, D20", 45: "13, D16", 46: "6, D20", 47: "15, D16", 48: "16, D16", 49: "17, D16", 50: "10, D20", 51: "19, D16", 52: "12, D20", 53: "13, D20", 54: "14, D20", 55: "15, D20", 56: "16, D20", 57: "17, D20", 58: "18, D20", 59: "19, D20", 60: "20, D20", 141: "T20, T19, D12", 170: "T20, T20, Bull" };
+        const checkoutTable = { 2: "D1", 4: "D2", 6: "D3", 8: "D4", 10: "D5", 12: "D6", 14: "D7", 16: "D8", 18: "D9", 20: "D10", 22: "D11", 24: "D12", 26: "D13", 28: "D14", 30: "D15", 32: "D16", 34: "D17", 36: "D18", 38: "D19", 40: "D20", 41: "9, D16", 42: "10, D16", 43: "3, D20", 44: "4, D20", 45: "13, D16", 46: "6, D20", 47: "15, D16", 48: "16, D16", 49: "17, D16", 50: "10, D20", 51: "19, D16", 52: "12, D20", 53: "13, D20", 54: "14, D20", 55: "15, D20", 56: "16, D20", 57: "17, D20", 58: "18, D20", 59: "19, D20", 60: "20, D20", 61: "T15, D8", 62: "T10, D16", 63: "T13, D12", 64: "T16, D8", 65: "T11, D16", 66: "T14, D12", 67: "T17, D8", 68: "T16, D10", 69: "T19, D6", 70: "T18, D8", 71: "T13, D16", 72: "T16, D12", 73: "T19, D8", 74: "T14, D16", 75: "T17, D12", 76: "T20, D8", 77: "T19, D10", 78: "T18, D12", 79: "T19, D11", 80: "T20, D10", 81: "T19, D12", 82: "T14, D20", 83: "T17, D16", 84: "T20, D12", 85: "T15, D20", 86: "T18, D16", 87: "T17, D18", 88: "T16, D20", 89: "T19, D16", 90: "T20, D15", 91: "T17, D20", 92: "T20, D16", 93: "T19, D18", 94: "T18, D20", 95: "T19, D19", 96: "T20, D18", 97: "T19, D20", 98: "T20, D19", 99: "T19, Bull", 100: "T20, D20", 101: "T17, T10, D10", 104: "T20, T12, D4", 110: "T20, Bull", 120: "T20, T20, D20", 121: "T20, T11, D14", 130: "T20, T20, D5", 141: "T20, T19, D12", 160: "T20, T20, D20", 164: "T20, T19, Bull", 167: "T20, T19, Bull", 170: "T20, T20, Bull" };
 
         const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
         recognition.lang = 'pl-PL';
@@ -193,58 +196,69 @@
 
         function addPlayerInput() {
             const container = document.getElementById('player-inputs');
-            if(container.querySelectorAll('input').length >= 4) return;
+            if(container.querySelectorAll('input, .bot-entry').length >= 4) return;
             const input = document.createElement('input');
-            input.className = "p-name w-full bg-slate-900 border border-slate-700 p-3 rounded-xl focus:border-sky-500 outline-none text-sm font-semibold text-white mt-2";
-            input.placeholder = `Gracz ${container.querySelectorAll('input').length + 1}`;
+            input.className = "p-name w-full bg-slate-900 border border-slate-700 p-3 rounded-xl focus:border-sky-500 outline-none text-sm font-semibold text-white";
+            input.placeholder = `Gracz ${container.querySelectorAll('input, .bot-entry').length + 1}`;
             container.appendChild(input);
         }
 
+        function addBotInput() {
+            const container = document.getElementById('player-inputs');
+            if(container.querySelectorAll('input, .bot-entry').length >= 4) return;
+            
+            const div = document.createElement('div');
+            div.className = "bot-entry flex flex-col gap-1 p-3 bg-slate-900 border border-amber-900/40 rounded-xl mt-1";
+            div.innerHTML = `
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-[10px] font-bold text-amber-500 tracking-widest">BOT DARTOWY</span>
+                    <button onclick="this.parentElement.parentElement.remove()" class="text-rose-500 text-xs">USUŃ</button>
+                </div>
+                <select class="p-bot-range w-full bg-slate-800 border-none text-amber-400 text-xs font-bold rounded-lg p-2 outline-none">
+                    <option value="30-35">Widełki: 30 - 35 AVG</option>
+                    <option value="35-40">Widełki: 35 - 40 AVG</option>
+                    <option value="40-45">Widełki: 40 - 45 AVG</option>
+                    <option value="45-50">Widełki: 45 - 50 AVG</option>
+                    <option value="50-60">Widełki: 50 - 60 AVG</option>
+                    <option value="60-70">Widełki: 60 - 70 AVG</option>
+                    <option value="70-80">Widełki: 70 - 80 AVG</option>
+                    <option value="80-100">Widełki: 80 - 100 AVG</option>
+                </select>
+            `;
+            container.appendChild(div);
+        }
+
         function startGame() {
-            const nameInputs = document.querySelectorAll('.p-name');
+            const inputElements = document.getElementById('player-inputs').children;
             players = [];
             turnHistory = [];
-            nameInputs.forEach((input, index) => {
-                const name = input.value.trim();
-                if (name !== "" || index === 0) {
+
+            Array.from(inputElements).forEach((el, index) => {
+                if (el.tagName === 'INPUT') {
+                    const name = el.value.trim();
                     players.push({ 
                         name: name || `Gracz ${index + 1}`, 
-                        score: gameMode === 'X01' ? x01TargetPoints : (gameMode === '121' ? 121 : (gameMode === 'ATC' ? 1 : 0)),
-                        legsWon: 0, 
-                        history: [], 
-                        avg: 0 
+                        score: gameMode === 'X01' ? x01TargetPoints : (gameMode === '121' ? 121 : 1),
+                        legsWon: 0, history: [], avg: 0, isBot: false 
+                    });
+                } else if (el.classList.contains('bot-entry')) {
+                    const range = el.querySelector('select').value.split('-').map(Number);
+                    players.push({ 
+                        name: `BOT (${el.querySelector('select').value})`, 
+                        score: gameMode === 'X01' ? x01TargetPoints : (gameMode === '121' ? 121 : 1),
+                        legsWon: 0, history: [], avg: 0, isBot: true,
+                        botMin: range[0], botMax: range[1]
                     });
                 }
             });
+
             currentPlayerIndex = 0;
             legStartingPlayerIndex = 0;
             document.getElementById('lobby').classList.add('hidden');
             document.getElementById('game-board').classList.remove('hidden');
-            document.getElementById('game-info').innerText = gameMode === 'RND' ? `RND DOUBLE OUT` : `${gameMode} (${gameMode === 'X01' ? x01TargetPoints : ''})`;
-            document.getElementById('game-log').innerHTML = "";
-            document.getElementById('voice-display').innerText = "---";
-            
-            if (gameMode === 'RND') {
-                document.getElementById('checkout-title').innerText = "CELUJ W DEBLA:";
-                document.getElementById('last-shot-label').innerText = "WYNIK";
-                document.getElementById('rnd-buttons').classList.remove('hidden');
-                document.getElementById('btn-undo-ui').classList.add('hidden');
-                generateRandomCheckoutTarget();
-            } else {
-                document.getElementById('checkout-title').innerText = "CELUJ W:";
-                document.getElementById('last-shot-label').innerText = "WYNIK";
-                document.getElementById('rnd-buttons').classList.add('hidden');
-                document.getElementById('btn-undo-ui').classList.remove('hidden');
-            }
+            document.getElementById('game-info').innerText = gameMode;
             renderPlayers();
-            shouldBeListening = true;
-            startVoiceEngine();
-        }
-
-        function generateRandomCheckoutTarget() {
-            const targets = ['D1','D2','D3','D4','D5','D6','D7','D8','D9','D10','D11','D12','D13','D14','D15','D16','D17','D18','D19','D20','BULLSEYE'];
-            currentRndTarget = targets[Math.floor(Math.random() * targets.length)];
-            document.getElementById('checkout-suggestion').innerText = currentRndTarget;
+            checkBotTurn();
         }
 
         function renderPlayers() {
@@ -257,29 +271,85 @@
                 const div = document.createElement('div');
                 div.className = `glass rounded-2xl p-6 flex flex-col items-center transition-all ${isActive ? 'active-player' : 'opacity-40'}`;
                 
-                let subStat = gameMode === 'RND' ? `SKUTECZNOŚĆ: ${p.avg.toFixed(0)}%` : `AVG: ${p.avg.toFixed(1)}`;
-                let legLabel = gameMode === 'RND' ? '' : `<div class="text-amber-500 font-bold text-xs mt-1">LEGI: ${p.legsWon}</div>`;
-
                 div.innerHTML = `
                     <div class="text-xs font-bold text-slate-400 tracking-wider uppercase">${p.name}</div>
-                    ${legLabel}
+                    <div class="text-amber-500 font-bold text-xs mt-1">LEGI: ${p.legsWon}</div>
                     <div class="text-6xl font-black my-2 text-white">${p.score}</div>
-                    <div class="text-xs font-bold text-sky-400">${subStat}</div>`;
+                    <div class="text-xs font-bold text-sky-400">AVG: ${p.avg.toFixed(1)}</div>`;
                 container.appendChild(div);
             });
             document.getElementById('current-player-label').innerText = `TURA: ${players[currentPlayerIndex].name.toUpperCase()}`;
-
+            
             if (gameMode === 'X01') {
                 const currentScore = players[currentPlayerIndex].score;
-                if (checkoutTable[currentScore]) {
-                    document.getElementById('checkout-container').classList.remove('hidden');
-                    document.getElementById('checkout-suggestion').innerText = checkoutTable[currentScore];
-                } else {
-                    document.getElementById('checkout-suggestion').innerText = "- - -";
-                }
-            } else if (gameMode !== 'RND') {
-                document.getElementById('checkout-suggestion').innerText = "- - -";
+                document.getElementById('checkout-suggestion').innerText = checkoutTable[currentScore] || "---";
             }
+        }
+
+        function checkBotTurn() {
+            const p = players[currentPlayerIndex];
+            if (p && p.isBot) {
+                shouldBeListening = false;
+                try { recognition.stop(); } catch(e) {}
+                document.getElementById('voice-status').innerText = "BOT RZUCA...";
+                document.getElementById('voice-status').className = "text-amber-500 text-sm font-black animate-pulse";
+                setTimeout(() => executeBotMove(p), 1800);
+            } else {
+                shouldBeListening = true;
+                startVoiceEngine();
+                document.getElementById('voice-status').innerText = "Słucham...";
+                document.getElementById('voice-status').className = "text-emerald-400 text-sm font-black animate-pulse-soft";
+            }
+        }
+
+        function executeBotMove(bot) {
+            let points = 0;
+            const targetAvg = (bot.botMin + bot.botMax) / 2;
+            const currentAvg = bot.avg;
+
+            if (gameMode === 'X01') {
+                // Nowa logika zbicia do średniej: Bot może rzucić wszystko (nawet 180), ale reaguje na aktualną średnią w meczu
+                if (bot.history.length === 0) {
+                    // Pierwszy rzut - całkowicie losowy z pełnej puli ludzkich rzutów
+                    const starterShots = [26, 41, 45, 60, 81, 100, 140, 180];
+                    points = starterShots[Math.floor(Math.random() * starterShots.length)];
+                } else {
+                    if (currentAvg > bot.botMax) {
+                        // Jeśli bot gra za dobrze, celowo rzuca słabiej, żeby zbić średnią w dół do widełek
+                        const lowShots = [7, 11, 22, 26, 35, 41, 45];
+                        points = lowShots[Math.floor(Math.random() * lowShots.length)];
+                    } else if (currentAvg < bot.botMin) {
+                        // Jeśli gra poniżej swoich widełek, odpala wysokie rzuty
+                        const highShots = [60, 81, 100, 121, 140, 180];
+                        points = highShots[Math.floor(Math.random() * highShots.length)];
+                    } else {
+                        // Jeśli jest idealnie w widełkach, rzuca normalnie w okolice swojej średniej +/- wariacja
+                        const normalShots = [26, 41, 45, 57, 60, 81, 100];
+                        points = normalShots[Math.floor(Math.random() * normalShots.length)];
+                    }
+                }
+
+                // Logika wygrywania (Checkout) oparta na aktualnej średniej gracza bot
+                if (bot.score <= 40 && bot.score % 2 === 0) {
+                    let checkoutChance = 0.15; // bazowa szansa na zamknięcie
+                    
+                    if (currentAvg <= bot.botMin + 1) checkoutChance = 0.55; // bot jest przy dole widełek - zwiększamy szansę
+                    if (currentAvg < bot.botMin) checkoutChance = 0.85;       // bot drastycznie spadł poniżej normy - niemal pewny strzał ratunkowy
+                    
+                    if (Math.random() < checkoutChance) {
+                        points = bot.score;
+                    }
+                }
+
+                // Zabezpieczenie przed furażem bota
+                if (bot.score - points < 0 || bot.score - points === 1) points = 0;
+
+            } else {
+                // Tryb ATC / 121
+                points = Math.random() * 100 < bot.botMin ? (gameMode === 'ATC' ? bot.score : 20) : 0;
+            }
+
+            handleScore(points);
         }
 
         function startVoiceEngine() {
@@ -288,129 +358,101 @@
         }
 
         function undoLastMove() {
-            if (gameMode === 'RND' || turnHistory.length === 0) return;
+            if (turnHistory.length === 0) return;
             const lastState = turnHistory.pop();
             players = JSON.parse(JSON.stringify(lastState.players));
             currentPlayerIndex = lastState.currentPlayerIndex;
-            const log = document.getElementById('game-log');
-            if (log.firstChild) log.removeChild(log.firstChild);
-            document.getElementById('voice-display').innerText = "---";
             renderPlayers();
-        }
-
-        function handleRndVoiceCommand(isHit) {
-            const p = players[currentPlayerIndex];
-            const log = document.getElementById('game-log');
-            if (isHit) {
-                p.score += 1;
-                p.history.push(1);
-                document.getElementById('voice-display').innerText = "TRAFIONY";
-                log.innerHTML = `<div class="border-b border-slate-800 pb-1 font-mono text-emerald-400">Trafiono debla ${currentRndTarget}</div>` + log.innerHTML;
-            } else {
-                p.history.push(0);
-                document.getElementById('voice-display').innerText = "PUDŁO";
-                log.innerHTML = `<div class="border-b border-slate-800 pb-1 font-mono text-rose-400">Pudło na ${currentRndTarget}</div>` + log.innerHTML;
-            }
-            p.avg = (p.history.filter(x => x === 1).length / p.history.length) * 100;
-            if (players.length > 1) currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
-            generateRandomCheckoutTarget();
-            renderPlayers();
+            checkBotTurn();
         }
 
         recognition.onresult = (event) => {
             const transcript = event.results[0][0].transcript.toLowerCase().trim();
-            if (gameMode === 'RND') {
-                if (["trafiony", "tak", "yes", "siedzi", "było", "weszło"].some(kw => transcript.includes(kw))) handleRndVoiceCommand(true);
-                else if (["pudło", "nie", "no", "obok", "skucha"].some(kw => transcript.includes(kw))) handleRndVoiceCommand(false);
-                return;
+            const p = players[currentPlayerIndex];
+
+            if (["cofnij", "popraw", "błąd"].some(kw => transcript.includes(kw))) { 
+                undoLastMove(); 
+                return; 
             }
-            if (["cofnij", "popraw", "błąd", "źle"].some(kw => transcript.includes(kw))) {
-                undoLastMove();
-                return;
-            }
+
+            // NAPRAWIONY BŁĄD LOGICZNY: Słowa kluczowe kończą leg tylko i wyłącznie gdy stan licznika wynosi max 170
             if (transcript.includes("buja") || transcript.includes("check")) {
-                handleScore(players[currentPlayerIndex].score);
+                if (p.score <= 170) {
+                    handleScore(p.score);
+                } else {
+                    showNotification("Nie można zakończyć lega z tej wartości! (Max to 170)");
+                }
                 return;
             }
+
             const num = parseInt(transcript.replace(/\D/g, ''));
             if (!isNaN(num) && num <= 180) handleScore(num);
         };
 
-        recognition.onend = () => { if (shouldBeListening) setTimeout(startVoiceEngine, 250); };
+        recognition.onend = () => { if (shouldBeListening) setTimeout(startVoiceEngine, 300); };
 
         function handleScore(points) {
             turnHistory.push({ players: JSON.parse(JSON.stringify(players)), currentPlayerIndex: currentPlayerIndex });
             const p = players[currentPlayerIndex];
             let finished = false;
-            const log = document.getElementById('game-log');
 
-            if (gameMode === 'X01') {
-                if (p.score - points >= 0) {
-                    p.score -= points;
-                    p.history.push(points);
-                    if (p.score === 0) finished = true;
-                    log.innerHTML = `<div class="border-b border-slate-800 pb-1 font-mono">${p.name}: ${points} pkt (zostaje ${p.score})</div>` + log.innerHTML;
-                } else {
-                    p.history.push(0);
-                    log.innerHTML = `<div class="border-b border-slate-800 pb-1 font-mono text-rose-500">${p.name}: FURA (0)</div>` + log.innerHTML;
-                }
-            } else if (gameMode === 'ATC') {
-                if (points === p.score) {
-                    p.history.push(points);
-                    p.score += 1;
-                    if (p.score > 20) finished = true;
-                    log.innerHTML = `<div class="border-b border-slate-800 pb-1 font-mono">Trafiono singiel: ${points}</div>` + log.innerHTML;
-                }
-            } else if (gameMode === '121') {
-                if (p.score - points >= 0) {
-                    p.score -= points;
-                    p.history.push(points);
-                    if (p.score === 0) finished = true;
-                    log.innerHTML = `<div class="border-b border-slate-800 pb-1 font-mono">${p.name}: ${points} pkt</div>` + log.innerHTML;
-                }
+            if (p.score - points === 0) {
+                p.score = 0; 
+                p.history.push(points); 
+                finished = true;
+            } else if (p.score - points > 1) {
+                p.score -= points; 
+                p.history.push(points);
+            } else {
+                p.history.push(0); // Fura
             }
 
-            p.avg = p.history.length > 0 ? p.history.reduce((a, b) => a + b, 0) / p.history.length : 0;
+            // POPRAWNA ŚREDNIA TELEWIZYJNA (Suma punktów pomnożona przez 3 i podzielona przez liczbę rzuconych lotek)
+            if (p.history.length > 0) {
+                const totalPoints = p.history.reduce((a, b) => a + b, 0);
+                p.avg = (totalPoints / (p.history.length * 3)) * 3; // To upraszcza się do totalPoints / history.length, czyli poprawna średnia z 3 lotek
+            } else {
+                p.avg = 0;
+            }
 
             if (finished) {
                 p.legsWon++;
-                showNotification(`Leg zdobyty przez ${p.name}!`);
+                showNotification(`Leg dla ${p.name}!`);
                 if (p.legsWon === legTargetCount) {
-                    showNotification(`Mecz wygrywa ${p.name}!`);
-                    setTimeout(exitGame, 2500);
+                    showNotification(`KONIEC! Wygrał ${p.name}`);
+                    setTimeout(exitGame, 3000);
                     return;
                 }
                 resetLeg();
             } else {
-                if (players.length > 1) currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+                currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
             }
+            
             document.getElementById('voice-display').innerText = points;
+            const log = document.getElementById('game-log');
+            log.innerHTML = `<div>${p.name}: ${points} pkt</div>` + log.innerHTML;
+            
             renderPlayers();
+            checkBotTurn();
         }
 
         function resetLeg() {
             players.forEach(p => {
-                p.score = gameMode === 'X01' ? x01TargetPoints : (gameMode === '121' ? 121 : (gameMode === 'ATC' ? 1 : 0));
+                p.score = gameMode === 'X01' ? x01TargetPoints : 121;
                 p.history = [];
             });
-            if (players.length > 1) {
-                legStartingPlayerIndex = (legStartingPlayerIndex + 1) % players.length;
-                currentPlayerIndex = legStartingPlayerIndex;
-            } else {
-                currentPlayerIndex = 0;
-            }
+            legStartingPlayerIndex = (legStartingPlayerIndex + 1) % players.length;
+            currentPlayerIndex = legStartingPlayerIndex;
         }
 
         function exitGame() {
             shouldBeListening = false;
-            recognition.stop();
+            try { recognition.stop(); } catch(e) {}
             document.getElementById('lobby').classList.remove('hidden');
             document.getElementById('game-board').classList.add('hidden');
         }
 
-        function resetCurrentGame() {
-            if(confirm("Zresetować mecz?")) startGame();
-        }
+        function resetCurrentGame() { if(confirm("Zresetować?")) startGame(); }
 
         selectGameMode('X01');
     </script>
