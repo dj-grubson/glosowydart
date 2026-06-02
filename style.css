@@ -1,6 +1,5 @@
-/* --- GŁÓWNE TŁO I TYPOGRAFIA --- */
 body {
-    background-color: #0f172a; /* Oryginalne, jednolite ciemne tło darta */
+    background-color: #0b0f19;
     font-family: 'ui-sans-serif', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     min-height: 100vh;
     color: white;
@@ -10,41 +9,41 @@ body {
     align-items: center;
 }
 
-/* --- PANEL DO GRY (ZGODNIE ZE SCREENEM) --- */
 .glass {
-    background: #1e293b; /* Ciemne panele jak na zrzucie */
-    border-radius: 1rem;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    background: rgba(30, 41, 59, 0.7);
+    backdrop-filter: blur(12px);
+    border-radius: 1.25rem;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
 }
 
-/* --- AKTYWNY GRACZ (ŻÓŁTA RAMKA NEONOWA ZE SCREENA) --- */
 .active-player {
-    border: 3px solid #f59e0b !important; /* Charakterystyczny żółto-pomarańczowy deweloperski border */
-    box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
-    background: #1e293b;
+    border: 3px solid #f59e0b !important;
+    box-shadow: 0 0 30px rgba(245, 158, 11, 0.4);
+    background: rgba(30, 41, 59, 0.9);
+    transform: scale(1.02);
 }
 
-.neon-border-cyan {
-    border-color: #38bdf8 !important;
+.neon-border-cyan { 
+    border-color: #38bdf8 !important; 
+    box-shadow: 0 0 15px rgba(56, 189, 248, 0.2); 
 }
 
-.neon-border-amber {
-    border-color: #f59e0b !important;
+.neon-border-amber { 
+    border-color: #f59e0b !important; 
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.2); 
 }
 
-/* --- ANIMACJA DIODY MIKROFONU --- */
 @keyframes neon-pulse {
     0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(0.98); }
+    50% { opacity: 0.6; transform: scale(0.98); }
 }
 
-.animate-pulse-soft {
-    animation: neon-pulse 2s infinite ease-in-out;
+.animate-pulse-soft { 
+    animation: neon-pulse 2s infinite ease-in-out; 
 }
 
-/* --- POWIADOMIENIA (TOASTS ZAMIAST ALERTÓW PRZEGLĄDARKI) --- */
-.toast-notification {
-    animation: slideIn 0.25s ease-out forwards;
+.toast-notification { 
+    animation: slideIn 0.25s ease-out forwards; 
 }
 
 @keyframes slideIn {
@@ -52,13 +51,44 @@ body {
     to { transform: translate(-50%, 0); opacity: 1; }
 }
 
-#game-log::-webkit-scrollbar {
-    width: 4px;
+#game-log::-webkit-scrollbar { 
+    width: 4px; 
 }
-#game-log::-webkit-scrollbar-track {
-    background: transparent;
+
+#game-log::-webkit-scrollbar-thumb { 
+    background: #475569; 
+    border-radius: 10px; 
 }
-#game-log::-webkit-scrollbar-thumb {
-    background: #475569;
-    border-radius: 10px;
+
+/* ANIMACJE WYBUCHÓW I CELEBRACJI ZWYCIĘSTWA */
+@keyframes celebrate-bg {
+    0% { background-color: rgba(56, 189, 248, 0); }
+    10% { background-color: rgba(56, 189, 248, 0.25); }
+    100% { background-color: rgba(56, 189, 248, 0); }
+}
+
+.celebrate-flash {
+    animation: celebrate-bg 1.2s ease-out infinite;
+}
+
+@keyframes shockwave {
+    0% { transform: scale(0.5); opacity: 1; border-width: 4px; }
+    100% { transform: scale(2.2); opacity: 0; border-width: 1px; }
+}
+
+.burst-ring {
+    position: absolute;
+    border-radius: 50%;
+    border-style: solid;
+    animation: shockwave 1s cubic-bezier(0.1, 0.8, 0.3, 1) infinite;
+    pointer-events: none;
+}
+
+/* Dioda statusu mikrofonu */
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px;
 }
