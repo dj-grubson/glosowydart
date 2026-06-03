@@ -5,136 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dart Master Pro - System Głosowy i Treningowy</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
-        
-        .font-digital { font-family: 'Orbitron', sans-serif; }
-        
-        @keyframes pulse-glow {
-            0%, 100% { border-color: rgba(14, 165, 233, 0.4); box-shadow: 0 0 12px rgba(14, 165, 233, 0.1); }
-            50% { border-color: rgba(14, 165, 233, 1); box-shadow: 0 0 25px rgba(14, 165, 233, 0.4); }
-        }
-        @keyframes active-glow {
-            0%, 100% { border-color: rgba(245, 158, 11, 0.5); box-shadow: 0 0 15px rgba(245, 158, 11, 0.2); }
-            50% { border-color: rgba(245, 158, 11, 1); box-shadow: 0 0 30px rgba(245, 158, 11, 0.6); }
-        }
-        .active-player-card { animation: active-glow 2s infinite; border-width: 3px !important; }
-        .pulse-border { animation: pulse-glow 2.5s infinite; }
-        
-        .countdown-circle {
-            transition: stroke-dashoffset 1s linear;
-            transform: rotate(-90deg);
-            transform-origin: 50% 50%;
-        }
-
-        @keyframes screen-shake {
-            0%, 100% { transform: translate(0, 0); }
-            10% { transform: translate(-3px, -2px); }
-            20% { transform: translate(3px, 2px); }
-            30% { transform: translate(-2px, 3px); }
-            40% { transform: translate(2px, -3px); }
-            50% { transform: translate(-3px, 2px); }
-            60% { transform: translate(3px, -2px); }
-            70% { transform: translate(-2px, -3px); }
-            80% { transform: translate(2px, 3px); }
-            90% { transform: translate(-3px, -2px); }
-        }
-        .screen-shake { animation: screen-shake 0.5s ease-in-out; }
-
-        @keyframes golden-flash {
-            0% { background: rgba(251, 191, 36, 0); }
-            15% { background: rgba(251, 191, 36, 0.3); }
-            100% { background: rgba(251, 191, 36, 0); }
-        }
-        .golden-flash { animation: golden-flash 1s ease-out; }
-
-        @keyframes trophy-spin {
-            0% { transform: rotateY(0deg) scale(1); filter: drop-shadow(0 0 20px rgba(251, 191, 36, 0.8)); }
-            50% { transform: rotateY(180deg) scale(1.15); filter: drop-shadow(0 0 40px rgba(251, 191, 36, 1)); }
-            100% { transform: rotateY(360deg) scale(1); filter: drop-shadow(0 0 20px rgba(251, 191, 36, 0.8)); }
-        }
-        .trophy-spin { animation: trophy-spin 3s ease-in-out infinite; }
-
-        @keyframes title-pulse {
-            0%, 100% { 
-                text-shadow: 0 0 20px rgba(251, 191, 36, 0.6), 0 0 40px rgba(251, 191, 36, 0.3);
-                transform: scale(1);
-            }
-            50% { 
-                text-shadow: 0 0 30px rgba(251, 191, 36, 1), 0 0 60px rgba(251, 191, 36, 0.6), 0 0 80px rgba(251, 191, 36, 0.3);
-                transform: scale(1.05);
-            }
-        }
-        .title-pulse { animation: title-pulse 1.5s ease-in-out infinite; }
-
-        @keyframes bust-flash {
-            0%, 100% { background: rgba(239, 68, 68, 0); }
-            50% { background: rgba(239, 68, 68, 0.3); }
-        }
-        .bust-flash { animation: bust-flash 0.5s ease-out; }
-
-        @keyframes checkout-glow {
-            0%, 100% { box-shadow: 0 0 20px rgba(34, 197, 94, 0.5); }
-            50% { box-shadow: 0 0 60px rgba(34, 197, 94, 1); }
-        }
-        .checkout-glow { animation: checkout-glow 1s ease-out; }
-
-        #fireworks-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        .celebration-content {
-            position: relative;
-            z-index: 2;
-            pointer-events: auto;
-        }
-
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #475569; }
-
-        .stat-card {
-            background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.9) 100%);
-            border: 1px solid rgba(51, 65, 85, 0.5);
-        }
-
-        .muted-indicator {
-            animation: pulse-red 2s infinite;
-        }
-
-        @keyframes pulse-red {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .num-btn {
-            transition: all 0.15s ease;
-        }
-        .num-btn:active {
-            transform: scale(0.95);
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-[#070a13] text-slate-100 min-h-screen flex items-center justify-center font-sans selection:bg-sky-500 selection:text-white overflow-x-hidden p-4">
 
     <div class="w-full max-w-6xl flex flex-col items-center justify-center min-h-[90vh] my-auto">
 
+        <!-- Toasty -->
         <div id="toast-container" class="fixed top-4 z-50 w-full max-w-sm pointer-events-none left-1/2 -translate-x-1/2 flex flex-col gap-2 px-4"></div>
 
+        <!-- Ekran celebracji wygranej -->
         <div id="celebration-overlay" class="hidden fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-950/95 backdrop-blur-lg">
             <canvas id="fireworks-canvas"></canvas>
             
             <div class="celebration-content text-center space-y-6 max-w-lg px-6 flex flex-col items-center">
                 <div id="celebration-trophy" class="text-8xl trophy-spin">🏆</div>
                 
-                <div id="celebration-title" class="text-amber-400 font-black text-3xl tracking-widest uppercase title-pulse">LEG ZDOBYTY!</div>
+                <div id="celebration-title" class="text-sky-400 font-black text-3xl tracking-widest uppercase title-pulse">LEG ZDOBYTY!</div>
                 <div id="celebration-winner" class="text-6xl font-black text-white italic uppercase tracking-tighter drop-shadow-[0_10px_25px_rgba(14,165,233,0.6)] font-digital">---</div>
                 
                 <div id="celebration-stats" class="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 text-sm text-slate-400 font-mono text-left space-y-1 w-full max-w-xs"></div>
@@ -153,6 +40,7 @@
             </div>
         </div>
 
+        <!-- Modal potwierdzenia akcji (Reset / Wyjście) -->
         <div id="confirm-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm px-4">
             <div class="bg-slate-900 border border-slate-800 p-6 max-w-sm w-full text-center space-y-5 rounded-2xl shadow-2xl">
                 <h3 id="modal-title" class="text-lg font-bold text-white">Czy na pewno chcesz zresetować grę?</h3>
@@ -164,6 +52,55 @@
             </div>
         </div>
 
+        <!-- Okno Instrukcji i Pomocy -->
+        <div id="instructions-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md px-4 py-6 overflow-y-auto">
+            <div class="bg-slate-900 border border-slate-800 p-6 max-w-2xl w-full rounded-2xl shadow-2xl relative max-h-[90vh] overflow-y-auto">
+                <button onclick="toggleInstructions()" class="absolute top-4 right-4 text-slate-400 hover:text-white font-bold text-2xl transition-all">&times;</button>
+                <h3 class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-indigo-500 font-digital uppercase tracking-widest mb-4">Centrum Pomocy i Skrótów</h3>
+                
+                <div class="space-y-6 text-sm text-slate-300">
+                    <div>
+                        <h4 class="font-bold text-sky-400 uppercase tracking-wider mb-2">⌨️ Skróty Klawiszowe (Szybka obsługa)</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 font-mono text-xs">
+                            <div class="bg-slate-950 p-2.5 rounded border border-slate-800/80 flex justify-between"><span class="text-sky-400">[0-9]</span> <span>Wpisywanie punktów tury</span></div>
+                            <div class="bg-slate-950 p-2.5 rounded border border-slate-800/80 flex justify-between"><span class="text-sky-400">[Enter]</span> <span>Zatwierdzenie i wpisanie</span></div>
+                            <div class="bg-slate-950 p-2.5 rounded border border-slate-800/80 flex justify-between"><span class="text-sky-400">[Backspace / Del]</span> <span>Kasowanie wpisywanej cyfry</span></div>
+                            <div class="bg-slate-950 p-2.5 rounded border border-slate-800/80 flex justify-between"><span class="text-sky-400">[u] lub [Ctrl+Z]</span> <span>Cofnięcie rzutu (Undo)</span></div>
+                            <div class="bg-slate-950 p-2.5 rounded border border-slate-800/80 flex justify-between"><span class="text-sky-400">[Space] lub [b]</span> <span>Zgłoszenie Furażu (Bust - 0)</span></div>
+                            <div class="bg-slate-950 p-2.5 rounded border border-slate-800/80 flex justify-between"><span class="text-sky-400">[c]</span> <span>Szybki Checkout (Check)</span></div>
+                            <div class="bg-slate-950 p-2.5 rounded border border-slate-800/80 flex justify-between"><span class="text-sky-400">[Esc]</span> <span>Zarządzanie resetem</span></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="font-bold text-emerald-400 uppercase tracking-wider mb-2">🎙️ System Głosowy (Słowa kluczowe)</h4>
+                        <p class="text-xs text-slate-400 mb-2 leading-relaxed">Gdy system nasłuchuje (turze żywego gracza), możesz wypowiedzieć:</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 font-mono text-xs">
+                            <div class="bg-slate-950 p-2.5 rounded border border-slate-800/80 flex flex-col"><span class="text-emerald-400">"Wartość" (np. 45, sto, osiemdziesiąt)</span> <span class="text-[10px] text-slate-500">Zatwierdza punkty (0-180)</span></div>
+                            <div class="bg-slate-950 p-2.5 rounded border border-slate-800/80 flex flex-col"><span class="text-emerald-400">"check", "czek", "zakończ"</span> <span class="text-[10px] text-slate-500">Próba skończenia aktualnym sugerowanym dublem</span></div>
+                            <div class="bg-slate-950 p-2.5 rounded border border-slate-800/80 flex flex-col"><span class="text-emerald-400">"cofnij"</span> <span class="text-[10px] text-slate-500">Cofa ostatni zapisany rzut</span></div>
+                            <div class="bg-slate-950 p-2.5 rounded border border-slate-800/80 flex flex-col"><span class="text-emerald-400">"furaż", "błąd", "spudłować"</span> <span class="text-[10px] text-slate-500">Zapisuje brak trafień (0 pkt)</span></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="font-bold text-pink-400 uppercase tracking-wider mb-2">🎯 Informacje o trybach i zasadach</h4>
+                        <ul class="list-disc pl-5 space-y-1.5 text-xs text-slate-400">
+                            <li><strong class="text-slate-300">X01:</strong> Tradycyjna gra od wybranej wartości do 0 z Double-Out (wymóg zakończenia dublem).</li>
+                            <li><strong class="text-slate-300">Around the Clock:</strong> Trening rzucania w segmenty od 1 do 20, kończony środkiem (Bullseye).</li>
+                            <li><strong class="text-slate-300">121 / Finch:</strong> Dynamiczna walka o zamknięcie wartości 121 w 9 lotkach. Sukces zwiększa cel, porażka resetuje postęp.</li>
+                            <li><strong class="text-slate-300">Losowy Cel:</strong> Rzuty w wyznaczane dynamicznie sektory (np. T20, D16, S5) i wpisywanie liczby udanych trafień (0-3).</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-slate-800/60 mt-6 flex justify-end">
+                    <button onclick="toggleInstructions()" class="bg-sky-600 hover:bg-sky-500 text-white font-bold py-2 px-6 rounded-xl text-xs uppercase tracking-wider transition-all">Zamknij</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lobby (Ekran przygotowania rozgrywki) -->
         <div id="lobby" class="w-full space-y-6 animate-fade-in">
             <header class="text-center py-4">
                 <h1 class="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-indigo-400 to-sky-400 italic uppercase tracking-tighter font-digital">DART MASTER</h1>
@@ -175,14 +112,19 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div class="lg:col-span-2 space-y-4">
                     <section class="bg-slate-900/60 p-5 border border-slate-800/80 rounded-2xl backdrop-blur-md">
-                        <h2 class="text-xs font-bold mb-4 text-sky-400 uppercase tracking-widest flex items-center gap-2">
-                            <span class="w-1.5 h-3 bg-sky-500 rounded-sm"></span> 1. Wybierz Tryb Rozgrywki
-                        </h2>
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xs font-bold text-sky-400 uppercase tracking-widest flex items-center gap-2">
+                                <span class="w-1.5 h-3 bg-sky-500 rounded-sm"></span> 1. Wybierz Tryb Rozgrywki
+                            </h2>
+                            <button onclick="toggleInstructions()" class="bg-slate-800/80 hover:bg-slate-700 text-sky-400 hover:text-sky-300 font-bold text-[10px] px-3 py-1.5 rounded-lg border border-slate-700/60 transition-all uppercase tracking-wider flex items-center gap-1.5">
+                                📖 Pomoc i Skróty
+                            </button>
+                        </div>
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                             <button onclick="selectGameMode('X01')" id="btn-X01" class="game-opt p-4 rounded-xl bg-slate-800 border border-sky-500 font-black text-sm transition-all text-white">X01</button>
                             <button onclick="selectGameMode('ATC')" id="btn-ATC" class="game-opt p-4 rounded-xl bg-slate-900/40 border border-slate-800 font-bold text-sm text-slate-400 hover:text-slate-200 transition-all">Around the Clock</button>
                             <button onclick="selectGameMode('121')" id="btn-121" class="game-opt p-4 rounded-xl bg-slate-900/40 border border-slate-800 font-bold text-sm text-slate-400 hover:text-slate-200 transition-all">121 / Finch</button>
-                            <button onclick="selectGameMode('RND')" id="btn-RND" class="game-opt p-4 rounded-xl bg-slate-900/40 border border-slate-800 font-bold text-sm text-amber-500/70 hover:text-amber-400 transition-all">Losowy Cel</button>
+                            <button onclick="selectGameMode('RND')" id="btn-RND" class="game-opt p-4 rounded-xl bg-slate-900/40 border border-slate-800 font-bold text-sm text-slate-400 hover:text-slate-200 transition-all">Losowy Cel</button>
                         </div>
                     </section>
 
@@ -252,22 +194,26 @@
             </button>
         </div>
 
+        <!-- Ekran Rozgrywki (Game Board) -->
         <div id="game-board" class="hidden w-full space-y-4 animate-fade-in">
             <div class="flex justify-between items-center py-2 px-1 text-xs font-bold flex-wrap gap-2">
                 <button onclick="triggerExitRoute()" class="text-slate-400 hover:text-white uppercase tracking-widest transition-all flex items-center gap-1">← Wyjdź do Menu</button>
                 <div class="flex items-center gap-2 flex-wrap justify-center">
                     <span class="px-3 py-1 bg-slate-900 border border-slate-800 rounded-full font-digital text-sky-400 uppercase tracking-widest text-[10px]" id="game-info-badge">X01 - 501</span>
                     <span class="px-3 py-1 bg-slate-900 border border-slate-800 rounded-full font-mono text-amber-500 uppercase text-[10px]" id="match-limit-badge">Mecz do: 3 wygranych</span>
-                    <button onclick="toggleTTS()" id="tts-toggle-btn" class="px-3 py-1 bg-slate-900 border border-slate-800 rounded-full text-slate-400 hover:text-white uppercase tracking-widest text-[10px] transition-all flex items-center gap-1">
-                        <span id="tts-icon">🔊</span> <span id="tts-text">TTS ON</span>
+                    <!-- Lektor TTS domyślnie wyciszony (Klasy wyciszenia dodane w kodzie HTML) -->
+                    <button onclick="toggleTTS()" id="tts-toggle-btn" class="muted-indicator px-3 py-1 bg-slate-900 border border-rose-500 rounded-full text-slate-400 hover:text-white uppercase tracking-widest text-[10px] transition-all flex items-center gap-1">
+                        <span id="tts-icon">🔇</span> <span id="tts-text" class="text-rose-400">TTS OFF</span>
                     </button>
                 </div>
                 <button onclick="openResetConfirm()" class="text-slate-400 hover:text-rose-400 uppercase tracking-widest transition-all">Reset Meczu</button>
             </div>
 
-            <div id="players-display" class="flex flex-wrap items-center justify-center gap-5 w-full py-2"></div>
+            <!-- Karty graczy z osobnymi statystykami per-gracz -->
+            <div id="players-display" class="flex flex-wrap items-stretch justify-center gap-5 w-full py-2"></div>
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 w-full">
+                <!-- Główny status głosowy -->
                 <div class="lg:col-span-8 bg-slate-900/80 p-5 border border-slate-800 rounded-3xl flex flex-col justify-between relative overflow-hidden backdrop-blur-md min-h-[180px]">
                     <div class="flex justify-between items-start w-full">
                         <div class="flex items-center">
@@ -278,26 +224,27 @@
                             </div>
                         </div>
                         <div class="text-[10px] font-mono text-slate-500 bg-slate-950/80 px-2 py-1 rounded border border-slate-900">
-                            Komendy: "cofnij", "furaż", "check"
+                            Komendy: "cofnij", "furaż", "check" (oraz cyfry)
                         </div>
                     </div>
 
                     <div class="text-center my-2">
                         <div id="voice-display" class="text-7xl font-black text-white italic tracking-tighter font-digital drop-shadow-md">---</div>
                         <div id="checkout-suggestion" class="text-amber-400 font-bold text-sm tracking-wide uppercase h-5 mt-1 font-digital"></div>
-                        <div id="checkout-hint" class="text-emerald-400 text-xs font-bold mt-1 hidden">✨ Powiedz "CHECK" aby zakończyć!</div>
+                        <div id="checkout-hint" class="text-emerald-400 text-xs font-bold mt-1 hidden">✨ Powiedz lub kliknij "CHECK" aby zakończyć!</div>
                     </div>
 
                     <div id="training-controls" class="hidden w-full border-t border-slate-800/60 pt-3 mt-2">
                         <div id="rnd-actions" class="hidden grid grid-cols-4 gap-2">
-                            <button onclick="submitTrainingHits(0)" class="bg-slate-950 border border-slate-800 p-2.5 rounded-xl font-bold text-xs hover:bg-slate-900">0 Trafień</button>
-                            <button onclick="submitTrainingHits(1)" class="bg-sky-950/40 border border-sky-900/60 text-sky-400 p-2.5 rounded-xl font-bold text-xs hover:bg-sky-950/80">1 Trafienie</button>
-                            <button onclick="submitTrainingHits(2)" class="bg-indigo-950/40 border border-indigo-900/60 text-indigo-400 p-2.5 rounded-xl font-bold text-xs hover:bg-indigo-950/80">2 Trafienia</button>
-                            <button onclick="submitTrainingHits(3)" class="bg-emerald-950/40 border border-emerald-900/60 text-emerald-400 p-2.5 rounded-xl font-bold text-xs hover:bg-emerald-950/80">3 Trafienia!</button>
+                            <button onclick="submitTrainingHits(0)" class="bg-slate-950 border border-slate-800 p-2.5 rounded-xl font-bold text-xs hover:bg-slate-900 transition-all">0 Trafień</button>
+                            <button onclick="submitTrainingHits(1)" class="bg-sky-950/40 border border-sky-900/60 text-sky-400 p-2.5 rounded-xl font-bold text-xs hover:bg-sky-950/80 transition-all">1 Trafienie</button>
+                            <button onclick="submitTrainingHits(2)" class="bg-indigo-950/40 border border-indigo-900/60 text-indigo-400 p-2.5 rounded-xl font-bold text-xs hover:bg-indigo-950/80 transition-all">2 Trafienia</button>
+                            <button onclick="submitTrainingHits(3)" class="bg-emerald-950/40 border border-emerald-900/60 text-emerald-400 p-2.5 rounded-xl font-bold text-xs hover:bg-emerald-950/80 transition-all">3 Trafienia!</button>
                         </div>
                     </div>
                 </div>
 
+                <!-- Klawiatura numeryczna -->
                 <div class="lg:col-span-4 bg-slate-900/40 p-4 border border-slate-800/80 rounded-3xl backdrop-blur-md">
                     <div class="grid grid-cols-3 gap-2">
                         <button onclick="appendNum(1)" class="num-btn bg-slate-900 hover:bg-slate-800 active:bg-slate-950 h-14 rounded-xl text-xl font-bold border border-slate-800/40 font-digital text-white">1</button>
@@ -317,6 +264,7 @@
                 </div>
             </div>
 
+            <!-- Sekcja dolna: logi i zarządzanie stanem -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
                 <div class="md:col-span-2 bg-slate-950/60 border border-slate-900 rounded-2xl p-4 flex flex-col justify-between">
                     <div class="text-[10px] uppercase font-bold text-slate-500 tracking-widest mb-2 flex justify-between">
@@ -338,29 +286,104 @@
                     </div>
                 </div>
             </div>
-
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 w-full">
-                <div class="stat-card p-4 rounded-xl text-center">
-                    <div class="text-[10px] text-slate-400 uppercase tracking-wider mb-1">Najlepszy AVG</div>
-                    <div id="stat-best-avg" class="text-2xl font-bold text-emerald-400 font-digital">-</div>
-                </div>
-                <div class="stat-card p-4 rounded-xl text-center">
-                    <div class="text-[10px] text-slate-400 uppercase tracking-wider mb-1">Najwyższy rzut</div>
-                    <div id="stat-high-score" class="text-2xl font-bold text-amber-400 font-digital">-</div>
-                </div>
-                <div class="stat-card p-4 rounded-xl text-center">
-                    <div class="text-[10px] text-slate-400 uppercase tracking-wider mb-1">Checkout %</div>
-                    <div id="stat-checkout-pct" class="text-2xl font-bold text-sky-400 font-digital">-</div>
-                </div>
-                <div class="stat-card p-4 rounded-xl text-center">
-                    <div class="text-[10px] text-slate-400 uppercase tracking-wider mb-1">180s</div>
-                    <div id="stat-180s" class="text-2xl font-bold text-rose-400 font-digital">0</div>
-                </div>
-            </div>
         </div>
     </div>
 
     <script>
+        // ============================================
+        // 🔊 SYNTEZATOR EFEKTÓW DŹWIĘKOWYCH (Web Audio API)
+        // ============================================
+        const SoundEffects = {
+            ctx: null,
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            },
+            play(type) {
+                try {
+                    this.init();
+                    if (this.ctx.state === 'suspended') {
+                        this.ctx.resume();
+                    }
+                    const now = this.ctx.currentTime;
+                    
+                    if (type === 'click') {
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.connect(gain);
+                        gain.connect(this.ctx.destination);
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(800, now);
+                        osc.frequency.exponentialRampToValueAtTime(150, now + 0.08);
+                        gain.gain.setValueAtTime(0.08, now);
+                        gain.gain.linearRampToValueAtTime(0.001, now + 0.08);
+                        osc.start(now);
+                        osc.stop(now + 0.08);
+                    } else if (type === 'key') {
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.connect(gain);
+                        gain.connect(this.ctx.destination);
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(1000, now);
+                        osc.frequency.linearRampToValueAtTime(600, now + 0.05);
+                        gain.gain.setValueAtTime(0.05, now);
+                        gain.gain.linearRampToValueAtTime(0.001, now + 0.05);
+                        osc.start(now);
+                        osc.stop(now + 0.05);
+                    } else if (type === 'success') {
+                        const osc1 = this.ctx.createOscillator();
+                        const osc2 = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc1.connect(gain);
+                        osc2.connect(gain);
+                        gain.connect(this.ctx.destination);
+                        osc1.type = 'sine';
+                        osc2.type = 'sine';
+                        osc1.frequency.setValueAtTime(523.25, now); 
+                        osc1.frequency.setValueAtTime(659.25, now + 0.08); 
+                        osc2.frequency.setValueAtTime(783.99, now + 0.16); 
+                        gain.gain.setValueAtTime(0.08, now);
+                        gain.gain.linearRampToValueAtTime(0.001, now + 0.3);
+                        osc1.start(now);
+                        osc1.stop(now + 0.3);
+                        osc2.start(now + 0.08);
+                        osc2.stop(now + 0.3);
+                    } else if (type === 'bust') {
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.connect(gain);
+                        gain.connect(this.ctx.destination);
+                        osc.type = 'sawtooth';
+                        osc.frequency.setValueAtTime(130, now);
+                        osc.frequency.linearRampToValueAtTime(90, now + 0.35);
+                        gain.gain.setValueAtTime(0.12, now);
+                        gain.gain.linearRampToValueAtTime(0.001, now + 0.35);
+                        osc.start(now);
+                        osc.stop(now + 0.35);
+                    } else if (type === 'win') {
+                        const notes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99, 1046.50];
+                        notes.forEach((freq, i) => {
+                            const osc = this.ctx.createOscillator();
+                            const gain = this.ctx.createGain();
+                            osc.connect(gain);
+                            gain.connect(this.ctx.destination);
+                            osc.type = 'sine';
+                            osc.frequency.setValueAtTime(freq, now + i * 0.08);
+                            gain.gain.setValueAtTime(0.06, now + i * 0.08);
+                            gain.gain.linearRampToValueAtTime(0.001, now + i * 0.08 + 0.2);
+                            osc.start(now + i * 0.08);
+                            osc.stop(now + i * 0.08 + 0.2);
+                        });
+                    }
+                } catch (e) {
+                    console.error("Audio Synthesis Error: ", e);
+                }
+            }
+        };
+
+        // Konfiguracja rozgrywki i stan
         let gameMode = 'X01'; 
         let x01TargetPoints = 501;
         let atcType = 'singles'; 
@@ -374,12 +397,11 @@
         let legCount = 1;
         let legsToWinMatch = 3; 
         let isMatchFinished = false;
-        let ttsMuted = false;
+        let ttsMuted = true; // Domyślnie zmutowany lektor (TTS) [ZMIANA]
         let checkoutAttempts = 0;
         let successfulCheckouts = 0;
         let highestScore = 0;
         let count180s = 0;
-        let playerStats = {};
         
         let countdownTimer = null;
         let countdownSecondsLeft = 5;
@@ -415,6 +437,17 @@
             164: "T20, T18, Bull", 167: "T20, T19, Bull", 170: "T20, T20, BULL"
         };
 
+        // Instrukcje - przełączanie modala
+        function toggleInstructions() {
+            SoundEffects.play('click');
+            const instModal = document.getElementById('instructions-modal');
+            if (instModal.classList.contains('hidden')) {
+                instModal.classList.remove('hidden');
+            } else {
+                instModal.classList.add('hidden');
+            }
+        }
+
         // ============================================
         // 🗣️ SYSTEM TTS (TEXT-TO-SPEECH)
         // ============================================
@@ -424,6 +457,7 @@
         let isSpeaking = false;
 
         function toggleTTS() {
+            SoundEffects.play('click');
             ttsMuted = !ttsMuted;
             const btn = document.getElementById('tts-toggle-btn');
             const icon = document.getElementById('tts-icon');
@@ -468,9 +502,9 @@
             const utterance = new SpeechSynthesisUtterance(text);
             
             utterance.lang = 'pl-PL';
-            utterance.rate = 0.9;
+            utterance.rate = 0.95;
             utterance.pitch = 1.0;
-            utterance.volume = 0.8;
+            utterance.volume = 0.85;
             
             const voices = speechSynthesis.getVoices();
             const polishVoice = voices.find(voice => voice.lang.includes('pl'));
@@ -500,7 +534,7 @@
         }
 
         // ============================================
-        // 🎆 SYSTEM FAJERWERKÓW
+        // 🎆 SYSTEM FAJERWERKÓW (CANVAS)
         // ============================================
         class Particle {
             constructor(x, y, color, velocity, size, type = 'spark') {
@@ -738,8 +772,8 @@
                 this.autoLaunchInterval = null;
                 
                 this.palettes = [
-                    ['#fbbf24', '#f59e0b', '#fcd34d', '#ffffff', '#fde68a'],
                     ['#0ea5e9', '#38bdf8', '#7dd3fc', '#bae6fd', '#ffffff'],
+                    ['#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe', '#ffffff'],
                     ['#a855f7', '#c084fc', '#d8b4fe', '#e9d5ff', '#ffffff'],
                     ['#10b981', '#34d399', '#6ee7b7', '#a7f3d0', '#ffffff'],
                     ['#f43f5e', '#fb7185', '#fda4af', '#fecdd3', '#ffffff'],
@@ -835,10 +869,7 @@
             }
         }
 
-        // ============================================
-        // KONIEC SYSTEMU FAJERWERKÓW
-        // ============================================
-
+        // Voice API setup
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let recognition = null;
         if (SpeechRecognition) {
@@ -851,20 +882,24 @@
         }
 
         function selectGameMode(mode) {
+            SoundEffects.play('click');
             gameMode = mode;
             document.querySelectorAll('.game-opt').forEach(btn => {
                 btn.classList.remove('bg-slate-800', 'border-sky-500', 'text-white');
                 btn.classList.add('bg-slate-900/40', 'border-slate-800', 'text-slate-400');
             });
             const activeBtn = document.getElementById(`btn-${mode}`);
-            activeBtn.classList.remove('bg-slate-900/40', 'border-slate-800', 'text-slate-400');
-            activeBtn.classList.add('bg-slate-800', 'border-sky-500', 'text-white');
+            if (activeBtn) {
+                activeBtn.classList.remove('bg-slate-900/40', 'border-slate-800', 'text-slate-400');
+                activeBtn.classList.add('bg-slate-800', 'border-sky-500', 'text-white');
+            }
 
             document.querySelectorAll('.mode-config-panel').forEach(panel => panel.classList.add('hidden'));
             document.getElementById(`config-${mode}`).classList.remove('hidden');
         }
 
         function setX01Points(pts) {
+            SoundEffects.play('click');
             x01TargetPoints = pts;
             
             document.querySelectorAll('.x01-pts').forEach(btn => {
@@ -880,28 +915,33 @@
         }
 
         function setAtcType(type) {
+            SoundEffects.play('click');
             atcType = type;
             document.querySelectorAll('.atc-type').forEach(btn => {
                 btn.classList.remove('bg-slate-800', 'border-sky-500', 'text-white');
                 btn.classList.add('bg-slate-900/40', 'border-slate-800', 'text-slate-400');
             });
             const activeBtn = document.getElementById(`btn-atc-${type}`);
-            activeBtn.classList.remove('bg-slate-900/40', 'border-slate-800', 'text-slate-400');
-            activeBtn.classList.add('bg-slate-800', 'border-sky-500', 'text-white');
+            if (activeBtn) {
+                activeBtn.classList.remove('bg-slate-900/40', 'border-slate-800', 'text-slate-400');
+                activeBtn.classList.add('bg-slate-800', 'border-sky-500', 'text-white');
+            }
         }
 
         function addPlayerInput() {
+            SoundEffects.play('click');
             const container = document.getElementById('player-inputs');
             const div = document.createElement('div');
             div.className = "flex gap-2 items-center animate-fade-in";
             div.innerHTML = `
                 <input type="text" placeholder="Nazwa gracza" class="p-name flex-grow bg-slate-950 border border-slate-800 p-3 rounded-xl text-sm font-semibold focus:border-sky-500 focus:outline-none transition-all">
-                <button onclick="this.parentElement.remove()" class="w-10 h-10 flex items-center justify-center bg-rose-950/20 text-rose-500 border border-rose-900/30 font-bold rounded-xl text-xs hover:bg-rose-950/50 transition-all">X</button>
+                <button onclick="SoundEffects.play('click'); this.parentElement.remove()" class="w-10 h-10 flex items-center justify-center bg-rose-950/20 text-rose-500 border border-rose-900/30 font-bold rounded-xl text-xs hover:bg-rose-950/50 transition-all">X</button>
             `;
             container.appendChild(div);
         }
 
         function addBotInput() {
+            SoundEffects.play('click');
             const container = document.getElementById('player-inputs');
             const div = document.createElement('div');
             div.className = "bot-entry bg-slate-950 p-3 rounded-xl border border-amber-900/20 flex justify-between items-center animate-fade-in";
@@ -911,12 +951,13 @@
                     <option value="50-55" class="bg-slate-950">Średniak (50-55 AVG)</option>
                     <option value="70-80" class="bg-slate-950">Wirtuoz (70-80 AVG)</option>
                 </select>
-                <button onclick="this.parentElement.remove()" class="text-rose-500 text-[10px] font-bold uppercase tracking-wider bg-rose-950/10 px-2 py-1 rounded border border-rose-900/20 hover:bg-rose-950/30">Usuń</button>
+                <button onclick="SoundEffects.play('click'); this.parentElement.remove()" class="text-rose-500 text-[10px] font-bold uppercase tracking-wider bg-rose-950/10 px-2 py-1 rounded border border-rose-900/20 hover:bg-rose-950/30">Usuń</button>
             `;
             container.appendChild(div);
         }
 
         function startGame() {
+            SoundEffects.play('success');
             const container = document.getElementById('player-inputs');
             players = [];
             let humanCount = 0;
@@ -926,7 +967,6 @@
             successfulCheckouts = 0;
             highestScore = 0;
             count180s = 0;
-            playerStats = {};
 
             legsToWinMatch = parseInt(document.getElementById('legs-to-win-selector').value) || 3;
             document.getElementById('match-limit-badge').innerText = `Mecz do: ${legsToWinMatch} wygranych`;
@@ -939,24 +979,26 @@
                     players.push({
                         name: playerName,
                         score: 0, isBot: false, matchPoints: 0, matchThrows: 0, legs: 0,
-                        atcNext: 1, history: [], turnsTotal: 0
+                        atcNext: 1, history: [], turnsTotal: 0,
+                        totalPoints: 0, totalThrows: 0, lastScore: "-", count180s: 0
                     });
-                    playerStats[playerName] = { avg: 0, throws: 0, totalPoints: 0 };
                 } else if (el.classList.contains('bot-entry')) {
                     const range = el.querySelector('select').value.split('-').map(Number);
                     const botName = `BOT ${range[0]}-${range[1]}`;
                     players.push({
                         name: botName,
                         score: 0, isBot: true, botMin: range[0], botMax: range[1],
-                        matchPoints: 0, matchThrows: 0, legs: 0, atcNext: 1, history: [], turnsTotal: 0
+                        matchPoints: 0, matchThrows: 0, legs: 0, atcNext: 1, history: [], turnsTotal: 0,
+                        totalPoints: 0, totalThrows: 0, lastScore: "-", count180s: 0
                     });
-                    playerStats[botName] = { avg: 0, throws: 0, totalPoints: 0 };
                 }
             });
 
             if (players.length === 0) {
-                players.push({ name: "Gracz 1", score: 0, isBot: false, matchPoints: 0, matchThrows: 0, legs: 0, atcNext: 1, history: [], turnsTotal: 0 });
-                playerStats["Gracz 1"] = { avg: 0, throws: 0, totalPoints: 0 };
+                players.push({ 
+                    name: "Gracz 1", score: 0, isBot: false, matchPoints: 0, matchThrows: 0, legs: 0, atcNext: 1, history: [], turnsTotal: 0,
+                    totalPoints: 0, totalThrows: 0, lastScore: "-", count180s: 0 
+                });
             }
 
             legCount = 1;
@@ -982,7 +1024,6 @@
             }
 
             updateBadgeInfo();
-            updateStats();
             render();
             checkAndPropagateTurn();
             
@@ -997,7 +1038,7 @@
                 else p.score = 0; 
                 
                 p.matchPoints = 0;
-                p.matchThrows = 0;
+                p.matchThrows = 0; 
                 p.turnsTotal = 0;
             });
             currentPlayerIndex = 0;
@@ -1012,57 +1053,95 @@
             document.getElementById('total-legs-counter').innerText = `Leg #${legCount}`;
         }
 
-        function updateStats() {
-            let bestAvg = 0;
-            let bestAvgPlayer = '-';
-            
-            players.forEach(p => {
-                if (p.matchThrows > 0) {
-                    const avg = (p.matchPoints / p.matchThrows).toFixed(1);
-                    playerStats[p.name].avg = avg;
-                    playerStats[p.name].throws = p.matchThrows;
-                    playerStats[p.name].totalPoints = p.matchPoints;
-                    
-                    if (parseFloat(avg) > bestAvg) {
-                        bestAvg = parseFloat(avg);
-                        bestAvgPlayer = p.name;
-                    }
-                }
-            });
-            
-            document.getElementById('stat-best-avg').innerText = bestAvg > 0 ? bestAvg.toFixed(1) : '-';
-            document.getElementById('stat-high-score').innerText = highestScore > 0 ? highestScore : '-';
-            document.getElementById('stat-180s').innerText = count180s;
-            
-            const checkoutPct = checkoutAttempts > 0 ? ((successfulCheckouts / checkoutAttempts) * 100).toFixed(0) : 0;
-            document.getElementById('stat-checkout-pct').innerText = checkoutPct + '%';
-        }
-
+        // Renderowanie kart zawodników wraz z dużym, widocznym licznikiem punktów (text-7xl)
         function render() {
             const display = document.getElementById('players-display');
             
             display.innerHTML = players.map((p, idx) => {
                 const isActive = idx === currentPlayerIndex;
-                let statLabel = `AVG: ${(p.matchPoints / (p.matchThrows || 1)).toFixed(1)}`;
                 let mainValue = p.score;
+                let targetLabel = "SCORE";
 
                 if (gameMode === 'ATC') {
                     const targetName = p.score === 21 ? (atcType === 'singles' ? 'BULL' : 'D-BULL') : `${atcType === 'singles' ? '' : 'D'}${p.score}`;
                     mainValue = targetName;
-                    statLabel = `Rzuty: ${p.matchThrows * 3}`;
+                    targetLabel = "TARGET";
                 } else if (gameMode === 'RND') {
                     mainValue = p.history.reduce((a, b) => a + b, 0); 
-                    statLabel = `Trafienia: ${mainValue}/${p.matchThrows * 3}`;
+                    targetLabel = "HITS";
                 } else if (gameMode === '121') {
-                    statLabel = `Tura: ${p.turnsTotal % 3 + 1}/3 (Cel: ${p.score})`;
+                    targetLabel = `TURA ${p.turnsTotal % 3 + 1}/3`;
+                }
+
+                // Ograniczenie "Darts thrown" wyłącznie do bieżącego lega (matchThrows * 3)
+                const dartsThrown = p.matchThrows * 3;
+                const computedAvg = p.totalThrows > 0 ? (p.totalPoints / p.totalThrows).toFixed(2) : "0.00";
+                const lastScoreVal = p.lastScore !== undefined ? p.lastScore : "-";
+
+                // Kapsuła z podpowiedzią checkoutu (Jak na zdjęciu Dorian - wycentrowana, bezpośrednio pod wynikiem)
+                let checkoutPillHtml = '<div class="h-8 mt-2"></div>'; // stabilizator wysokości layoutu
+                if (gameMode === 'X01') {
+                    if (p.score <= 170 && !bogeyNumbers.includes(p.score) && p.score >= 2) {
+                        const checkoutRoute = checkoutTable[p.score] || "DUBEL";
+                        checkoutPillHtml = `
+                            <div class="mt-2 inline-block bg-slate-950 text-sky-400 font-digital font-black text-sm px-4 py-1.5 rounded-lg border border-slate-800 shadow-inner tracking-wider uppercase">
+                                ${checkoutRoute}
+                            </div>
+                        `;
+                    }
                 }
 
                 return `
-                    <div class="bg-slate-900/70 border border-slate-800 p-5 rounded-2xl flex flex-col items-center justify-center transition-all duration-300 w-64 ${isActive ? 'active-player-card scale-[1.04] bg-slate-900/90 z-10' : 'opacity-30'}">
-                        <div class="text-xs font-bold text-slate-400 uppercase tracking-widest text-center truncate w-full">${p.name}</div>
-                        <div class="text-amber-500 font-black text-xs font-mono mt-1">LEGI: ${p.legs}</div>
-                        <div class="text-5xl font-black my-2 font-digital tracking-tight text-white">${mainValue}</div>
-                        <div class="text-[11px] text-sky-400 font-mono font-bold uppercase tracking-wider">${statLabel}</div>
+                    <div class="relative w-72 rounded-3xl p-6 transition-all duration-300 flex flex-col justify-between ${
+                        isActive 
+                        ? 'bg-gradient-to-br from-sky-600 via-sky-700 to-indigo-900 text-white active-player-card scale-[1.04] z-10 shadow-2xl shadow-sky-950/50' 
+                        : 'bg-[#0c1220]/90 border border-slate-800 text-slate-300 opacity-60'
+                    }">
+                        <!-- Górna linia: awatar inicjału, nazwa i mała plakietka legów -->
+                        <div class="flex justify-between items-center w-full mb-3">
+                            <div class="flex items-center gap-3 truncate">
+                                <div class="w-9 h-9 rounded-full bg-slate-950/80 border border-slate-800 flex items-center justify-center font-bold text-sm text-sky-400 font-digital uppercase shrink-0">
+                                    ${p.name.charAt(0)}
+                                </div>
+                                <div class="text-xs font-bold uppercase tracking-wider truncate max-w-[120px]">${p.name}</div>
+                            </div>
+                            
+                            <!-- Mała plakietka z liczbą wygranych legów -->
+                            <div class="bg-slate-950/90 text-amber-500 font-digital font-black text-xs px-2.5 py-1 rounded-lg border border-slate-800/80 shadow-inner">
+                                ${p.legs}
+                            </div>
+                        </div>
+
+                        <!-- Wielki wskaźnik wyniku (zwiększony do text-7xl font-extrabold dla maksymalnej widoczności) -->
+                        <div class="text-center my-3">
+                            <div class="text-7xl font-extrabold font-digital tracking-tighter drop-shadow-md">
+                                ${mainValue}
+                            </div>
+                            <div class="text-[9px] opacity-60 tracking-widest uppercase font-bold mt-1">${targetLabel}</div>
+                            <div class="flex justify-center items-center">
+                                ${checkoutPillHtml}
+                            </div>
+                        </div>
+
+                        <!-- Osobna tabela statystyk (Dorian layout zintegrowany z nową paletą) -->
+                        <div class="border-t border-white/10 pt-4 mt-2 space-y-2 text-xs font-semibold">
+                            <div class="flex justify-between items-center">
+                                <span class="${isActive ? 'text-sky-100/70' : 'text-slate-500'}">3-dart avg.</span>
+                                <span class="font-digital text-sm ${isActive ? 'text-white' : 'text-sky-400 font-bold'}">${computedAvg}</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="${isActive ? 'text-sky-100/70' : 'text-slate-500'}">Last score</span>
+                                <span class="font-digital text-sm ${isActive ? 'text-white' : 'text-amber-500 font-bold'}">${lastScoreVal}</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="${isActive ? 'text-sky-100/70' : 'text-slate-500'}">Darts thrown</span>
+                                <span class="font-digital text-sm ${isActive ? 'text-white' : 'text-emerald-400 font-bold'}">${dartsThrown}</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="${isActive ? 'text-sky-100/70' : 'text-slate-500'}">180s</span>
+                                <span class="font-digital text-sm ${isActive ? 'text-white' : 'text-rose-400 font-bold'}">${p.count180s || 0}</span>
+                            </div>
+                        </div>
                     </div>
                 `;
             }).join('');
@@ -1074,12 +1153,10 @@
             const hint = document.getElementById('checkout-hint');
             
             if (gameMode === 'X01') {
-                if (activePlayer.score <= 170 && !bogeyNumbers.includes(activePlayer.score)) {
-                    const checkout = checkoutTable[activePlayer.score];
-                    summ.innerText = checkout || "Wykończ leg dublem";
+                summ.innerText = "";
+                if (activePlayer.score <= 170 && !bogeyNumbers.includes(activePlayer.score) && activePlayer.score >= 2) {
                     hint.classList.remove('hidden');
                 } else {
-                    summ.innerText = activePlayer.score <= 170 ? "Brak checkoutu (Bogey)" : "";
                     hint.classList.add('hidden');
                 }
             } else {
@@ -1091,7 +1168,7 @@
             if (isCelebrating || isMatchFinished) return;
 
             const targetAverage = (bot.botMin + bot.botMax) / 2;
-            const currentAverage = bot.matchThrows > 0 ? (bot.matchPoints / bot.matchThrows) : targetAverage;
+            const currentAverage = bot.totalThrows > 0 ? (bot.totalPoints / bot.totalThrows) : targetAverage;
             let finalTurnScore = 0;
 
             if (gameMode === 'X01') {
@@ -1151,6 +1228,8 @@
                 for (let i = 0; i < 3; i++) { if (Math.random() < hitChance) hits++; }
                 setTimeout(() => {
                     bot.matchThrows++;
+                    bot.totalThrows++;
+                    bot.lastScore = hits;
                     if (hits > 0) {
                         bot.score += hits;
                         if (bot.score > 21) bot.score = 21;
@@ -1165,6 +1244,8 @@
                 for (let i = 0; i < 3; i++) { if (Math.random() < hitChance) hits++; }
                 setTimeout(() => {
                     bot.matchThrows++;
+                    bot.totalThrows++;
+                    bot.lastScore = hits;
                     bot.history.push(hits);
                     logTurn(bot.name, `Rzucał w losowy cel: trafione ${hits}x`);
                     nextPlayer();
@@ -1174,6 +1255,9 @@
                 bot.turnsTotal++;
                 let closed = Math.random() < successChance;
                 setTimeout(() => {
+                    bot.matchThrows++;
+                    bot.totalThrows++;
+                    bot.lastScore = closed ? 3 : 0;
                     if (closed) {
                         logTurn(bot.name, `ZAMKNĄŁ ${bot.score}! Awans.`);
                         bot.score += 1;
@@ -1203,16 +1287,15 @@
                 activePlayer.score -= score;
             }
             
+            // Zapis do statystyk per gracz
             activePlayer.matchPoints += score;
+            activePlayer.totalPoints += score;
             activePlayer.matchThrows++;
-            
-            if (playerStats[activePlayer.name]) {
-                playerStats[activePlayer.name].throws++;
-                playerStats[activePlayer.name].totalPoints += score;
-                playerStats[activePlayer.name].avg = (playerStats[activePlayer.name].totalPoints / playerStats[activePlayer.name].throws).toFixed(1);
-            }
+            activePlayer.totalThrows++;
+            activePlayer.lastScore = score;
 
             if (score === 180) {
+                activePlayer.count180s = (activePlayer.count180s || 0) + 1;
                 count180s++;
             }
             if (score > highestScore) {
@@ -1224,27 +1307,31 @@
             
             if (isCheckout) {
                 successfulCheckouts++;
-                const board = document.querySelector('.dartboard-container');
+                SoundEffects.play('win');
+                const board = document.getElementById('game-board');
                 if (board) board.classList.add('checkout-glow');
                 setTimeout(() => { if (board) board.classList.remove('checkout-glow'); }, 1000);
             }
             
             if (score === 0 && !isCheckout) {
+                SoundEffects.play('bust');
                 speak(`${activePlayer.name} - furaż`, 'high');
             } else if (!isCheckout) {
+                SoundEffects.play('success');
                 speak(`${activePlayer.name} - ${score} punktów. Zostaje ${activePlayer.score}`, 'normal');
             }
 
             if (activePlayer.score === 0) {
                 triggerWinCelebration(activePlayer);
             } else {
-                updateStats();
                 nextPlayer();
             }
         }
 
         function setBustManual() {
+            if (isCelebrating || isMatchFinished) return;
             if (gameMode !== 'X01' || players[currentPlayerIndex].isBot) return;
+            SoundEffects.play('bust');
             processScoreSubmission(0);
             showToast("Zgłoszono furaż (0 punktów)", "warning");
         }
@@ -1312,13 +1399,17 @@
             const p = players[currentPlayerIndex];
             turnHistory.push(JSON.parse(JSON.stringify(players)));
 
+            p.matchThrows++;
+            p.totalThrows++;
+            p.lastScore = hits;
+
             if (gameMode === 'RND') {
-                p.matchThrows++;
+                SoundEffects.play('success');
                 p.history.push(hits);
                 logTurn(p.name, `Trening RND: Trafiono ${hits}x cel`);
                 nextPlayer();
             } else if (gameMode === 'ATC') {
-                p.matchThrows++;
+                SoundEffects.play('success');
                 if (hits > 0) {
                     p.score += hits;
                     if (p.score > 21) p.score = 21;
@@ -1328,12 +1419,14 @@
                 else nextPlayer();
             } else if (gameMode === '121') {
                 if (hits === 3) { 
+                    SoundEffects.play('success');
                     logTurn(p.name, `ZAMKNIĘTE ${p.score}! Wyższy poziom.`);
                     p.score++;
                     p.turnsTotal = 0;
                     if (p.score > 170) triggerWinCelebration(p);
                     else nextPlayer();
                 } else {
+                    SoundEffects.play('bust');
                     if (p.turnsTotal >= 3) {
                         logTurn(p.name, `Koniec prób na ${p.score}. Spadek do 121.`);
                         p.score = 121;
@@ -1414,11 +1507,15 @@
 
         function appendNum(num) {
             const input = document.getElementById('manual-score-input');
-            if (input.value.length < 3) input.value += num;
+            if (input.value.length < 3) {
+                input.value += num;
+                SoundEffects.play('key');
+            }
             document.getElementById('voice-display').innerText = input.value;
         }
 
         function clearManualInput() {
+            SoundEffects.play('click');
             document.getElementById('manual-score-input').value = "";
             document.getElementById('voice-display').innerText = "---";
         }
@@ -1433,12 +1530,14 @@
                 if (val <= 180) {
                     processScoreSubmission(val);
                 } else {
+                    SoundEffects.play('bust');
                     showToast("Maksymalny wynik tury to 180!", "error");
                 }
             } else {
                 if (val <= 3) {
                     submitTrainingHits(val);
                 } else {
+                    SoundEffects.play('bust');
                     showToast("Wpisz trafienia w zakresie od 0 do 3", "warning");
                 }
             }
@@ -1447,6 +1546,7 @@
 
         function undoLastMove() {
             if (turnHistory.length > 0) {
+                SoundEffects.play('click');
                 players = turnHistory.pop();
                 currentPlayerIndex = (currentPlayerIndex - 1 + players.length) % players.length;
                 
@@ -1468,11 +1568,12 @@
         }
 
         // ============================================
-        // 🎆 CELEBRACJA Z FAJERWERKAMI
+        // 🎇 CELEBRACJA WYGRANEJ / FAJERWERKI
         // ============================================
         function triggerWinCelebration(player) {
             isCelebrating = true;
             deactivateVoiceRecognition();
+            SoundEffects.play('win');
             
             player.legs++; 
             
@@ -1487,12 +1588,14 @@
 
             document.getElementById('celebration-winner').innerText = player.name;
             
-            const totalThrows = player.matchThrows * 3;
+            const totalDarts = player.matchThrows * 3;
+            const computedAvg = player.matchThrows > 0 ? (player.matchPoints / player.matchThrows).toFixed(2) : "0.00";
+            
             document.getElementById('celebration-stats').innerHTML = `
                 <div>• Tryb gry: ${gameMode}</div>
-                <div>• Wykorzystane lotki w legu: ${totalThrows}</div>
-                <div>• Średnia meczowa: ${(player.matchPoints / (player.matchThrows || 1)).toFixed(2)}</div>
-                <div class="text-amber-400 font-bold mt-2">• Stan legów w meczu: ${player.legs} / ${legsToWinMatch}</div>
+                <div>• Wykorzystane lotki w legu: ${totalDarts}</div>
+                <div>• Średnia meczowa: ${computedAvg}</div>
+                <div class="text-sky-400 font-bold mt-2">• Stan legów w meczu: ${player.legs} / ${legsToWinMatch}</div>
             `;
             
             document.getElementById('celebration-overlay').classList.remove('hidden');
@@ -1532,6 +1635,7 @@
         }
 
         function closeCelebration() {
+            SoundEffects.play('click');
             if (countdownTimer) clearInterval(countdownTimer);
             
             if (fireworksSystem) {
@@ -1558,6 +1662,7 @@
         let modalActionType = '';
 
         function openResetConfirm() {
+            SoundEffects.play('click');
             modalActionType = 'RESET';
             document.getElementById('modal-title').innerText = "Czy na pewno chcesz zresetować cały mecz?";
             document.getElementById('modal-desc').innerText = "Wszystkie ugrane legi oraz statystyki zostaną całkowicie wyzerowane.";
@@ -1565,6 +1670,7 @@
         }
 
         function triggerExitRoute() {
+            SoundEffects.play('click');
             modalActionType = 'EXIT';
             document.getElementById('modal-title').innerText = "Czy chcesz zakończyć mecz?";
             document.getElementById('modal-desc').innerText = "Spowoduje to natychmiastowe wyjście z gry i utratę punktów.";
@@ -1572,11 +1678,18 @@
         }
 
         function closeConfirmModal(confirm) {
+            SoundEffects.play('click');
             document.getElementById('confirm-modal').classList.add('hidden');
             if (confirm) {
                 if (modalActionType === 'RESET') {
                     legCount = 1;
-                    players.forEach(p => p.legs = 0);
+                    players.forEach(p => {
+                        p.legs = 0;
+                        p.totalPoints = 0;
+                        p.totalThrows = 0;
+                        p.lastScore = "-";
+                        p.count180s = 0;
+                    });
                     initNewLegData();
                     updateBadgeInfo();
                     render();
@@ -1613,6 +1726,53 @@
             }, 3500);
         }
 
+        // ============================================
+        // ⌨️ OBSŁUGA SKRÓTÓW KLAWIATUROWYCH
+        // ============================================
+        window.addEventListener('keydown', (e) => {
+            if (document.activeElement && document.activeElement.tagName === 'INPUT') {
+                return; 
+            }
+            
+            const key = e.key;
+
+            if (key >= '0' && key <= '9') {
+                e.preventDefault();
+                appendNum(parseInt(key));
+            }
+            else if (key === 'Enter') {
+                e.preventDefault();
+                submitManualScore();
+            }
+            else if (key === 'Backspace' || key === 'Delete') {
+                e.preventDefault();
+                clearManualInput();
+            }
+            else if ((key === 'z' && e.ctrlKey) || key === 'u' || key === 'U') {
+                e.preventDefault();
+                undoLastMove();
+            }
+            else if (key === ' ' || key === 'b' || key === 'B') {
+                e.preventDefault();
+                setBustManual();
+            }
+            else if (key === 'Escape') {
+                e.preventDefault();
+                openResetConfirm();
+            }
+            else if (key === 'c' || key === 'C') {
+                e.preventDefault();
+                const activePlayer = players[currentPlayerIndex];
+                if (gameMode === 'X01' && activePlayer.score <= 170 && activePlayer.score >= 2 && !bogeyNumbers.includes(activePlayer.score)) {
+                    checkoutAttempts++;
+                    const checkoutScore = activePlayer.score;
+                    speak(`Checkout! ${checkoutTable[checkoutScore]}`, 'high');
+                    processScoreSubmission(checkoutScore, true);
+                }
+            }
+        });
+
+        // Inicjalizacja domyślnego trybu
         selectGameMode('X01');
         setX01Points(501);
     </script>
