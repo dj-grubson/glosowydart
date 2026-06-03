@@ -3,744 +3,1618 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Apka Darterska Pro</title>
+    <title>Dart Master Pro - System Głosowy i Treningowy</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+        
+        .font-digital { font-family: 'Orbitron', sans-serif; }
+        
+        @keyframes pulse-glow {
+            0%, 100% { border-color: rgba(14, 165, 233, 0.4); box-shadow: 0 0 12px rgba(14, 165, 233, 0.1); }
+            50% { border-color: rgba(14, 165, 233, 1); box-shadow: 0 0 25px rgba(14, 165, 233, 0.4); }
+        }
+        @keyframes active-glow {
+            0%, 100% { border-color: rgba(245, 158, 11, 0.5); box-shadow: 0 0 15px rgba(245, 158, 11, 0.2); }
+            50% { border-color: rgba(245, 158, 11, 1); box-shadow: 0 0 30px rgba(245, 158, 11, 0.6); }
+        }
+        .active-player-card { animation: active-glow 2s infinite; border-width: 3px !important; }
+        .pulse-border { animation: pulse-glow 2.5s infinite; }
+        
+        .countdown-circle {
+            transition: stroke-dashoffset 1s linear;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+
+        @keyframes screen-shake {
+            0%, 100% { transform: translate(0, 0); }
+            10% { transform: translate(-3px, -2px); }
+            20% { transform: translate(3px, 2px); }
+            30% { transform: translate(-2px, 3px); }
+            40% { transform: translate(2px, -3px); }
+            50% { transform: translate(-3px, 2px); }
+            60% { transform: translate(3px, -2px); }
+            70% { transform: translate(-2px, -3px); }
+            80% { transform: translate(2px, 3px); }
+            90% { transform: translate(-3px, -2px); }
+        }
+        .screen-shake { animation: screen-shake 0.5s ease-in-out; }
+
+        @keyframes golden-flash {
+            0% { background: rgba(251, 191, 36, 0); }
+            15% { background: rgba(251, 191, 36, 0.3); }
+            100% { background: rgba(251, 191, 36, 0); }
+        }
+        .golden-flash { animation: golden-flash 1s ease-out; }
+
+        @keyframes trophy-spin {
+            0% { transform: rotateY(0deg) scale(1); filter: drop-shadow(0 0 20px rgba(251, 191, 36, 0.8)); }
+            50% { transform: rotateY(180deg) scale(1.15); filter: drop-shadow(0 0 40px rgba(251, 191, 36, 1)); }
+            100% { transform: rotateY(360deg) scale(1); filter: drop-shadow(0 0 20px rgba(251, 191, 36, 0.8)); }
+        }
+        .trophy-spin { animation: trophy-spin 3s ease-in-out infinite; }
+
+        @keyframes title-pulse {
+            0%, 100% { 
+                text-shadow: 0 0 20px rgba(251, 191, 36, 0.6), 0 0 40px rgba(251, 191, 36, 0.3);
+                transform: scale(1);
+            }
+            50% { 
+                text-shadow: 0 0 30px rgba(251, 191, 36, 1), 0 0 60px rgba(251, 191, 36, 0.6), 0 0 80px rgba(251, 191, 36, 0.3);
+                transform: scale(1.05);
+            }
+        }
+        .title-pulse { animation: title-pulse 1.5s ease-in-out infinite; }
+
+        @keyframes bust-flash {
+            0%, 100% { background: rgba(239, 68, 68, 0); }
+            50% { background: rgba(239, 68, 68, 0.3); }
+        }
+        .bust-flash { animation: bust-flash 0.5s ease-out; }
+
+        @keyframes checkout-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(34, 197, 94, 0.5); }
+            50% { box-shadow: 0 0 60px rgba(34, 197, 94, 1); }
+        }
+        .checkout-glow { animation: checkout-glow 1s ease-out; }
+
+        #fireworks-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .celebration-content {
+            position: relative;
+            z-index: 2;
+            pointer-events: auto;
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.9) 100%);
+            border: 1px solid rgba(51, 65, 85, 0.5);
+        }
+
+        .muted-indicator {
+            animation: pulse-red 2s infinite;
+        }
+
+        @keyframes pulse-red {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .num-btn {
+            transition: all 0.15s ease;
+        }
+        .num-btn:active {
+            transform: scale(0.95);
+        }
+    </style>
 </head>
-<body class="p-4 md:p-8 relative overflow-x-hidden">
+<body class="bg-[#070a13] text-slate-100 min-h-screen flex items-center justify-center font-sans selection:bg-sky-500 selection:text-white overflow-x-hidden p-4">
 
-    <div id="toast-container" class="fixed top-4 z-50 w-full max-w-xs pointer-events-none left-1/2 -translate-x-1/2 flex flex-col gap-2"></div>
+    <div class="w-full max-w-6xl flex flex-col items-center justify-center min-h-[90vh] my-auto">
 
-    <div id="celebration-overlay" class="hidden fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-950/90 backdrop-blur-md pointer-events-none">
-        <div class="relative flex items-center justify-center w-80 h-80">
-            <div class="burst-ring border-sky-400 w-full h-full" style="animation-delay: 0s;"></div>
-            <div class="burst-ring border-amber-400 w-full h-full" style="animation-delay: 0.3s;"></div>
-            <div class="burst-ring border-emerald-400 w-full h-full" style="animation-delay: 0.6s;"></div>
-            <div class="z-10 text-center px-4">
-                <div class="text-amber-400 font-black text-2xl tracking-widest uppercase animate-bounce mb-2">LEG ZDOBYTY! 🔥</div>
-                <div id="celebration-winner" class="text-5xl font-black text-white italic uppercase tracking-tighter drop-shadow-[0_5px_20px_rgba(56,189,248,0.7)]">GRACZ 1</div>
-            </div>
-        </div>
-    </div>
+        <div id="toast-container" class="fixed top-4 z-50 w-full max-w-sm pointer-events-none left-1/2 -translate-x-1/2 flex flex-col gap-2 px-4"></div>
 
-    <div id="confirm-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4">
-        <div class="glass p-6 border border-slate-700 max-w-sm w-full text-center space-y-4">
-            <h3 class="text-lg font-bold text-white">Czy na pewno chcesz zresetować grę?</h3>
-            <p class="text-xs text-slate-400">Aktualne punkty i historia legów zostaną bezpowrotnie usunięte.</p>
-            <div class="flex gap-3">
-                <button onclick="closeConfirmModal(false)" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 rounded-xl text-xs uppercase border border-slate-600 transition-all">Anuluj</button>
-                <button onclick="closeConfirmModal(true)" class="flex-1 bg-rose-600 hover:bg-rose-500 text-white font-bold py-2 rounded-xl text-xs uppercase transition-all">Tak, resetuj</button>
-            </div>
-        </div>
-    </div>
+        <div id="celebration-overlay" class="hidden fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-950/95 backdrop-blur-lg">
+            <canvas id="fireworks-canvas"></canvas>
+            
+            <div class="celebration-content text-center space-y-6 max-w-lg px-6 flex flex-col items-center">
+                <div id="celebration-trophy" class="text-8xl trophy-spin">🏆</div>
+                
+                <div id="celebration-title" class="text-amber-400 font-black text-3xl tracking-widest uppercase title-pulse">LEG ZDOBYTY!</div>
+                <div id="celebration-winner" class="text-6xl font-black text-white italic uppercase tracking-tighter drop-shadow-[0_10px_25px_rgba(14,165,233,0.6)] font-digital">---</div>
+                
+                <div id="celebration-stats" class="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 text-sm text-slate-400 font-mono text-left space-y-1 w-full max-w-xs"></div>
+                
+                <div class="relative w-24 h-24 my-2 flex items-center justify-center">
+                    <svg class="w-full h-full">
+                        <circle cx="48" cy="48" r="40" stroke="#1e293b" stroke-width="6" fill="transparent" />
+                        <circle id="countdown-ring" class="countdown-circle" cx="48" cy="48" r="40" stroke="#0ea5e9" stroke-width="6" fill="transparent" stroke-dasharray="251.2" stroke-dashoffset="0" />
+                    </svg>
+                    <div id="countdown-text" class="absolute font-digital font-bold text-2xl text-sky-400">5</div>
+                </div>
 
-    <!-- LOBBY -->
-    <div id="lobby" class="w-full max-w-2xl space-y-6">
-        <header class="text-center py-6">
-            <h1 class="text-5xl font-black text-sky-400 italic uppercase tracking-tighter drop-shadow-[0_2px_10px_rgba(56,189,248,0.15)]">Apka Darterska</h1>
-            <p class="text-slate-400 tracking-[0.2em] text-[10px] uppercase font-bold mt-1">Głosowy system liczenia</p>
-        </header>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="space-y-4">
-                <section class="glass p-5 border border-slate-700/50">
-                    <h2 class="text-xs font-bold mb-3 text-sky-400 uppercase tracking-widest">1. Tryb Gry</h2>
-                    <div class="grid grid-cols-4 gap-2">
-                        <button onclick="selectGameMode('X01')" id="btn-X01" class="game-opt p-3 rounded-xl bg-slate-700 border neon-border-cyan font-black text-sm">X01</button>
-                        <button onclick="selectGameMode('ATC')" id="btn-ATC" class="game-opt p-3 rounded-xl bg-slate-800/60 border border-slate-700 hover:bg-slate-700 transition font-black text-xs">A-T-C</button>
-                        <button onclick="selectGameMode('121')" id="btn-121" class="game-opt p-3 rounded-xl bg-slate-800/60 border border-slate-700 hover:bg-slate-700 transition font-black text-sm">121</button>
-                        <button onclick="selectGameMode('RND')" id="btn-RND" class="game-opt p-3 rounded-xl bg-slate-800/60 border border-slate-700 hover:bg-slate-700 transition font-black text-sm text-amber-400">RND</button>
-                    </div>
-                </section>
-
-                <section id="x01-options" class="glass p-5 border border-slate-700/50">
-                    <h2 class="text-xs font-bold mb-3 text-slate-400 uppercase tracking-widest">Ustawienie X01</h2>
-                    <div class="grid grid-cols-4 gap-2 text-xs font-bold">
-                        <button onclick="setX01Points(301)" id="btn-p301" class="x01-pts p-2 bg-slate-800/60 border border-slate-700 rounded-lg">301</button>
-                        <button onclick="setX01Points(501)" id="btn-p501" class="x01-pts p-2 bg-slate-700 border neon-border-cyan rounded-lg">501</button>
-                        <button onclick="setX01Points(701)" id="btn-p701" class="x01-pts p-2 bg-slate-800/60 border border-slate-700 rounded-lg">701</button>
-                        <button onclick="setX01Points(1001)" id="btn-p1001" class="x01-pts p-2 bg-slate-800/60 border border-slate-700 rounded-lg">1001</button>
-                    </div>
-                </section>
-
-                <section id="format-options" class="glass p-5 border border-slate-700/50">
-                    <h2 class="text-xs font-bold mb-3 text-sky-400 uppercase tracking-widest">2. Format Meczowy</h2>
-                    <div class="grid grid-cols-2 gap-3 mb-3 text-xs font-bold">
-                        <button onclick="setLegFormat('firstTo')" id="btn-fmt-firstTo" class="leg-fmt p-2.5 rounded-lg bg-slate-800/60 border neon-border-cyan">First to</button>
-                        <button onclick="setLegFormat('bestOf')" id="btn-fmt-bestOf" class="leg-fmt p-2.5 rounded-lg bg-slate-800/60 border border-slate-700">Best of</button>
-                    </div>
-                    <div id="leg-options-container" class="grid grid-cols-4 gap-2 font-bold"></div>
-                </section>
-            </div>
-
-            <div class="flex flex-col">
-                <section class="glass p-5 border border-slate-700/50 h-full flex flex-col justify-between">
-                    <div>
-                        <h2 class="text-xs font-bold mb-3 uppercase tracking-widest text-sky-400">3. Zawodnicy</h2>
-                        <div id="player-inputs" class="space-y-2">
-                            <input type="text" placeholder="Twój nick" class="p-name w-full bg-slate-900 border border-slate-700 p-3 rounded-xl focus:border-sky-500 outline-none text-sm font-semibold text-white">
-                        </div>
-                    </div>
-                    <div class="flex gap-2 mt-4">
-                        <button onclick="addPlayerInput()" class="flex-1 bg-slate-800/60 hover:bg-slate-700 text-sky-400 text-[10px] py-2.5 font-bold rounded-lg border border-slate-700 uppercase transition-all">+ Gracz</button>
-                        <button onclick="addBotInput()" class="flex-1 bg-slate-800/60 hover:bg-slate-700 text-amber-500 text-[10px] py-2.5 font-bold rounded-lg border border-slate-700 uppercase transition-all">+ BOT</button>
-                    </div>
-                </section>
+                <button onclick="closeCelebration()" class="bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 font-bold py-2.5 px-6 rounded-xl text-xs uppercase tracking-wider transition-all">
+                    Pomiń i kontynuuj teraz
+                </button>
             </div>
         </div>
 
-        <button onclick="startGame()" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-black py-4 rounded-2xl shadow-lg transition-all text-xl uppercase italic tracking-tighter border border-sky-400/20">
-            GRAJ <span id="start-game-name" class="ml-1 text-sky-200"></span>
-        </button>
-    </div>
-
-    <!-- WIDOK GRY -->
-    <div id="game-board" class="hidden w-full max-w-xl space-y-4 transition-all">
-        <div class="flex justify-between items-center py-2 text-sm font-bold">
-            <button onclick="exitGame()" class="text-slate-400 hover:text-white tracking-widest transition-all">← WYJDŹ</button>
-            <div id="game-info" class="font-black text-sky-400 italic text-xl tracking-tight">X01</div>
-            <button onclick="openConfirmModal()" class="text-slate-400 hover:text-rose-400 tracking-widest transition-all">RESET</button>
-        </div>
-
-        <div id="players-display" class="grid grid-cols-1 gap-4"></div>
-
-        <div id="voice-panel" class="glass p-5 border border-slate-700/50 flex items-center justify-between px-6 relative overflow-hidden transition-all">
-            <div class="text-left flex items-center">
-                <span id="voice-dot" class="status-dot bg-emerald-400 animate-ping"></span>
-                <div>
-                    <div id="voice-status" class="text-emerald-400 text-sm font-black uppercase tracking-widest">Słucham...</div>
-                    <div id="current-player-label" class="text-slate-400 text-[11px] uppercase font-bold tracking-wider mt-0.5">TURA: GRACZ 1</div>
+        <div id="confirm-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm px-4">
+            <div class="bg-slate-900 border border-slate-800 p-6 max-w-sm w-full text-center space-y-5 rounded-2xl shadow-2xl">
+                <h3 id="modal-title" class="text-lg font-bold text-white">Czy na pewno chcesz zresetować grę?</h3>
+                <p id="modal-desc" class="text-xs text-slate-400">Aktualny postęp w tym legu zostanie utracony.</p>
+                <div class="flex gap-3 pt-2">
+                    <button onclick="closeConfirmModal(false)" class="flex-1 bg-slate-800 hover:bg-slate-700 py-3 rounded-xl text-xs uppercase font-bold tracking-wider text-slate-300">Anuluj</button>
+                    <button onclick="closeConfirmModal(true)" id="modal-confirm-btn" class="flex-1 bg-rose-600 hover:bg-rose-500 py-3 rounded-xl text-xs uppercase font-bold tracking-wider text-white shadow-lg shadow-rose-900/30">Tak, zresetuj</button>
                 </div>
             </div>
-            <div class="text-right">
-                <span id="last-shot-label" class="text-slate-500 text-[10px] block uppercase font-bold tracking-widest">RZUT</span>
-                <span id="voice-display" class="text-4xl font-black text-white italic tracking-tighter">---</span>
-            </div>
         </div>
 
-        <div id="checkout-container" class="glass p-5 border border-slate-700/50 text-center">
-            <div id="checkout-title" class="text-slate-400 text-[11px] uppercase font-bold tracking-widest mb-1">CELUJ W:</div>
-            <div id="checkout-suggestion" class="text-amber-400 font-black text-3xl italic tracking-tight">---</div>
-            <div id="rnd-buttons" class="hidden grid grid-cols-2 gap-3 mt-3">
-                <button onclick="handleRndVoiceCommand(true)" class="bg-emerald-600/20 border border-emerald-500/40 hover:bg-emerald-600 text-emerald-400 hover:text-white p-2.5 rounded-xl text-xs font-black uppercase transition-all">Trafione (Tak)</button>
-                <button onclick="handleRndVoiceCommand(false)" class="bg-rose-600/20 border border-rose-500/40 hover:bg-rose-600 text-rose-400 hover:text-white p-2.5 rounded-xl text-xs font-black uppercase transition-all">Pudło (Nie)</button>
+        <div id="lobby" class="w-full space-y-6 animate-fade-in">
+            <header class="text-center py-4">
+                <h1 class="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-indigo-400 to-sky-400 italic uppercase tracking-tighter font-digital">DART MASTER</h1>
+                <p class="text-slate-500 tracking-[0.3em] text-xs uppercase font-bold mt-2 flex items-center justify-center gap-2">
+                    <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Inteligentny System Głosowy v5.0
+                </p>
+            </header>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 space-y-4">
+                    <section class="bg-slate-900/60 p-5 border border-slate-800/80 rounded-2xl backdrop-blur-md">
+                        <h2 class="text-xs font-bold mb-4 text-sky-400 uppercase tracking-widest flex items-center gap-2">
+                            <span class="w-1.5 h-3 bg-sky-500 rounded-sm"></span> 1. Wybierz Tryb Rozgrywki
+                        </h2>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            <button onclick="selectGameMode('X01')" id="btn-X01" class="game-opt p-4 rounded-xl bg-slate-800 border border-sky-500 font-black text-sm transition-all text-white">X01</button>
+                            <button onclick="selectGameMode('ATC')" id="btn-ATC" class="game-opt p-4 rounded-xl bg-slate-900/40 border border-slate-800 font-bold text-sm text-slate-400 hover:text-slate-200 transition-all">Around the Clock</button>
+                            <button onclick="selectGameMode('121')" id="btn-121" class="game-opt p-4 rounded-xl bg-slate-900/40 border border-slate-800 font-bold text-sm text-slate-400 hover:text-slate-200 transition-all">121 / Finch</button>
+                            <button onclick="selectGameMode('RND')" id="btn-RND" class="game-opt p-4 rounded-xl bg-slate-900/40 border border-slate-800 font-bold text-sm text-amber-500/70 hover:text-amber-400 transition-all">Losowy Cel</button>
+                        </div>
+                    </section>
+
+                    <section id="mode-configs" class="bg-slate-900/60 p-5 border border-slate-800/80 rounded-2xl backdrop-blur-md min-h-[110px]">
+                        <div id="config-X01" class="mode-config-panel space-y-3">
+                            <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Ustawienia Punktów X01</h2>
+                            <div class="grid grid-cols-3 gap-3 text-xs font-bold">
+                                <button onclick="setX01Points(301)" id="btn-p301" class="x01-pts p-3 bg-slate-900/40 border border-slate-800 hover:border-slate-700 rounded-xl transition-all text-slate-400">301</button>
+                                <button onclick="setX01Points(501)" id="btn-p501" class="x01-pts p-3 bg-slate-800 border border-sky-500 rounded-xl transition-all text-white">501</button>
+                                <button onclick="setX01Points(701)" id="btn-p701" class="x01-pts p-3 bg-slate-900/40 border border-slate-800 hover:border-slate-700 rounded-xl transition-all text-slate-400">701</button>
+                            </div>
+                        </div>
+                        <div id="config-ATC" class="mode-config-panel hidden space-y-3">
+                            <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Ustawienia Around the Clock</h2>
+                            <div class="grid grid-cols-2 gap-3 text-xs font-bold">
+                                <button onclick="setAtcType('singles')" id="btn-atc-singles" class="atc-type p-3 bg-slate-800 border border-sky-500 rounded-xl text-white">Tylko Single (1-20 + Bull)</button>
+                                <button onclick="setAtcType('doubles')" id="btn-atc-doubles" class="atc-type p-3 bg-slate-900/40 border border-slate-800 rounded-xl text-slate-400">Tylko Duble (D1-D20 + DBull)</button>
+                            </div>
+                        </div>
+                        <div id="config-121" class="mode-config-panel hidden space-y-2">
+                            <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Zasady Trybu 121</h2>
+                            <p class="text-xs text-slate-400 leading-relaxed">Masz 9 lotek (3 tury) na zamknięcie licznika. Jeśli zamkniesz, przechodzisz do wartości o 1 wyższej. Jeśli nie – wracasz na start (121) lub zostajesz na bezpiecznym progu. Gra kończy się sukcesem przy zamknięciu 170.</p>
+                        </div>
+                        <div id="config-RND" class="mode-config-panel hidden space-y-2">
+                            <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Zasady Losowego Celu</h2>
+                            <p class="text-xs text-slate-400 leading-relaxed">System losuje dla Ciebie segment na tarczy (S, D lub T). Wpisujesz ile lotek z trzech trafiło dany cel. Idealny trening celności i skupienia.</p>
+                        </div>
+
+                        <div class="mt-4 pt-3 border-t border-slate-800/50">
+                            <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Limit legów do wygrania meczu</h2>
+                            <div class="flex items-center gap-3">
+                                <select id="legs-to-win-selector" class="bg-slate-950 border border-slate-800 text-sky-400 p-2.5 rounded-xl text-xs font-bold outline-none focus:border-sky-500 transition-all">
+                                    <option value="1">1 Leg (Szybka gra)</option>
+                                    <option value="3" selected>Do 3 wygranych legów</option>
+                                    <option value="5">Do 5 wygranych legów</option>
+                                    <option value="10">Do 10 wygranych legów</option>
+                                </select>
+                                <span class="text-[11px] text-slate-500 font-medium">Pierwszy gracz, który osiągnie tę liczbę, wygrywa cały mecz.</span>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <div class="space-y-4">
+                    <section class="bg-slate-900/60 p-5 border border-slate-800/80 rounded-2xl flex flex-col h-full backdrop-blur-md">
+                        <h2 class="text-xs font-bold mb-4 uppercase tracking-widest text-sky-400 flex items-center gap-2">
+                            <span class="w-1.5 h-3 bg-sky-500 rounded-sm"></span> 2. Lista Startowa
+                        </h2>
+                        
+                        <div id="player-inputs" class="space-y-2.5 max-h-[220px] overflow-y-auto pr-1 flex-grow">
+                            <div class="flex gap-2 items-center">
+                                <input type="text" placeholder="Nazwa gracza" class="p-name flex-grow bg-slate-950 border border-slate-800 p-3 rounded-xl text-sm font-semibold focus:border-sky-500 focus:outline-none transition-all">
+                                <div class="w-10 h-10 flex items-center justify-center text-slate-600 font-bold text-xs bg-slate-900 rounded-xl">#1</div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 mt-4">
+                            <button onclick="addPlayerInput()" class="bg-slate-950 hover:bg-slate-800 text-sky-400 text-xs py-3 font-bold rounded-xl border border-slate-800 uppercase tracking-wider transition-all">+ Gracz</button>
+                            <button onclick="addBotInput()" class="bg-slate-950 hover:bg-slate-800 text-amber-500 text-xs py-3 font-bold rounded-xl border border-slate-800 uppercase tracking-wider transition-all">+ Dodaj Bota</button>
+                        </div>
+                    </section>
+                </div>
             </div>
+
+            <button onclick="startGame()" class="w-full bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-black py-4 rounded-2xl text-xl uppercase italic tracking-wider transition-all shadow-xl shadow-indigo-950/40 active:scale-[0.99]">
+                Zatwierdź i Uruchom Maszynę
+            </button>
         </div>
 
-        <!-- PANEL WPISYWANIA RĘCZNEGO - ZMNIEJSZONY -->
-        <div id="manual-input-panel" class="glass p-3 border border-slate-700/50 space-y-3">
-            <div class="flex gap-2">
-                <input type="number" id="manual-score-input" placeholder="Wpisz..." class="flex-1 bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-2xl font-black text-center text-sky-400 outline-none focus:border-sky-500" readonly>
-                <button onclick="clearManualInput()" class="numpad-btn numpad-del px-4 text-xs">DEL</button>
+        <div id="game-board" class="hidden w-full space-y-4 animate-fade-in">
+            <div class="flex justify-between items-center py-2 px-1 text-xs font-bold flex-wrap gap-2">
+                <button onclick="triggerExitRoute()" class="text-slate-400 hover:text-white uppercase tracking-widest transition-all flex items-center gap-1">← Wyjdź do Menu</button>
+                <div class="flex items-center gap-2 flex-wrap justify-center">
+                    <span class="px-3 py-1 bg-slate-900 border border-slate-800 rounded-full font-digital text-sky-400 uppercase tracking-widest text-[10px]" id="game-info-badge">X01 - 501</span>
+                    <span class="px-3 py-1 bg-slate-900 border border-slate-800 rounded-full font-mono text-amber-500 uppercase text-[10px]" id="match-limit-badge">Mecz do: 3 wygranych</span>
+                    <button onclick="toggleTTS()" id="tts-toggle-btn" class="px-3 py-1 bg-slate-900 border border-slate-800 rounded-full text-slate-400 hover:text-white uppercase tracking-widest text-[10px] transition-all flex items-center gap-1">
+                        <span id="tts-icon">🔊</span> <span id="tts-text">TTS ON</span>
+                    </button>
+                </div>
+                <button onclick="openResetConfirm()" class="text-slate-400 hover:text-rose-400 uppercase tracking-widest transition-all">Reset Meczu</button>
             </div>
-            <div class="grid grid-cols-3 gap-1.5">
-                <button onclick="appendNum(1)" class="numpad-btn">1</button>
-                <button onclick="appendNum(2)" class="numpad-btn">2</button>
-                <button onclick="appendNum(3)" class="numpad-btn">3</button>
-                <button onclick="appendNum(4)" class="numpad-btn">4</button>
-                <button onclick="appendNum(5)" class="numpad-btn">5</button>
-                <button onclick="appendNum(6)" class="numpad-btn">6</button>
-                <button onclick="appendNum(7)" class="numpad-btn">7</button>
-                <button onclick="appendNum(8)" class="numpad-btn">8</button>
-                <button onclick="appendNum(9)" class="numpad-btn">9</button>
-                <button onclick="appendNum(0)" class="numpad-btn">0</button>
-                <button onclick="submitManualScore()" class="numpad-btn numpad-enter text-xs">ZATWIERDŹ</button>
-            </div>
-        </div>
 
-        <div class="space-y-1">
-            <div id="game-log" class="space-y-1 text-[11px] text-slate-400 h-24 overflow-y-auto bg-slate-900/60 p-4 rounded-xl font-mono border border-slate-800"></div>
-            <div class="text-right pt-1">
-                <button onclick="undoLastMove()" id="btn-undo-ui" class="text-rose-400 font-bold text-[10px] uppercase hover:text-rose-300 tracking-wider transition-all">↶ Cofnij ostatni rzut</button>
+            <div id="players-display" class="flex flex-wrap items-center justify-center gap-5 w-full py-2"></div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 w-full">
+                <div class="lg:col-span-8 bg-slate-900/80 p-5 border border-slate-800 rounded-3xl flex flex-col justify-between relative overflow-hidden backdrop-blur-md min-h-[180px]">
+                    <div class="flex justify-between items-start w-full">
+                        <div class="flex items-center">
+                            <span id="voice-dot" class="w-3 h-3 rounded-full mr-3 bg-emerald-500 animate-pulse"></span>
+                            <div>
+                                <div id="voice-status" class="text-emerald-400 text-xs font-black uppercase tracking-widest transition-all">System Aktywny</div>
+                                <div id="current-player-label" class="text-slate-400 text-[10px] font-mono uppercase mt-0.5">Tura: ---</div>
+                            </div>
+                        </div>
+                        <div class="text-[10px] font-mono text-slate-500 bg-slate-950/80 px-2 py-1 rounded border border-slate-900">
+                            Komendy: "cofnij", "furaż", "check"
+                        </div>
+                    </div>
+
+                    <div class="text-center my-2">
+                        <div id="voice-display" class="text-7xl font-black text-white italic tracking-tighter font-digital drop-shadow-md">---</div>
+                        <div id="checkout-suggestion" class="text-amber-400 font-bold text-sm tracking-wide uppercase h-5 mt-1 font-digital"></div>
+                        <div id="checkout-hint" class="text-emerald-400 text-xs font-bold mt-1 hidden">✨ Powiedz "CHECK" aby zakończyć!</div>
+                    </div>
+
+                    <div id="training-controls" class="hidden w-full border-t border-slate-800/60 pt-3 mt-2">
+                        <div id="rnd-actions" class="hidden grid grid-cols-4 gap-2">
+                            <button onclick="submitTrainingHits(0)" class="bg-slate-950 border border-slate-800 p-2.5 rounded-xl font-bold text-xs hover:bg-slate-900">0 Trafień</button>
+                            <button onclick="submitTrainingHits(1)" class="bg-sky-950/40 border border-sky-900/60 text-sky-400 p-2.5 rounded-xl font-bold text-xs hover:bg-sky-950/80">1 Trafienie</button>
+                            <button onclick="submitTrainingHits(2)" class="bg-indigo-950/40 border border-indigo-900/60 text-indigo-400 p-2.5 rounded-xl font-bold text-xs hover:bg-indigo-950/80">2 Trafienia</button>
+                            <button onclick="submitTrainingHits(3)" class="bg-emerald-950/40 border border-emerald-900/60 text-emerald-400 p-2.5 rounded-xl font-bold text-xs hover:bg-emerald-950/80">3 Trafienia!</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-4 bg-slate-900/40 p-4 border border-slate-800/80 rounded-3xl backdrop-blur-md">
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="appendNum(1)" class="num-btn bg-slate-900 hover:bg-slate-800 active:bg-slate-950 h-14 rounded-xl text-xl font-bold border border-slate-800/40 font-digital text-white">1</button>
+                        <button onclick="appendNum(2)" class="num-btn bg-slate-900 hover:bg-slate-800 active:bg-slate-950 h-14 rounded-xl text-xl font-bold border border-slate-800/40 font-digital text-white">2</button>
+                        <button onclick="appendNum(3)" class="num-btn bg-slate-900 hover:bg-slate-800 active:bg-slate-950 h-14 rounded-xl text-xl font-bold border border-slate-800/40 font-digital text-white">3</button>
+                        <button onclick="appendNum(4)" class="num-btn bg-slate-900 hover:bg-slate-800 active:bg-slate-950 h-14 rounded-xl text-xl font-bold border border-slate-800/40 font-digital text-white">4</button>
+                        <button onclick="appendNum(5)" class="num-btn bg-slate-900 hover:bg-slate-800 active:bg-slate-950 h-14 rounded-xl text-xl font-bold border border-slate-800/40 font-digital text-white">5</button>
+                        <button onclick="appendNum(6)" class="num-btn bg-slate-900 hover:bg-slate-800 active:bg-slate-950 h-14 rounded-xl text-xl font-bold border border-slate-800/40 font-digital text-white">6</button>
+                        <button onclick="appendNum(7)" class="num-btn bg-slate-900 hover:bg-slate-800 active:bg-slate-950 h-14 rounded-xl text-xl font-bold border border-slate-800/40 font-digital text-white">7</button>
+                        <button onclick="appendNum(8)" class="num-btn bg-slate-900 hover:bg-slate-800 active:bg-slate-950 h-14 rounded-xl text-xl font-bold border border-slate-800/40 font-digital text-white">8</button>
+                        <button onclick="appendNum(9)" class="num-btn bg-slate-900 hover:bg-slate-800 active:bg-slate-950 h-14 rounded-xl text-xl font-bold border border-slate-800/40 font-digital text-white">9</button>
+                        <button onclick="clearManualInput()" class="num-btn bg-rose-950/30 text-rose-400 hover:bg-rose-950/50 rounded-xl font-bold text-xs uppercase tracking-wider border border-rose-900/40">Reset</button>
+                        <button onclick="appendNum(0)" class="num-btn bg-slate-900 hover:bg-slate-800 active:bg-slate-950 h-14 rounded-xl text-xl font-bold border border-slate-800/40 font-digital text-white">0</button>
+                        <button onclick="submitManualScore()" class="num-btn bg-sky-600 text-white hover:bg-sky-500 font-bold rounded-xl text-xs uppercase tracking-wider shadow-md shadow-sky-950/50">Wpisz</button>
+                        <input type="hidden" id="manual-score-input" value="">
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
+                <div class="md:col-span-2 bg-slate-950/60 border border-slate-900 rounded-2xl p-4 flex flex-col justify-between">
+                    <div class="text-[10px] uppercase font-bold text-slate-500 tracking-widest mb-2 flex justify-between">
+                        <span>Historia rzutów (Bieżący mecz)</span>
+                        <span id="total-legs-counter" class="text-sky-500">Mecz trwa</span>
+                    </div>
+                    <div id="game-log" class="h-24 overflow-y-auto font-mono text-[11px] text-slate-400 space-y-1.5 pr-2">
+                        <div class="text-slate-600 italic">Oczekiwanie na pierwszy rzut...</div>
+                    </div>
+                </div>
+                
+                <div class="bg-slate-950/40 border border-slate-900 rounded-2xl p-4 flex flex-col justify-between items-end">
+                    <div class="w-full text-left text-[10px] uppercase font-bold text-slate-500 tracking-widest mb-1">
+                        Zarządzanie stanem
+                    </div>
+                    <div class="w-full space-y-2">
+                        <button onclick="setBustManual()" id="btn-bust-manual" class="w-full py-2 bg-amber-950/20 text-amber-500 hover:bg-amber-950/40 border border-amber-900/30 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all">Zgłoś Furaż (Bust)</button>
+                        <button onclick="undoLastMove()" class="w-full py-2 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all border border-slate-800">↺ Cofnij Ostatnią Turę</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 w-full">
+                <div class="stat-card p-4 rounded-xl text-center">
+                    <div class="text-[10px] text-slate-400 uppercase tracking-wider mb-1">Najlepszy AVG</div>
+                    <div id="stat-best-avg" class="text-2xl font-bold text-emerald-400 font-digital">-</div>
+                </div>
+                <div class="stat-card p-4 rounded-xl text-center">
+                    <div class="text-[10px] text-slate-400 uppercase tracking-wider mb-1">Najwyższy rzut</div>
+                    <div id="stat-high-score" class="text-2xl font-bold text-amber-400 font-digital">-</div>
+                </div>
+                <div class="stat-card p-4 rounded-xl text-center">
+                    <div class="text-[10px] text-slate-400 uppercase tracking-wider mb-1">Checkout %</div>
+                    <div id="stat-checkout-pct" class="text-2xl font-bold text-sky-400 font-digital">-</div>
+                </div>
+                <div class="stat-card p-4 rounded-xl text-center">
+                    <div class="text-[10px] text-slate-400 uppercase tracking-wider mb-1">180s</div>
+                    <div id="stat-180s" class="text-2xl font-bold text-rose-400 font-digital">0</div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        let gameMode = 'X01';
+        let gameMode = 'X01'; 
         let x01TargetPoints = 501;
+        let atcType = 'singles'; 
         let players = [];
         let currentPlayerIndex = 0;
-        let shouldBeListening = false;
-        let legFormat = 'firstTo'; 
-        let legTargetCount = 3;    
-        let selectedLegValue = 3;  
-        let legStartingPlayerIndex = 0; 
         let turnHistory = [];
         let isCelebrating = false;
+        let shouldBeListening = false;
+        let currentTrainingTarget = 0; 
+        let currentTrainingTargetType = 'S'; 
+        let legCount = 1;
+        let legsToWinMatch = 3; 
+        let isMatchFinished = false;
+        let ttsMuted = false;
+        let checkoutAttempts = 0;
+        let successfulCheckouts = 0;
+        let highestScore = 0;
+        let count180s = 0;
+        let playerStats = {};
+        
+        let countdownTimer = null;
+        let countdownSecondsLeft = 5;
+        const totalCircleLength = 251.2;
 
         const bogeyNumbers = [159, 162, 163, 165, 166, 168, 169];
+        const checkoutTable = {
+            2: "D1", 3: "S1, D1", 4: "D2", 5: "S1, D2", 6: "D3", 7: "S3, D2", 8: "D4", 9: "S1, D4", 10: "D5",
+            11: "S3, D4", 12: "D6", 13: "S5, D4", 14: "D7", 15: "S7, D4", 16: "D8", 17: "S1, D8", 18: "D9",
+            19: "S3, D8", 20: "D10", 21: "S5, D8", 22: "D11", 23: "S7, D8", 24: "D12", 25: "S9, D8", 26: "D13",
+            27: "S11, D8", 28: "D14", 29: "S13, D8", 30: "D15", 31: "S15, D8", 32: "D16", 33: "S1, D16", 34: "D17",
+            35: "S3, D16", 36: "D18", 37: "S5, D18", 38: "D19", 39: "S7, D19", 40: "D20", 41: "S9, D16", 42: "D21",
+            43: "S11, D16", 44: "D22", 45: "S13, D16", 46: "D23", 47: "S15, D16", 48: "D24", 49: "S17, D16", 50: "BULL",
+            51: "S19, D16", 52: "D26", 53: "S21, D16", 54: "D27", 55: "S15, D20", 56: "D28", 57: "S17, D20", 58: "D29",
+            59: "S19, D20", 60: "S20, D20", 61: "S25, D18", 62: "T10, D16", 63: "T13, D12", 64: "D32", 65: "T15, D10",
+            66: "T14, D12", 67: "T17, D8", 68: "T16, D10", 69: "T19, D6", 70: "T18, D8", 71: "T13, D16", 72: "T16, D12",
+            73: "T19, D8", 74: "T14, D16", 75: "T17, D12", 76: "T20, D8", 77: "T19, D10", 78: "T18, D12", 79: "T13, D20",
+            80: "T20, D10", 81: "T19, D12", 82: "T14, D20", 83: "T17, D16", 84: "T20, D12", 85: "T15, D20", 86: "T18, D16",
+            87: "T17, D18", 88: "T16, D20", 89: "T19, D16", 90: "T20, D15", 91: "T17, D20", 92: "T20, D16", 93: "T19, D18",
+            94: "T18, D20", 95: "T19, D19", 96: "T20, D18", 97: "T19, D20", 98: "T20, D19", 99: "T19, D21", 100: "T20, D20",
+            101: "T17, T10, D10", 102: "T20, T10, D6", 103: "T19, T10, D8", 104: "T20, T14, D11", 105: "T19, T16, D5",
+            106: "T20, T10, D8", 107: "T19, T10, D10", 108: "T20, T16, D0", 109: "T20, T13, D5", 110: "T20, T10, D10",
+            111: "T20, T13, D6", 112: "T20, T12, D8", 113: "T19, T12, D10", 114: "T20, T14, D6", 115: "T20, T15, D5",
+            116: "T20, T16, D4", 117: "T20, T17, D3", 118: "T20, T18, D2", 119: "T19, T10, D16", 120: "T20, T20, D0",
+            121: "T20, T11, D14", 122: "T18, T18, D7", 123: "T19, T16, D9", 124: "T20, T16, D8", 125: "T18, T13, D16",
+            126: "T19, T19, D6", 127: "T20, T17, D8", 128: "T18, T14, D16", 129: "T19, T16, D12", 130: "T20, T20, D5",
+            131: "T20, T13, D16", 132: "T20, T16, D12", 133: "T20, T17, D10", 134: "T25, T13, D20", 135: "T25, T15, D20",
+            136: "T20, T20, D8", 137: "T19, T16, D16", 138: "T20, T18, D12", 139: "T19, T14, D20", 140: "T20, T20, D10",
+            141: "T20, T15, D18", 142: "T20, T14, D20", 143: "T20, T17, D16", 144: "T20, T20, D12", 145: "T20, T15, D20",
+            146: "T20, T18, D16", 147: "T20, T17, D18", 148: "T20, T16, D20", 149: "T20, T19, D16", 150: "T20, T20, D15",
+            151: "T20, T17, D20", 152: "T20, T20, D16", 153: "T20, T19, D18", 154: "T20, T18, D20", 155: "T20, T15, D20",
+            156: "T20, T20, D18", 157: "T20, T19, D20", 158: "T20, T20, D19", 160: "T20, T20, D20", 161: "T20, T17, Bull",
+            164: "T20, T18, Bull", 167: "T20, T19, Bull", 170: "T20, T20, BULL"
+        };
 
-        const checkoutTable = { 2: "D1", 4: "D2", 6: "D3", 8: "D4", 10: "D5", 12: "D6", 14: "D7", 16: "D8", 18: "D9", 20: "D10", 22: "D11", 24: "D12", 26: "D13", 28: "D14", 30: "D15", 32: "D16", 34: "D17", 36: "D18", 38: "D19", 40: "D20", 41: "9, D16", 42: "10, D16", 43: "3, D20", 44: "4, D20", 45: "13, D16", 46: "6, D20", 47: "15, D16", 48: "16, D16", 49: "17, D16", 50: "10, D20", 51: "19, D16", 52: "12, D20", 53: "13, D20", 54: "14, D20", 55: "15, D20", 56: "16, D20", 57: "17, D20", 58: "18, D20", 59: "19, D20", 60: "20, D20", 61: "T15, D8", 62: "T10, D16", 63: "T13, D12", 64: "T16, D8", 65: "T11, D16", 66: "T14, D12", 67: "T17, D8", 68: "T16, D10", 69: "T19, D6", 70: "T18, D8", 71: "T13, D16", 72: "T16, D12", 73: "T19, D8", 74: "T14, D16", 75: "T17, D12", 76: "T20, D8", 77: "T19, D10", 78: "T18, D12", 79: "T19, D11", 80: "T20, D10", 81: "T19, D12", 82: "T14, D20", 83: "T17, D16", 84: "T20, D12", 85: "T15, D20", 86: "T18, D16", 87: "T17, D18", 88: "T16, D20", 89: "T19, D16", 90: "T20, D15", 91: "T17, D20", 92: "T20, D16", 93: "T19, D18", 94: "T18, D20", 95: "T19, D19", 96: "T20, D18", 97: "T19, D20", 98: "T20, D19", 99: "T19, Bull", 100: "T20, D20", 101: "T17, T10, D10", 104: "T20, T12, D4", 110: "T20, Bull", 120: "T20, T20, D20", 121: "T20, T11, D14", 130: "T20, T20, D5", 141: "T20, T19, D12", 160: "T20, T20, D20", 164: "T20, T19, Bull", 167: "T20, T19, Bull", 170: "T20, T20, Bull" };
+        // ============================================
+        // 🗣️ SYSTEM TTS (TEXT-TO-SPEECH)
+        // ============================================
+        let speechSynthesis = window.speechSynthesis;
+        let ttsEnabled = true;
+        let ttsQueue = [];
+        let isSpeaking = false;
 
-        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-        recognition.lang = 'pl-PL';
-        recognition.continuous = false;
-
-        function showNotification(message) {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = `toast-notification p-4 rounded-xl text-center font-bold bg-slate-800 text-white border border-slate-700 shadow-2xl text-xs tracking-wide`;
-            toast.innerText = message;
-            container.appendChild(toast);
-            setTimeout(() => { toast.remove(); }, 3500);
+        function toggleTTS() {
+            ttsMuted = !ttsMuted;
+            const btn = document.getElementById('tts-toggle-btn');
+            const icon = document.getElementById('tts-icon');
+            const text = document.getElementById('tts-text');
+            
+            if (ttsMuted) {
+                btn.classList.add('muted-indicator', 'border-rose-500');
+                btn.classList.remove('border-slate-800');
+                icon.innerText = '🔇';
+                text.innerText = 'TTS OFF';
+                text.classList.add('text-rose-400');
+                text.classList.remove('text-slate-400');
+                speechSynthesis.cancel();
+                ttsQueue = [];
+            } else {
+                btn.classList.remove('muted-indicator', 'border-rose-500');
+                btn.classList.add('border-slate-800');
+                icon.innerText = '🔊';
+                text.innerText = 'TTS ON';
+                text.classList.remove('text-rose-400');
+                text.classList.add('text-slate-400');
+            }
         }
 
-        function openConfirmModal() {
-            document.getElementById('confirm-modal').classList.remove('hidden');
+        function speak(text, priority = 'normal') {
+            if (ttsMuted || !ttsEnabled || !speechSynthesis) return;
+            
+            if (priority === 'high') {
+                speechSynthesis.cancel();
+                ttsQueue = [];
+            }
+            
+            ttsQueue.push(text);
+            processTTSQueue();
         }
 
-        function closeConfirmModal(shouldReset) {
-            document.getElementById('confirm-modal').classList.add('hidden');
-            if (shouldReset) startGame();
+        function processTTSQueue() {
+            if (isSpeaking || ttsQueue.length === 0) return;
+            
+            isSpeaking = true;
+            const text = ttsQueue.shift();
+            const utterance = new SpeechSynthesisUtterance(text);
+            
+            utterance.lang = 'pl-PL';
+            utterance.rate = 0.9;
+            utterance.pitch = 1.0;
+            utterance.volume = 0.8;
+            
+            const voices = speechSynthesis.getVoices();
+            const polishVoice = voices.find(voice => voice.lang.includes('pl'));
+            if (polishVoice) {
+                utterance.voice = polishVoice;
+            }
+            
+            utterance.onend = () => {
+                isSpeaking = false;
+                processTTSQueue();
+            };
+            
+            utterance.onerror = () => {
+                isSpeaking = false;
+                processTTSQueue();
+            };
+            
+            speechSynthesis.speak(utterance);
+        }
+
+        if (speechSynthesis) {
+            if (speechSynthesis.onvoiceschanged !== undefined) {
+                speechSynthesis.onvoiceschanged = () => {
+                    speechSynthesis.getVoices();
+                };
+            }
+        }
+
+        // ============================================
+        // 🎆 SYSTEM FAJERWERKÓW
+        // ============================================
+        class Particle {
+            constructor(x, y, color, velocity, size, type = 'spark') {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.velocity = velocity;
+                this.size = size;
+                this.type = type;
+                this.alpha = 1;
+                this.decay = Math.random() * 0.015 + 0.008;
+                this.gravity = 0.08;
+                this.friction = 0.98;
+                this.trail = [];
+                this.maxTrail = type === 'rocket' ? 8 : 4;
+                this.rotation = Math.random() * Math.PI * 2;
+                this.rotationSpeed = (Math.random() - 0.5) * 0.2;
+            }
+
+            update() {
+                this.trail.push({ x: this.x, y: this.y, alpha: this.alpha });
+                if (this.trail.length > this.maxTrail) this.trail.shift();
+
+                this.velocity.x *= this.friction;
+                this.velocity.y *= this.friction;
+                this.velocity.y += this.gravity;
+                
+                this.x += this.velocity.x;
+                this.y += this.velocity.y;
+                
+                this.alpha -= this.decay;
+                this.rotation += this.rotationSpeed;
+            }
+
+            draw(ctx) {
+                if (this.trail.length > 1) {
+                    ctx.save();
+                    for (let i = 0; i < this.trail.length - 1; i++) {
+                        const t = this.trail[i];
+                        const progress = i / this.trail.length;
+                        ctx.globalAlpha = t.alpha * progress * 0.5;
+                        ctx.fillStyle = this.color;
+                        ctx.beginPath();
+                        ctx.arc(t.x, t.y, this.size * progress, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    ctx.restore();
+                }
+
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation);
+                
+                if (this.type === 'spark') {
+                    const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, this.size * 3);
+                    gradient.addColorStop(0, this.color);
+                    gradient.addColorStop(0.4, this.color);
+                    gradient.addColorStop(1, 'transparent');
+                    ctx.fillStyle = gradient;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.size * 3, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.size * 0.6, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (this.type === 'rocket') {
+                    ctx.fillStyle = this.color;
+                    ctx.shadowBlur = 15;
+                    ctx.shadowColor = this.color;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (this.type === 'glitter') {
+                    ctx.fillStyle = this.color;
+                    ctx.fillRect(-this.size/2, -this.size/2, this.size, this.size);
+                }
+
+                ctx.restore();
+            }
+
+            isAlive() {
+                return this.alpha > 0.01;
+            }
+        }
+
+        class Firework {
+            constructor(canvas, startX, startY, targetX, targetY, colorPalette) {
+                this.canvas = canvas;
+                this.startX = startX;
+                this.startY = startY;
+                this.targetX = targetX;
+                this.targetY = targetY;
+                this.colorPalette = colorPalette;
+                
+                this.particles = [];
+                this.rocket = null;
+                this.exploded = false;
+                this.done = false;
+                
+                this.createRocket();
+            }
+
+            createRocket() {
+                const angle = Math.atan2(this.targetY - this.startY, this.targetX - this.startX);
+                const speed = 12 + Math.random() * 3;
+                this.rocket = new Particle(
+                    this.startX,
+                    this.startY,
+                    this.colorPalette[0],
+                    {
+                        x: Math.cos(angle) * speed,
+                        y: Math.sin(angle) * speed
+                    },
+                    3,
+                    'rocket'
+                );
+                this.rocket.gravity = 0;
+                this.rocket.friction = 1;
+                this.rocket.decay = 0;
+                this.distanceToTarget = Math.hypot(this.targetX - this.startX, this.targetY - this.startY);
+                this.distanceTraveled = 0;
+                this.prevX = this.startX;
+                this.prevY = this.startY;
+            }
+
+            explode() {
+                this.exploded = true;
+                this.rocket = null;
+                
+                const particleCount = 80 + Math.floor(Math.random() * 60);
+                const explosionType = Math.floor(Math.random() * 4);
+                
+                for (let i = 0; i < particleCount; i++) {
+                    const color = this.colorPalette[Math.floor(Math.random() * this.colorPalette.length)];
+                    let angle, speed, size;
+                    
+                    if (explosionType === 0) {
+                        angle = (Math.PI * 2 / particleCount) * i + (Math.random() - 0.5) * 0.2;
+                        speed = 4 + Math.random() * 5;
+                        size = Math.random() * 2 + 1.5;
+                    } else if (explosionType === 1) {
+                        angle = (Math.PI * 2 / particleCount) * i;
+                        speed = i % 2 === 0 ? 6 + Math.random() * 2 : 3 + Math.random() * 2;
+                        size = Math.random() * 2 + 1;
+                    } else if (explosionType === 2) {
+                        angle = Math.random() * Math.PI * 2;
+                        speed = Math.random() * 8 + 1;
+                        size = Math.random() * 2.5 + 0.5;
+                    } else {
+                        angle = (Math.PI * 2 / particleCount) * i;
+                        const arm = i % 5;
+                        speed = arm === 0 ? 8 : 3 + Math.random() * 3;
+                        size = Math.random() * 2 + 1;
+                    }
+                    
+                    this.particles.push(new Particle(
+                        this.targetX,
+                        this.targetY,
+                        color,
+                        {
+                            x: Math.cos(angle) * speed,
+                            y: Math.sin(angle) * speed
+                        },
+                        size,
+                        'spark'
+                    ));
+                }
+
+                const glitterCount = 30;
+                for (let i = 0; i < glitterCount; i++) {
+                    const color = this.colorPalette[Math.floor(Math.random() * this.colorPalette.length)];
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = Math.random() * 3 + 0.5;
+                    const p = new Particle(
+                        this.targetX,
+                        this.targetY,
+                        color,
+                        { x: Math.cos(angle) * speed, y: Math.sin(angle) * speed },
+                        Math.random() * 1.5 + 0.5,
+                        'glitter'
+                    );
+                    p.gravity = 0.05;
+                    p.decay = 0.005;
+                    this.particles.push(p);
+                }
+            }
+
+            update() {
+                if (!this.exploded && this.rocket) {
+                    const dx = this.targetX - this.rocket.x;
+                    const dy = this.targetY - this.rocket.y;
+                    const distance = Math.hypot(dx, dy);
+                    
+                    if (distance < 15) {
+                        this.explode();
+                    } else {
+                        this.rocket.update();
+                    }
+                }
+
+                for (let i = this.particles.length - 1; i >= 0; i--) {
+                    this.particles[i].update();
+                    if (!this.particles[i].isAlive()) {
+                        this.particles.splice(i, 1);
+                    }
+                }
+
+                if (this.exploded && this.particles.length === 0) {
+                    this.done = true;
+                }
+            }
+
+            draw(ctx) {
+                if (this.rocket && !this.exploded) {
+                    this.rocket.draw(ctx);
+                }
+                this.particles.forEach(p => p.draw(ctx));
+            }
+
+            isDone() {
+                return this.done;
+            }
+        }
+
+        class FireworksSystem {
+            constructor(canvasId) {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext('2d');
+                this.fireworks = [];
+                this.running = false;
+                this.animationId = null;
+                this.autoLaunchInterval = null;
+                
+                this.palettes = [
+                    ['#fbbf24', '#f59e0b', '#fcd34d', '#ffffff', '#fde68a'],
+                    ['#0ea5e9', '#38bdf8', '#7dd3fc', '#bae6fd', '#ffffff'],
+                    ['#a855f7', '#c084fc', '#d8b4fe', '#e9d5ff', '#ffffff'],
+                    ['#10b981', '#34d399', '#6ee7b7', '#a7f3d0', '#ffffff'],
+                    ['#f43f5e', '#fb7185', '#fda4af', '#fecdd3', '#ffffff'],
+                    ['#fbbf24', '#0ea5e9', '#a855f7', '#10b981', '#ffffff'],
+                ];
+                
+                this.resize();
+                window.addEventListener('resize', () => this.resize());
+            }
+
+            resize() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+            }
+
+            launchFirework(x = null, y = null) {
+                const startX = x || (Math.random() * this.canvas.width * 0.8 + this.canvas.width * 0.1);
+                const startY = this.canvas.height;
+                const targetX = x || (Math.random() * this.canvas.width * 0.8 + this.canvas.width * 0.1);
+                const targetY = y || (Math.random() * this.canvas.height * 0.5 + this.canvas.height * 0.1);
+                const palette = this.palettes[Math.floor(Math.random() * this.palettes.length)];
+                
+                this.fireworks.push(new Firework(this.canvas, startX, startY, targetX, targetY, palette));
+            }
+
+            start() {
+                if (this.running) return;
+                this.running = true;
+                this.fireworks = [];
+                
+                this.animate();
+                
+                let launchCount = 0;
+                const maxLaunches = 14;
+                this.autoLaunchInterval = setInterval(() => {
+                    if (launchCount >= maxLaunches) {
+                        clearInterval(this.autoLaunchInterval);
+                        return;
+                    }
+                    const count = Math.random() < 0.3 ? 2 : 1;
+                    for (let i = 0; i < count; i++) {
+                        this.launchFirework();
+                    }
+                    launchCount++;
+                }, 350);
+            }
+
+            stop() {
+                this.running = false;
+                if (this.autoLaunchInterval) {
+                    clearInterval(this.autoLaunchInterval);
+                    this.autoLaunchInterval = null;
+                }
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                    this.animationId = null;
+                }
+                this.fireworks = [];
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            }
+
+            animate() {
+                if (!this.running) return;
+                
+                this.ctx.fillStyle = 'rgba(7, 10, 19, 0.2)';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                for (let i = this.fireworks.length - 1; i >= 0; i--) {
+                    this.fireworks[i].update();
+                    this.fireworks[i].draw(this.ctx);
+                    
+                    if (this.fireworks[i].isDone()) {
+                        this.fireworks.splice(i, 1);
+                    }
+                }
+                
+                this.animationId = requestAnimationFrame(() => this.animate());
+            }
+        }
+
+        let fireworksSystem = null;
+
+        function initFireworksSystem() {
+            if (!fireworksSystem) {
+                fireworksSystem = new FireworksSystem('fireworks-canvas');
+                
+                const overlay = document.getElementById('celebration-overlay');
+                overlay.addEventListener('click', (e) => {
+                    if (fireworksSystem && fireworksSystem.running) {
+                        fireworksSystem.launchFirework(e.clientX, e.clientY);
+                    }
+                });
+            }
+        }
+
+        // ============================================
+        // KONIEC SYSTEMU FAJERWERKÓW
+        // ============================================
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition = null;
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.lang = 'pl-PL';
+            recognition.continuous = false;
+            recognition.interimResults = false;
+        } else {
+            showToast("System głosowy nie jest wspierany przez tę przeglądarkę.", "error");
         }
 
         function selectGameMode(mode) {
             gameMode = mode;
-            document.querySelectorAll('.game-opt').forEach(btn => btn.classList.remove('neon-border-cyan', 'neon-border-amber', 'bg-slate-700'));
-            const activeClass = mode === 'RND' ? 'neon-border-amber' : 'neon-border-cyan';
-            document.getElementById(`btn-${mode}`).classList.add(activeClass, 'bg-slate-700');
-            document.getElementById('x01-options').classList.toggle('hidden', mode !== 'X01');
-            document.getElementById('format-options').classList.toggle('hidden', mode === 'RND');
-            updateLegOptionsDisplay();
-            updateStartButtonText();
+            document.querySelectorAll('.game-opt').forEach(btn => {
+                btn.classList.remove('bg-slate-800', 'border-sky-500', 'text-white');
+                btn.classList.add('bg-slate-900/40', 'border-slate-800', 'text-slate-400');
+            });
+            const activeBtn = document.getElementById(`btn-${mode}`);
+            activeBtn.classList.remove('bg-slate-900/40', 'border-slate-800', 'text-slate-400');
+            activeBtn.classList.add('bg-slate-800', 'border-sky-500', 'text-white');
+
+            document.querySelectorAll('.mode-config-panel').forEach(panel => panel.classList.add('hidden'));
+            document.getElementById(`config-${mode}`).classList.remove('hidden');
         }
 
         function setX01Points(pts) {
             x01TargetPoints = pts;
-            document.querySelectorAll('.x01-pts').forEach(btn => btn.classList.remove('neon-border-cyan', 'bg-slate-700'));
-            document.getElementById(`btn-p${pts}`).classList.add('neon-border-cyan', 'bg-slate-700');
-            updateStartButtonText();
-        }
-
-        function setLegFormat(format) {
-            legFormat = format;
-            document.querySelectorAll('.leg-fmt').forEach(btn => btn.classList.remove('neon-border-cyan', 'bg-slate-700'));
-            document.getElementById(`btn-fmt-${format}`).classList.add('neon-border-cyan', 'bg-slate-700');
-            selectedLegValue = (format === 'firstTo') ? 3 : 5; 
-            updateLegOptionsDisplay();
-            updateStartButtonText();
-        }
-
-        function setLegValue(val) {
-            selectedLegValue = val;
-            legTargetCount = (legFormat === 'firstTo') ? val : Math.ceil(val / 2);
-            document.querySelectorAll('.leg-val-btn').forEach(btn => btn.classList.remove('neon-border-cyan', 'bg-slate-700'));
-            document.getElementById(`btn-legval-${val}`).classList.add('neon-border-cyan', 'bg-slate-700');
-            updateStartButtonText();
-        }
-
-        function updateLegOptionsDisplay() {
-            const container = document.getElementById('leg-options-container');
-            container.innerHTML = '';
-            if (gameMode === 'RND') return;
-            let options = legFormat === 'firstTo' ? [1, 3, 5, 7] : [3, 5, 7, 9];
-            options.forEach(val => {
-                const btn = document.createElement('button');
-                btn.id = `btn-legval-${val}`;
-                btn.className = `leg-val-btn p-2 bg-slate-800 border border-slate-700 rounded-lg hover:bg-slate-700 transition-all ${val === selectedLegValue ? 'neon-border-cyan bg-slate-700' : ''}`;
-                btn.innerText = val;
-                btn.onclick = () => setLegValue(val);
-                container.appendChild(btn);
+            
+            document.querySelectorAll('.x01-pts').forEach(btn => {
+                btn.classList.remove('bg-slate-800', 'border-sky-500', 'text-white');
+                btn.classList.add('bg-slate-900/40', 'border-slate-800', 'text-slate-400');
             });
+            
+            const activeBtn = document.getElementById(`btn-p${pts}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('bg-slate-900/40', 'border-slate-800', 'text-slate-400');
+                activeBtn.classList.add('bg-slate-800', 'border-sky-500', 'text-white');
+            }
         }
 
-        function updateStartButtonText() {
-            if (gameMode === 'RND') {
-                document.getElementById('start-game-name').innerText = `RND (DOUBLE TRAINING)`;
-                return;
-            }
-            let label = gameMode === 'X01' ? `${x01TargetPoints}` : gameMode;
-            document.getElementById('start-game-name').innerText = `${label} (DO ${selectedLegValue})`;
+        function setAtcType(type) {
+            atcType = type;
+            document.querySelectorAll('.atc-type').forEach(btn => {
+                btn.classList.remove('bg-slate-800', 'border-sky-500', 'text-white');
+                btn.classList.add('bg-slate-900/40', 'border-slate-800', 'text-slate-400');
+            });
+            const activeBtn = document.getElementById(`btn-atc-${type}`);
+            activeBtn.classList.remove('bg-slate-900/40', 'border-slate-800', 'text-slate-400');
+            activeBtn.classList.add('bg-slate-800', 'border-sky-500', 'text-white');
         }
 
         function addPlayerInput() {
             const container = document.getElementById('player-inputs');
-            if(container.querySelectorAll('input, .bot-entry').length >= 4) return;
-            const input = document.createElement('input');
-            input.className = "p-name w-full bg-slate-900 border border-slate-700 p-3 rounded-xl focus:border-sky-500 outline-none text-sm font-semibold text-white";
-            input.placeholder = `Gracz ${container.querySelectorAll('input, .bot-entry').length + 1}`;
-            container.appendChild(input);
-        }
-
-        function addBotInput() {
-            const container = document.getElementById('player-inputs');
-            if(container.querySelectorAll('input, .bot-entry').length >= 4) return;
-            
             const div = document.createElement('div');
-            div.className = "bot-entry flex flex-col gap-1 p-3 bg-slate-900 border border-amber-900/40 rounded-xl mt-1";
+            div.className = "flex gap-2 items-center animate-fade-in";
             div.innerHTML = `
-                <div class="flex items-center justify-between mb-1">
-                    <span class="text-[10px] font-bold text-amber-500 tracking-widest">BOT DARTOWY</span>
-                    <button onclick="this.parentElement.parentElement.remove()" class="text-rose-500 text-xs hover:text-rose-400">USUŃ</button>
-                </div>
-                <select class="p-bot-range w-full bg-slate-800 border-none text-amber-400 text-xs font-bold rounded-lg p-2 outline-none cursor-pointer">
-                    <option value="30-35">Widełki: 30 - 35 AVG</option>
-                    <option value="35-40">Widełki: 35 - 40 AVG</option>
-                    <option value="40-45">Widełki: 40 - 45 AVG</option>
-                    <option value="45-50">Widełki: 45 - 50 AVG</option>
-                    <option value="50-60">Widełki: 50 - 60 AVG</option>
-                    <option value="60-70">Widełki: 60 - 70 AVG</option>
-                    <option value="70-80">Widełki: 70 - 80 AVG</option>
-                    <option value="80-100">Widełki: 80 - 100 AVG</option>
-                </select>
+                <input type="text" placeholder="Nazwa gracza" class="p-name flex-grow bg-slate-950 border border-slate-800 p-3 rounded-xl text-sm font-semibold focus:border-sky-500 focus:outline-none transition-all">
+                <button onclick="this.parentElement.remove()" class="w-10 h-10 flex items-center justify-center bg-rose-950/20 text-rose-500 border border-rose-900/30 font-bold rounded-xl text-xs hover:bg-rose-950/50 transition-all">X</button>
             `;
             container.appendChild(div);
         }
 
-        function appendNum(n) {
-            const input = document.getElementById('manual-score-input');
-            if (input.value.length < 3) input.value += n;
-        }
-
-        function clearManualInput() {
-            document.getElementById('manual-score-input').value = '';
-        }
-
-        function submitManualScore() {
-            const input = document.getElementById('manual-score-input');
-            const score = parseInt(input.value);
-            if (!isNaN(score) && score <= 180) {
-                handleScore(score);
-                clearManualInput();
-            } else {
-                showNotification("Podaj wynik w zakresie od 0 do 180");
-            }
+        function addBotInput() {
+            const container = document.getElementById('player-inputs');
+            const div = document.createElement('div');
+            div.className = "bot-entry bg-slate-950 p-3 rounded-xl border border-amber-900/20 flex justify-between items-center animate-fade-in";
+            div.innerHTML = `
+                <select class="p-bot-range bg-transparent text-amber-500 font-bold text-xs outline-none uppercase cursor-pointer">
+                    <option value="40-45" class="bg-slate-950">Amator (40-45 AVG)</option>
+                    <option value="50-55" class="bg-slate-950">Średniak (50-55 AVG)</option>
+                    <option value="70-80" class="bg-slate-950">Wirtuoz (70-80 AVG)</option>
+                </select>
+                <button onclick="this.parentElement.remove()" class="text-rose-500 text-[10px] font-bold uppercase tracking-wider bg-rose-950/10 px-2 py-1 rounded border border-rose-900/20 hover:bg-rose-950/30">Usuń</button>
+            `;
+            container.appendChild(div);
         }
 
         function startGame() {
-            const inputElements = document.getElementById('player-inputs').children;
+            const container = document.getElementById('player-inputs');
             players = [];
-            turnHistory = [];
-            isCelebrating = false;
+            let humanCount = 0;
+            isMatchFinished = false;
+            
+            checkoutAttempts = 0;
+            successfulCheckouts = 0;
+            highestScore = 0;
+            count180s = 0;
+            playerStats = {};
 
-            Array.from(inputElements).forEach((el, index) => {
-                if (el.tagName === 'INPUT') {
-                    const name = el.value.trim();
-                    players.push({ 
-                        name: name || `Gracz ${index + 1}`, 
-                        score: gameMode === 'X01' ? x01TargetPoints : (gameMode === '121' ? 121 : 1),
-                        legsWon: 0, history: [], avg: 0, isBot: false, matchPoints: 0, matchThrows: 0 
+            legsToWinMatch = parseInt(document.getElementById('legs-to-win-selector').value) || 3;
+            document.getElementById('match-limit-badge').innerText = `Mecz do: ${legsToWinMatch} wygranych`;
+
+            Array.from(container.children).forEach((el) => {
+                if (el.querySelector('.p-name')) {
+                    const val = el.querySelector('.p-name').value.trim();
+                    humanCount++;
+                    const playerName = val || `Gracz ${humanCount}`;
+                    players.push({
+                        name: playerName,
+                        score: 0, isBot: false, matchPoints: 0, matchThrows: 0, legs: 0,
+                        atcNext: 1, history: [], turnsTotal: 0
                     });
+                    playerStats[playerName] = { avg: 0, throws: 0, totalPoints: 0 };
                 } else if (el.classList.contains('bot-entry')) {
                     const range = el.querySelector('select').value.split('-').map(Number);
-                    players.push({ 
-                        name: `BOT (${el.querySelector('select').value})`, 
-                        score: gameMode === 'X01' ? x01TargetPoints : (gameMode === '121' ? 121 : 1),
-                        legsWon: 0, history: [], avg: 0, isBot: true,
-                        botMin: range[0], botMax: range[1], matchPoints: 0, matchThrows: 0
+                    const botName = `BOT ${range[0]}-${range[1]}`;
+                    players.push({
+                        name: botName,
+                        score: 0, isBot: true, botMin: range[0], botMax: range[1],
+                        matchPoints: 0, matchThrows: 0, legs: 0, atcNext: 1, history: [], turnsTotal: 0
                     });
+                    playerStats[botName] = { avg: 0, throws: 0, totalPoints: 0 };
                 }
             });
 
-            currentPlayerIndex = 0;
-            legStartingPlayerIndex = 0;
+            if (players.length === 0) {
+                players.push({ name: "Gracz 1", score: 0, isBot: false, matchPoints: 0, matchThrows: 0, legs: 0, atcNext: 1, history: [], turnsTotal: 0 });
+                playerStats["Gracz 1"] = { avg: 0, throws: 0, totalPoints: 0 };
+            }
+
+            legCount = 1;
+            initNewLegData();
+
             document.getElementById('lobby').classList.add('hidden');
             document.getElementById('game-board').classList.remove('hidden');
-            document.getElementById('game-info').innerText = gameMode;
+            
+            const trainingPanel = document.getElementById('training-controls');
+            const rndActions = document.getElementById('rnd-actions');
             
             if (gameMode === 'RND') {
-                document.getElementById('checkout-container').classList.remove('hidden');
-                document.getElementById('rnd-buttons').classList.remove('hidden');
-                generateNewRndTarget();
+                trainingPanel.classList.remove('hidden');
+                rndActions.classList.remove('hidden');
+                generateNextTrainingTarget();
+            } else if (gameMode === 'ATC' || gameMode === '121') {
+                trainingPanel.classList.remove('hidden');
+                rndActions.classList.add('hidden');
+                if (gameMode === 'ATC') updateAtcTargetDisplay();
+                if (gameMode === '121') update121TargetDisplay();
             } else {
-                document.getElementById('rnd-buttons').classList.add('hidden');
+                trainingPanel.classList.add('hidden');
             }
 
-            renderPlayers();
-            checkBotTurn();
-        }
-
-        function generateNewRndTarget() {
-            const doubles = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 25];
-            const target = doubles[Math.floor(Math.random() * doubles.length)];
-            players[currentPlayerIndex].score = target;
-            document.getElementById('checkout-suggestion').innerText = target === 25 ? "BULLSEYE (D25)" : `D${target}`;
-        }
-
-        function handleRndVoiceCommand(isHit) {
-            if (isCelebrating) return;
-            turnHistory.push({ players: JSON.parse(JSON.stringify(players)), currentPlayerIndex: currentPlayerIndex });
-            const p = players[currentPlayerIndex];
-
-            if (isHit) {
-                p.history.push(1); 
-                document.getElementById('voice-display').innerText = "TRAFIONY";
-                triggerLegCelebration(p);
-            } else {
-                p.history.push(0);
-                document.getElementById('voice-display').innerText = "PUDŁO";
-                
-                const totalAttempts = p.history.length;
-                const hits = p.history.filter(h => h === 1).length;
-                p.avg = totalAttempts > 0 ? (hits / totalAttempts) * 100 : 0;
-
-                const log = document.getElementById('game-log');
-                log.innerHTML = `<div>${p.name}: Pudło w ${document.getElementById('checkout-suggestion').innerText}</div>` + log.innerHTML;
-
-                currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
-                generateNewRndTarget();
-                renderPlayers();
-                checkBotTurn();
-            }
-        }
-
-        function renderPlayers() {
-            const container = document.getElementById('players-display');
-            container.innerHTML = '';
-            container.className = players.length === 1 ? "grid grid-cols-1 gap-4" : "grid grid-cols-2 gap-4";
+            updateBadgeInfo();
+            updateStats();
+            render();
+            checkAndPropagateTurn();
             
-            players.forEach((p, i) => {
-                const isActive = (i === currentPlayerIndex);
-                const div = document.createElement('div');
-                div.className = `glass rounded-2xl p-6 flex flex-col items-center transition-all duration-300 ${isActive ? 'active-player' : 'opacity-30 scale-95'}`;
+            speak(`Rozpoczynamy mecz. Tryb ${gameMode}. ${players.length} graczy.`, 'high');
+        }
+
+        function initNewLegData() {
+            players.forEach(p => {
+                if (gameMode === 'X01') p.score = x01TargetPoints;
+                else if (gameMode === '121') p.score = 121;
+                else if (gameMode === 'ATC') p.score = 1; 
+                else p.score = 0; 
                 
-                let scoreLabel = p.score;
-                let avgLabel = `AVG: ${p.avg.toFixed(1)}`;
-                
-                if (gameMode === 'RND') {
-                    scoreLabel = p.history.filter(h => h === 1).length;
-                    avgLabel = `TRAFIENIA: ${p.avg.toFixed(0)}%`;
+                p.matchPoints = 0;
+                p.matchThrows = 0;
+                p.turnsTotal = 0;
+            });
+            currentPlayerIndex = 0;
+            document.getElementById('game-log').innerHTML = `<div class="text-sky-500 font-bold">=== Początek Legu #${legCount} ===</div>`;
+        }
+
+        function updateBadgeInfo() {
+            let label = gameMode;
+            if (gameMode === 'X01') label += ` - ${x01TargetPoints}`;
+            if (gameMode === 'ATC') label += ` (${atcType === 'singles' ? 'Single' : 'Duble'})`;
+            document.getElementById('game-info-badge').innerText = label;
+            document.getElementById('total-legs-counter').innerText = `Leg #${legCount}`;
+        }
+
+        function updateStats() {
+            let bestAvg = 0;
+            let bestAvgPlayer = '-';
+            
+            players.forEach(p => {
+                if (p.matchThrows > 0) {
+                    const avg = (p.matchPoints / p.matchThrows).toFixed(1);
+                    playerStats[p.name].avg = avg;
+                    playerStats[p.name].throws = p.matchThrows;
+                    playerStats[p.name].totalPoints = p.matchPoints;
+                    
+                    if (parseFloat(avg) > bestAvg) {
+                        bestAvg = parseFloat(avg);
+                        bestAvgPlayer = p.name;
+                    }
+                }
+            });
+            
+            document.getElementById('stat-best-avg').innerText = bestAvg > 0 ? bestAvg.toFixed(1) : '-';
+            document.getElementById('stat-high-score').innerText = highestScore > 0 ? highestScore : '-';
+            document.getElementById('stat-180s').innerText = count180s;
+            
+            const checkoutPct = checkoutAttempts > 0 ? ((successfulCheckouts / checkoutAttempts) * 100).toFixed(0) : 0;
+            document.getElementById('stat-checkout-pct').innerText = checkoutPct + '%';
+        }
+
+        function render() {
+            const display = document.getElementById('players-display');
+            
+            display.innerHTML = players.map((p, idx) => {
+                const isActive = idx === currentPlayerIndex;
+                let statLabel = `AVG: ${(p.matchPoints / (p.matchThrows || 1)).toFixed(1)}`;
+                let mainValue = p.score;
+
+                if (gameMode === 'ATC') {
+                    const targetName = p.score === 21 ? (atcType === 'singles' ? 'BULL' : 'D-BULL') : `${atcType === 'singles' ? '' : 'D'}${p.score}`;
+                    mainValue = targetName;
+                    statLabel = `Rzuty: ${p.matchThrows * 3}`;
+                } else if (gameMode === 'RND') {
+                    mainValue = p.history.reduce((a, b) => a + b, 0); 
+                    statLabel = `Trafienia: ${mainValue}/${p.matchThrows * 3}`;
+                } else if (gameMode === '121') {
+                    statLabel = `Tura: ${p.turnsTotal % 3 + 1}/3 (Cel: ${p.score})`;
                 }
 
-                div.innerHTML = `
-                    <div class="text-xs font-bold text-slate-400 tracking-wider uppercase">${p.name}</div>
-                    <div class="text-amber-500 font-bold text-xs mt-1">LEGI: ${p.legsWon}</div>
-                    <div class="text-6xl font-black my-2 text-white tracking-tight">${scoreLabel}</div>
-                    <div class="text-xs font-bold text-sky-400">${avgLabel}</div>`;
-                container.appendChild(div);
-            });
-            document.getElementById('current-player-label').innerText = `TURA: ${players[currentPlayerIndex].name.toUpperCase()}`;
+                return `
+                    <div class="bg-slate-900/70 border border-slate-800 p-5 rounded-2xl flex flex-col items-center justify-center transition-all duration-300 w-64 ${isActive ? 'active-player-card scale-[1.04] bg-slate-900/90 z-10' : 'opacity-30'}">
+                        <div class="text-xs font-bold text-slate-400 uppercase tracking-widest text-center truncate w-full">${p.name}</div>
+                        <div class="text-amber-500 font-black text-xs font-mono mt-1">LEGI: ${p.legs}</div>
+                        <div class="text-5xl font-black my-2 font-digital tracking-tight text-white">${mainValue}</div>
+                        <div class="text-[11px] text-sky-400 font-mono font-bold uppercase tracking-wider">${statLabel}</div>
+                    </div>
+                `;
+            }).join('');
+
+            const activePlayer = players[currentPlayerIndex];
+            document.getElementById('current-player-label').innerText = `Tura: ${activePlayer.name} ${activePlayer.isBot ? '[BOT]' : ''}`;
+
+            const summ = document.getElementById('checkout-suggestion');
+            const hint = document.getElementById('checkout-hint');
             
             if (gameMode === 'X01') {
-                document.getElementById('checkout-container').classList.remove('hidden');
-                const currentScore = players[currentPlayerIndex].score;
-                document.getElementById('checkout-suggestion').innerText = checkoutTable[currentScore] || "---";
-            } else if (gameMode === '121') {
-                document.getElementById('checkout-container').classList.remove('hidden');
-                document.getElementById('checkout-suggestion').innerText = `Zamknij w 9 lotkach`;
-            } else if (gameMode !== 'RND') {
-                document.getElementById('checkout-container').classList.add('hidden');
+                if (activePlayer.score <= 170 && !bogeyNumbers.includes(activePlayer.score)) {
+                    const checkout = checkoutTable[activePlayer.score];
+                    summ.innerText = checkout || "Wykończ leg dublem";
+                    hint.classList.remove('hidden');
+                } else {
+                    summ.innerText = activePlayer.score <= 170 ? "Brak checkoutu (Bogey)" : "";
+                    hint.classList.add('hidden');
+                }
+            } else {
+                hint.classList.add('hidden');
             }
         }
 
-        function checkBotTurn() {
-            if (isCelebrating) return;
+        function executeBotAI(bot) {
+            if (isCelebrating || isMatchFinished) return;
+
+            const targetAverage = (bot.botMin + bot.botMax) / 2;
+            const currentAverage = bot.matchThrows > 0 ? (bot.matchPoints / bot.matchThrows) : targetAverage;
+            let finalTurnScore = 0;
+
+            if (gameMode === 'X01') {
+                if (bot.score <= 170 && bot.score >= 2) {
+                    let checkoutProbability = 0.03; 
+
+                    if (bot.score <= 40 && bot.score % 2 === 0) {
+                        checkoutProbability = (targetAverage / 135); 
+                        if (currentAverage > bot.botMax) checkoutProbability *= 0.4; 
+                    } else if (bot.score > 100) {
+                        checkoutProbability = 0.008; 
+                    }
+
+                    if (Math.random() < checkoutProbability) {
+                        finalTurnScore = bot.score;
+                    } else {
+                        finalTurnScore = bot.score > 40 ? Math.floor(Math.random() * 25) + 15 : 0;
+                    }
+                } 
+                else {
+                    let dice = Math.random() * 100;
+                    let isOverperforming = currentAverage > (bot.botMax + 1);
+
+                    if (bot.botMin === 40) { 
+                        if (isOverperforming) {
+                            if (dice > 85) finalTurnScore = 45;
+                            else if (dice > 45) finalTurnScore = 26;
+                            else finalTurnScore = 11;
+                        } else {
+                            if (dice > 94) finalTurnScore = 100;
+                            else if (dice > 75) finalTurnScore = 60;
+                            else if (dice > 40) finalTurnScore = 45;
+                            else if (dice > 15) finalTurnScore = 41;
+                            else finalTurnScore = 26;
+                        }
+                    } else if (bot.botMin === 50) { 
+                        if (dice > 88) finalTurnScore = 100;
+                        else if (dice > 50) finalTurnScore = 60;
+                        else if (dice > 20) finalTurnScore = 45;
+                        else finalTurnScore = 26;
+                    } else { 
+                        if (dice > 80) finalTurnScore = 140;
+                        else if (dice > 40) finalTurnScore = 100;
+                        else if (dice > 10) finalTurnScore = 60;
+                        else finalTurnScore = 41;
+                    }
+                }
+
+                if (bot.score - finalTurnScore < 0 || bot.score - finalTurnScore === 1) {
+                    finalTurnScore = 0;
+                }
+                setTimeout(() => processScoreSubmission(finalTurnScore), 1400);
+            } 
+            else if (gameMode === 'ATC') {
+                let hitChance = (targetAverage / 160);
+                let hits = 0;
+                for (let i = 0; i < 3; i++) { if (Math.random() < hitChance) hits++; }
+                setTimeout(() => {
+                    bot.matchThrows++;
+                    if (hits > 0) {
+                        bot.score += hits;
+                        if (bot.score > 21) bot.score = 21;
+                    }
+                    logTurn(bot.name, `Trafił cel ${hits}x (Postęp: ${bot.score}/21)`);
+                    if (bot.score === 21) triggerWinCelebration(bot);
+                    else nextPlayer();
+                }, 1400);
+            } else if (gameMode === 'RND') {
+                let hitChance = (targetAverage / 170);
+                let hits = 0;
+                for (let i = 0; i < 3; i++) { if (Math.random() < hitChance) hits++; }
+                setTimeout(() => {
+                    bot.matchThrows++;
+                    bot.history.push(hits);
+                    logTurn(bot.name, `Rzucał w losowy cel: trafione ${hits}x`);
+                    nextPlayer();
+                }, 1400);
+            } else if (gameMode === '121') {
+                let successChance = (targetAverage / 220);
+                bot.turnsTotal++;
+                let closed = Math.random() < successChance;
+                setTimeout(() => {
+                    if (closed) {
+                        logTurn(bot.name, `ZAMKNĄŁ ${bot.score}! Awans.`);
+                        bot.score += 1;
+                        bot.turnsTotal = 0;
+                        if (bot.score > 170) triggerWinCelebration(bot);
+                    } else if (bot.turnsTotal % 3 === 0) {
+                        logTurn(bot.name, `Nie zamknął ${bot.score} w 9 lotkach. Reset.`);
+                        bot.score = 121; 
+                        bot.turnsTotal = 0;
+                    } else {
+                        logTurn(bot.name, `Tur ${bot.turnsTotal % 3}/3 nieudana dla ${bot.score}`);
+                    }
+                    nextPlayer();
+                }, 1400);
+            }
+        }
+
+        function processScoreSubmission(score, isCheckout = false) {
+            if (isCelebrating || isMatchFinished) return;
+
+            turnHistory.push(JSON.parse(JSON.stringify(players)));
+            const activePlayer = players[currentPlayerIndex];
+
+            if (isCheckout && score === activePlayer.score) {
+                activePlayer.score = 0;
+            } else {
+                activePlayer.score -= score;
+            }
+            
+            activePlayer.matchPoints += score;
+            activePlayer.matchThrows++;
+            
+            if (playerStats[activePlayer.name]) {
+                playerStats[activePlayer.name].throws++;
+                playerStats[activePlayer.name].totalPoints += score;
+                playerStats[activePlayer.name].avg = (playerStats[activePlayer.name].totalPoints / playerStats[activePlayer.name].throws).toFixed(1);
+            }
+
+            if (score === 180) {
+                count180s++;
+            }
+            if (score > highestScore) {
+                highestScore = score;
+            }
+
+            document.getElementById('voice-display').innerText = score;
+            logTurn(activePlayer.name, `${score} pkt (Zostaje: ${activePlayer.score})`);
+            
+            if (isCheckout) {
+                successfulCheckouts++;
+                const board = document.querySelector('.dartboard-container');
+                if (board) board.classList.add('checkout-glow');
+                setTimeout(() => { if (board) board.classList.remove('checkout-glow'); }, 1000);
+            }
+            
+            if (score === 0 && !isCheckout) {
+                speak(`${activePlayer.name} - furaż`, 'high');
+            } else if (!isCheckout) {
+                speak(`${activePlayer.name} - ${score} punktów. Zostaje ${activePlayer.score}`, 'normal');
+            }
+
+            if (activePlayer.score === 0) {
+                triggerWinCelebration(activePlayer);
+            } else {
+                updateStats();
+                nextPlayer();
+            }
+        }
+
+        function setBustManual() {
+            if (gameMode !== 'X01' || players[currentPlayerIndex].isBot) return;
+            processScoreSubmission(0);
+            showToast("Zgłoszono furaż (0 punktów)", "warning");
+        }
+
+        function nextPlayer() {
+            currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+            
+            if (gameMode === 'ATC') updateAtcTargetDisplay();
+            if (gameMode === '121') {
+                if (!players[currentPlayerIndex].isBot) players[currentPlayerIndex].turnsTotal++;
+                update121TargetDisplay();
+            }
+            if (gameMode === 'RND') generateNextTrainingTarget();
+
+            render();
+            checkAndPropagateTurn();
+        }
+
+        function checkAndPropagateTurn() {
+            if (isCelebrating || isMatchFinished) return;
             const p = players[currentPlayerIndex];
             const dot = document.getElementById('voice-dot');
             const status = document.getElementById('voice-status');
 
-            if (p && p.isBot) {
-                shouldBeListening = false;
-                try { recognition.stop(); } catch(e) {}
-                
-                dot.className = "status-dot bg-amber-500 animate-pulse";
-                status.innerText = "BOT RZUCA...";
-                status.className = "text-amber-500 text-sm font-black";
-                
-                setTimeout(() => executeBotMove(p), 1800);
+            if (p.isBot) {
+                deactivateVoiceRecognition();
+                dot.className = "w-3 h-3 rounded-full mr-3 bg-amber-500 animate-pulse";
+                status.innerText = "Bot analizuje tarczę...";
+                status.className = "text-amber-500 text-xs font-black uppercase tracking-widest";
+                executeBotAI(p);
             } else {
-                shouldBeListening = true;
-                startVoiceEngine();
-                dot.className = "status-dot bg-emerald-400 animate-ping";
-                status.innerText = "Słucham...";
-                status.className = "text-emerald-400 text-sm font-black";
+                dot.className = "w-3 h-3 rounded-full mr-3 bg-emerald-500 animate-ping";
+                status.innerText = "Słucham wyników...";
+                status.className = "text-emerald-400 text-xs font-black uppercase tracking-widest";
+                activateVoiceRecognition();
+                speak(`Tura gracza: ${p.name}`, 'normal');
             }
         }
 
-        function executeBotMove(bot) {
-            if (isCelebrating) return;
-            let points = 0;
-            const currentAvg = bot.avg;
-            const isHighLevel = bot.botMax >= 80;
+        function generateNextTrainingTarget() {
+            if (players[currentPlayerIndex].isBot) return;
+            const sectors = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,25];
+            const types = ['S', 'D', 'T'];
+            
+            currentTrainingTarget = sectors[Math.floor(Math.random() * sectors.length)];
+            currentTrainingTargetType = currentTrainingTarget === 25 ? 'S' : types[Math.floor(Math.random() * types.length)];
+            
+            if (currentTrainingTarget === 25 && currentTrainingTargetType === 'D') currentTrainingTargetType = 'S'; 
 
-            if (gameMode === 'X01') {
-                if (bot.score <= 170 && bot.score >= 2) {
-                    if (bogeyNumbers.includes(bot.score)) {
-                        let possibleShots = [45, 51, 54, 57, 60, 65, 80, 85, 95];
-                        let validShots = possibleShots.filter(shot => !bogeyNumbers.includes(bot.score - shot) && (bot.score - shot) >= 2);
-                        if (validShots.length > 0) {
-                            points = validShots[Math.floor(Math.random() * validShots.length)];
-                        } else {
-                            points = 41;
-                        }
-                    } else {
-                        let checkoutChance = isHighLevel ? 0.75 : 0.35;
-                        if (currentAvg < bot.botMin) checkoutChance += 0.15; 
-                        
-                        if (Math.random() < checkoutChance && bot.score % 2 === 0) {
-                            points = bot.score; 
-                        } else if (bot.score > 40) {
-                            let optimalSetup = [40, 32, 24, 16, 8, 4];
-                            let foundSetup = false;
-                            for (let target of optimalSetup) {
-                                let needed = bot.score - target;
-                                if (needed > 0 && needed <= 60 && !bogeyNumbers.includes(target)) {
-                                    points = needed;
-                                    foundSetup = true;
-                                    break;
-                                }
-                            }
-                            if (!foundSetup) {
-                                points = Math.floor(Math.random() * 20) + 20;
-                            }
-                        } else {
-                            points = 0; 
-                        }
-                    }
-                } 
-                else {
-                    let roll = Math.random() * 100;
-                    if (isHighLevel) {
-                        if (roll > 85) points = 180;
-                        else if (roll > 65) points = 140;
-                        else if (roll > 35) points = 100;
-                        else if (roll > 15) points = 60;
-                        else points = 41;
-                    } else if (bot.botMax >= 50) {
-                        if (roll > 95) points = 140;
-                        else if (roll > 75) points = 100;
-                        else if (roll > 40) points = 60;
-                        else if (roll > 15) points = 41;
-                        else points = 26;
-                    } else {
-                        if (roll > 90) points = 100;
-                        else if (roll > 60) points = 60;
-                        else if (roll > 30) points = 41;
-                        else points = 11;
-                    }
+            document.getElementById('checkout-suggestion').innerText = `Celuj w: ${currentTrainingTargetType}${currentTrainingTarget === 25 ? 'BULL' : currentTrainingTarget}`;
+        }
 
-                    let nextScore = bot.score - points;
-                    if (nextScore <= 170 && nextScore >= 2 && bogeyNumbers.includes(nextScore)) {
-                        let corrections = [1, 5, 11, 20];
-                        for (let corr of corrections) {
-                            if (!bogeyNumbers.includes(nextScore + corr)) {
-                                points -= corr;
-                                break;
-                            } else if (!bogeyNumbers.includes(nextScore - corr) && (nextScore - corr) >= 2) {
-                                points += corr;
-                                break;
-                            }
-                        }
-                    }
+        function updateAtcTargetDisplay() {
+            const p = players[currentPlayerIndex];
+            const tName = p.score === 21 ? "BULLSEYE" : `${atcType === 'singles' ? 'Single' : 'Double'} ${p.score}`;
+            document.getElementById('checkout-suggestion').innerText = `Aktualny cel ATC: ${tName}`;
+        }
+
+        function update121TargetDisplay() {
+            const p = players[currentPlayerIndex];
+            document.getElementById('checkout-suggestion').innerText = `Zamknij licznik: ${p.score}`;
+        }
+
+        function submitTrainingHits(hits) {
+            const p = players[currentPlayerIndex];
+            turnHistory.push(JSON.parse(JSON.stringify(players)));
+
+            if (gameMode === 'RND') {
+                p.matchThrows++;
+                p.history.push(hits);
+                logTurn(p.name, `Trening RND: Trafiono ${hits}x cel`);
+                nextPlayer();
+            } else if (gameMode === 'ATC') {
+                p.matchThrows++;
+                if (hits > 0) {
+                    p.score += hits;
+                    if (p.score > 21) p.score = 21;
                 }
-
-                if (bot.score - points < 0 || bot.score - points === 1) points = 0;
-                handleScore(points);
-            } 
-            else if (gameMode === 'ATC') {
-                let successChance = bot.botMin * 0.7; 
-                if (Math.random() * 100 < successChance) {
-                    points = 1;
-                }
-                handleScore(points);
-            }
-            else if (gameMode === '121') {
-                let roll = Math.random() * 100;
-                if (bot.score <= 50) {
-                    points = (roll < (isHighLevel ? 60 : 30)) ? bot.score : 0;
+                logTurn(p.name, `Trening ATC: Trafiono ${hits}x -> Cel: ${p.score}`);
+                if (p.score === 21) triggerWinCelebration(p);
+                else nextPlayer();
+            } else if (gameMode === '121') {
+                if (hits === 3) { 
+                    logTurn(p.name, `ZAMKNIĘTE ${p.score}! Wyższy poziom.`);
+                    p.score++;
+                    p.turnsTotal = 0;
+                    if (p.score > 170) triggerWinCelebration(p);
+                    else nextPlayer();
                 } else {
-                    points = isHighLevel ? 60 : 26;
+                    if (p.turnsTotal >= 3) {
+                        logTurn(p.name, `Koniec prób na ${p.score}. Spadek do 121.`);
+                        p.score = 121;
+                        p.turnsTotal = 0;
+                    } else {
+                        logTurn(p.name, `Próba ${p.turnsTotal}/3 nieudana.`);
+                    }
+                    nextPlayer();
                 }
-                if (bot.score - points < 0 || bot.score - points === 1) points = 0;
-                handleScore(points);
-            }
-            else if (gameMode === 'RND') {
-                let successChance = bot.botMin * 0.4;
-                handleRndVoiceCommand(Math.random() * 100 < successChance);
             }
         }
 
-        function startVoiceEngine() {
-            if (!shouldBeListening || isCelebrating) return;
+        function activateVoiceRecognition() {
+            shouldBeListening = true;
+            if (!recognition || isCelebrating || isMatchFinished) return;
             try { recognition.start(); } catch (e) {}
         }
 
-        function undoLastMove() {
-            if (turnHistory.length === 0 || isCelebrating) return;
-            const lastState = turnHistory.pop();
-            players = JSON.parse(JSON.stringify(lastState.players));
-            currentPlayerIndex = lastState.currentPlayerIndex;
-            
-            if (gameMode === 'RND') {
-                document.getElementById('voice-display').innerText = "COFNIĘTO";
-            }
-            
-            renderPlayers();
-            checkBotTurn();
+        function deactivateVoiceRecognition() {
+            shouldBeListening = false;
+            if (!recognition) return;
+            try { recognition.stop(); } catch (e) {}
         }
 
-        recognition.onresult = (event) => {
-            if (isCelebrating) return;
-            const transcript = event.results[0][0].transcript.toLowerCase().trim();
-            const p = players[currentPlayerIndex];
-
-            if (["cofnij", "popraw", "błąd"].some(kw => transcript.includes(kw))) { 
-                undoLastMove(); 
-                return; 
-            }
-
-            if (gameMode === 'RND') {
-                if (["trafione", "tak", "jest", "buja", "bort"].some(kw => transcript.includes(kw))) {
-                    handleRndVoiceCommand(true);
-                } else if (["pudło", "nie", "nie ma", "skucha"].some(kw => transcript.includes(kw))) {
-                    handleRndVoiceCommand(false);
+        if (recognition) {
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript.toLowerCase().trim();
+                document.getElementById('voice-status').innerText = `Usłyszałem: "${transcript}"`;
+                
+                if (transcript.includes("cofnij")) {
+                    undoLastMove();
+                    return;
                 }
-                return;
-            }
+                if (transcript.includes("furaż") || transcript.includes("błąd") || transcript.includes("spudłować")) {
+                    if (gameMode === 'X01') processScoreSubmission(0);
+                    return;
+                }
 
-            if (transcript.includes("buja") || transcript.includes("check") || transcript.includes("koniec")) {
                 if (gameMode === 'X01') {
-                    const canCheckout = p.score <= 170 && !bogeyNumbers.includes(p.score) && p.score >= 2;
-                    if (canCheckout) {
-                        handleScore(p.score);
-                    } else {
-                        showNotification(`Nie można zamknąć wartości ${p.score} w jednej turze!`);
+                    const activePlayer = players[currentPlayerIndex];
+                    const checkoutWords = ['czek', 'check', 'checkout', 'koniec', 'finish', 'zakończ', 'zamknij', 'out', 'double'];
+                    
+                    if (checkoutWords.some(word => transcript.includes(word))) {
+                        if (activePlayer.score <= 170 && activePlayer.score >= 2 && !bogeyNumbers.includes(activePlayer.score)) {
+                            checkoutAttempts++;
+                            const checkoutScore = activePlayer.score;
+                            speak(`Checkout! ${checkoutTable[checkoutScore]}`, 'high');
+                            processScoreSubmission(checkoutScore, true);
+                            return;
+                        } else {
+                            showToast("Nie możesz zakończyć - nieprawidłowy wynik!", "error");
+                            speak("Nie można zakończyć", 'high');
+                            return;
+                        }
                     }
-                } else if (gameMode === '121') {
-                    handleScore(p.score);
+
+                    const parsedNumber = parseInt(transcript.replace(/\D/g, ''));
+                    if (!isNaN(parsedNumber) && parsedNumber <= 180) {
+                        processScoreSubmission(parsedNumber);
+                    } else {
+                        showToast(`Niepoprawna wartość punktowa: ${transcript}`, "error");
+                    }
+                } 
+                else {
+                    if (transcript.includes("zero") || transcript.includes("0")) submitTrainingHits(0);
+                    else if (transcript.includes("jeden") || transcript.includes("raz") || transcript.includes("1")) submitTrainingHits(1);
+                    else if (transcript.includes("dwa") || transcript.includes("2")) submitTrainingHits(2);
+                    else if (transcript.includes("trzy") || transcript.includes("3")) submitTrainingHits(3);
                 }
-                return;
-            }
+            };
 
-            const num = parseInt(transcript.replace(/\D/g, ''));
-            if (!isNaN(num) && num <= 180) handleScore(num);
-        };
+            recognition.onend = () => {
+                if (shouldBeListening && !isCelebrating && !isMatchFinished) {
+                    try { recognition.start(); } catch (e) {}
+                }
+            };
+        }
 
-        recognition.onend = () => { if (shouldBeListening && !isCelebrating) setTimeout(startVoiceEngine, 300); };
+        function appendNum(num) {
+            const input = document.getElementById('manual-score-input');
+            if (input.value.length < 3) input.value += num;
+            document.getElementById('voice-display').innerText = input.value;
+        }
 
-        function handleScore(points) {
-            if (isCelebrating) return;
-            turnHistory.push({ players: JSON.parse(JSON.stringify(players)), currentPlayerIndex: currentPlayerIndex });
-            const p = players[currentPlayerIndex];
-            let finished = false;
+        function clearManualInput() {
+            document.getElementById('manual-score-input').value = "";
+            document.getElementById('voice-display').innerText = "---";
+        }
+
+        function submitManualScore() {
+            const input = document.getElementById('manual-score-input');
+            const val = parseInt(input.value);
+
+            if (isNaN(val)) return;
 
             if (gameMode === 'X01') {
-                if (p.score - points === 0) {
-                    p.score = 0; 
-                    p.history.push(points); 
-                    p.matchPoints += points;
-                    p.matchThrows += 1;
-                    finished = true;
-                } else if (p.score - points > 1) {
-                    p.score -= points; 
-                    p.history.push(points);
-                    p.matchPoints += points;
-                    p.matchThrows += 1;
+                if (val <= 180) {
+                    processScoreSubmission(val);
                 } else {
-                    p.history.push(0); 
-                    p.matchThrows += 1;
+                    showToast("Maksymalny wynik tury to 180!", "error");
                 }
-            } 
-            else if (gameMode === 'ATC') {
-                p.matchThrows += 1;
-                if (points > 0) {
-                    p.score += 1;
-                    p.history.push(1);
-                    p.matchPoints += 1;
-                    if (p.score > 21) {
-                        p.score = 21;
-                        finished = true;
-                    }
-                } else {
-                    p.history.push(0);
-                }
-            }
-            else if (gameMode === '121') {
-                p.matchThrows += 1;
-                if (p.score - points === 0) {
-                    p.score = 0;
-                    p.history.push(points);
-                    p.matchPoints += points;
-                    finished = true;
-                } else if (p.score - points > 1) {
-                    p.score -= points;
-                    p.history.push(points);
-                    p.matchPoints += points;
-                } else {
-                    p.history.push(0);
-                }
-
-                if (p.history.length >= 9 && !finished) {
-                    p.score = 121; 
-                    p.history = [];
-                    showNotification("Nie zamknięto w 9 lotkach! Reset do 121.");
-                }
-            }
-
-            if (gameMode === 'ATC') {
-                p.avg = p.matchThrows > 0 ? (p.matchPoints / p.matchThrows) * 100 : 0;
-            } else if (gameMode !== 'RND') {
-                p.avg = p.matchThrows > 0 ? (p.matchPoints / p.matchThrows) : 0;
-            }
-
-            document.getElementById('voice-display').innerText = points;
-            const log = document.getElementById('game-log');
-            log.innerHTML = `<div>${p.name}: +${points} (Zostaje: ${p.score})</div>` + log.innerHTML;
-
-            if (finished) {
-                triggerLegCelebration(p);
             } else {
-                currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
-                renderPlayers();
-                checkBotTurn();
+                if (val <= 3) {
+                    submitTrainingHits(val);
+                } else {
+                    showToast("Wpisz trafienia w zakresie od 0 do 3", "warning");
+                }
+            }
+            clearManualInput();
+        }
+
+        function undoLastMove() {
+            if (turnHistory.length > 0) {
+                players = turnHistory.pop();
+                currentPlayerIndex = (currentPlayerIndex - 1 + players.length) % players.length;
+                
+                const log = document.getElementById('game-log');
+                log.innerHTML = `<div class="text-rose-400 font-bold">↺ Cofnięto ostatnią turę rozkazem systemowym</div>` + log.innerHTML;
+                
+                render();
+                checkAndPropagateTurn();
+                showToast("Cofnięto rzut", "warning");
+                speak("Cofnięto ostatni rzut", 'high');
+            } else {
+                showToast("Brak rzutów do cofnięcia", "error");
             }
         }
 
-        function triggerLegCelebration(winnerInstance) {
+        function logTurn(name, action) {
+            const log = document.getElementById('game-log');
+            log.innerHTML = `<div><span class="text-slate-500">[${new Date().toLocaleTimeString()}]</span> <strong class="text-slate-300">${name}</strong>: ${action}</div>` + log.innerHTML;
+        }
+
+        // ============================================
+        // 🎆 CELEBRACJA Z FAJERWERKAMI
+        // ============================================
+        function triggerWinCelebration(player) {
             isCelebrating = true;
-            shouldBeListening = false;
-            try { recognition.stop(); } catch(e) {}
-
-            winnerInstance.legsWon++;
-            renderPlayers();
-
-            document.body.classList.add('celebrate-flash');
-            document.getElementById('celebration-winner').innerText = winnerInstance.name;
+            deactivateVoiceRecognition();
             
+            player.legs++; 
+            
+            if (player.legs >= legsToWinMatch) {
+                isMatchFinished = true;
+                document.getElementById('celebration-title').innerText = "🏆 MECZ ZAKOŃCZONY! ZWYCIĘSTWO! 🏆";
+                speak(`Mecz zakończony! Wygrywa ${player.name}!`, 'high');
+            } else {
+                document.getElementById('celebration-title').innerText = "LEG ZDOBYTY!";
+                speak(`Leg zdobyty przez ${player.name}!`, 'high');
+            }
+
+            document.getElementById('celebration-winner').innerText = player.name;
+            
+            const totalThrows = player.matchThrows * 3;
+            document.getElementById('celebration-stats').innerHTML = `
+                <div>• Tryb gry: ${gameMode}</div>
+                <div>• Wykorzystane lotki w legu: ${totalThrows}</div>
+                <div>• Średnia meczowa: ${(player.matchPoints / (player.matchThrows || 1)).toFixed(2)}</div>
+                <div class="text-amber-400 font-bold mt-2">• Stan legów w meczu: ${player.legs} / ${legsToWinMatch}</div>
+            `;
+            
+            document.getElementById('celebration-overlay').classList.remove('hidden');
+
+            initFireworksSystem();
+            if (fireworksSystem) {
+                fireworksSystem.start();
+            }
+
             const overlay = document.getElementById('celebration-overlay');
-            overlay.classList.remove('hidden');
+            overlay.classList.add('screen-shake');
+            setTimeout(() => overlay.classList.remove('screen-shake'), 500);
+
+            overlay.classList.add('golden-flash');
+            setTimeout(() => overlay.classList.remove('golden-flash'), 1000);
+
+            countdownSecondsLeft = 5;
+            const ring = document.getElementById('countdown-ring');
+            const textDisplay = document.getElementById('countdown-text');
+            
+            ring.style.strokeDashoffset = 0;
+            textDisplay.innerText = countdownSecondsLeft;
+
+            if (countdownTimer) clearInterval(countdownTimer);
+            
+            countdownTimer = setInterval(() => {
+                countdownSecondsLeft--;
+                if (countdownSecondsLeft <= 0) {
+                    clearInterval(countdownTimer);
+                    closeCelebration();
+                } else {
+                    textDisplay.innerText = countdownSecondsLeft;
+                    const offset = totalCircleLength - (totalCircleLength * (countdownSecondsLeft / 5));
+                    ring.style.strokeDashoffset = offset;
+                }
+            }, 1000);
+        }
+
+        function closeCelebration() {
+            if (countdownTimer) clearInterval(countdownTimer);
+            
+            if (fireworksSystem) {
+                fireworksSystem.stop();
+            }
+            
+            document.getElementById('celebration-overlay').classList.add('hidden');
+            isCelebrating = false;
+            
+            if (isMatchFinished) {
+                document.getElementById('game-board').classList.add('hidden');
+                document.getElementById('lobby').classList.remove('hidden');
+                speak("Powrót do menu głównego", 'normal');
+            } else {
+                legCount++;
+                initNewLegData();
+                updateBadgeInfo();
+                render();
+                checkAndPropagateTurn();
+                speak(`Rozpoczynamy leg numer ${legCount}`, 'normal');
+            }
+        }
+
+        let modalActionType = '';
+
+        function openResetConfirm() {
+            modalActionType = 'RESET';
+            document.getElementById('modal-title').innerText = "Czy na pewno chcesz zresetować cały mecz?";
+            document.getElementById('modal-desc').innerText = "Wszystkie ugrane legi oraz statystyki zostaną całkowicie wyzerowane.";
+            document.getElementById('confirm-modal').classList.remove('hidden');
+        }
+
+        function triggerExitRoute() {
+            modalActionType = 'EXIT';
+            document.getElementById('modal-title').innerText = "Czy chcesz zakończyć mecz?";
+            document.getElementById('modal-desc').innerText = "Spowoduje to natychmiastowe wyjście z gry i utratę punktów.";
+            document.getElementById('confirm-modal').classList.remove('hidden');
+        }
+
+        function closeConfirmModal(confirm) {
+            document.getElementById('confirm-modal').classList.add('hidden');
+            if (confirm) {
+                if (modalActionType === 'RESET') {
+                    legCount = 1;
+                    players.forEach(p => p.legs = 0);
+                    initNewLegData();
+                    updateBadgeInfo();
+                    render();
+                    checkAndPropagateTurn();
+                    showToast("Zresetowano konfigurację meczu", "info");
+                    speak("Mecz zresetowany", 'high');
+                } else if (modalActionType === 'EXIT') {
+                    deactivateVoiceRecognition();
+                    document.getElementById('game-board').classList.add('hidden');
+                    document.getElementById('lobby').classList.remove('hidden');
+                    speak("Powrót do menu", 'normal');
+                }
+            }
+        }
+
+        function showToast(msg, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            let bg = 'bg-slate-900 border-slate-800 text-white';
+            if (type === 'error') bg = 'bg-rose-950/90 border-rose-800 text-rose-300';
+            if (type === 'warning') bg = 'bg-amber-950/90 border-amber-800 text-amber-300';
+            
+            toast.className = `${bg} p-3 rounded-xl border text-xs font-semibold shadow-2xl transition-all duration-300 translate-y-2 opacity-0 flex items-center justify-between`;
+            toast.innerHTML = `<span>${msg}</span>`;
+            
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
 
             setTimeout(() => {
-                document.body.classList.remove('celebrate-flash');
-                overlay.classList.add('hidden');
-                isCelebrating = false;
-
-                if (gameMode !== 'RND' && winnerInstance.legsWon === legTargetCount) {
-                    showNotification(`MECZ ZAKOŃCZONY! Wygrał ${winnerInstance.name}`);
-                    setTimeout(exitGame, 2000);
-                } else {
-                    resetLeg();
-                    renderPlayers();
-                    checkBotTurn();
-                }
+                toast.classList.add('opacity-0', 'translate-y--2');
+                setTimeout(() => toast.remove(), 300);
             }, 3500);
         }
 
-        function resetLeg() {
-            players.forEach(p => {
-                p.score = gameMode === 'X01' ? x01TargetPoints : (gameMode === '121' ? 121 : 1);
-                p.history = [];
-            });
-            if (gameMode === 'RND') {
-                generateNewRndTarget();
-            } else {
-                legStartingPlayerIndex = (legStartingPlayerIndex + 1) % players.length;
-                currentPlayerIndex = legStartingPlayerIndex;
-            }
-        }
-
-        function exitGame() {
-            shouldBeListening = false;
-            isCelebrating = false;
-            try { recognition.stop(); } catch(e) {}
-            document.body.classList.remove('celebrate-flash');
-            document.getElementById('celebration-overlay').classList.add('hidden');
-            document.getElementById('lobby').classList.remove('hidden');
-            document.getElementById('game-board').classList.add('hidden');
-        }
-
         selectGameMode('X01');
+        setX01Points(501);
     </script>
 </body>
 </html>
