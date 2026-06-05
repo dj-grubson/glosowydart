@@ -3,1912 +3,1778 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DART MASTER PRO</title>
+    <title>Dart Master Pro - System Głosowy i Treningowy</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;700;800&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --red:    #e63946;
-            --gold:   #f4a201;
-            --green:  #39ff14;
-            --dark:   #0a0a0f;
-            --panel:  #0f1117;
-            --border: #1e2030;
-            --text:   #c8d0e0;
-            --dim:    #4a5268;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            background: var(--dark);
-            color: var(--text);
-            font-family: 'Rajdhani', sans-serif;
-            min-height: 100vh;
-            overflow-x: hidden;
-            cursor: crosshair;
-        }
-
-        /* ── DARTBOARD SVG BACKGROUND ── */
-        #bg-canvas {
-            position: fixed;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            opacity: 0.06;
-            pointer-events: none;
-        }
-
-        /* ── SCANLINE OVERLAY ── */
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background: repeating-linear-gradient(
-                0deg,
-                transparent,
-                transparent 2px,
-                rgba(0,0,0,0.18) 2px,
-                rgba(0,0,0,0.18) 4px
-            );
-            pointer-events: none;
-            z-index: 1000;
-        }
-
-        /* ── VIGNETTE ── */
-        body::after {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.85) 100%);
-            pointer-events: none;
-            z-index: 999;
-        }
-
-        /* ── FONTS ── */
-        .f-display { font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.05em; }
-        .f-mono    { font-family: 'JetBrains Mono', monospace; }
-        .f-ui      { font-family: 'Rajdhani', sans-serif; font-weight: 600; }
-
-        /* ── NEON TEXT ── */
-        .neon-red  { color: var(--red);  text-shadow: 0 0 8px var(--red),  0 0 20px var(--red); }
-        .neon-gold { color: var(--gold); text-shadow: 0 0 8px var(--gold), 0 0 20px var(--gold); }
-        .neon-green{ color: var(--green);text-shadow: 0 0 8px var(--green),0 0 20px var(--green); }
-
-        /* ── PANEL ── */
-        .panel {
-            background: linear-gradient(135deg, rgba(15,17,23,0.97) 0%, rgba(10,10,20,0.97) 100%);
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            position: relative;
-            overflow: hidden;
-        }
-        .panel::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: 4px;
-            padding: 1px;
-            background: linear-gradient(135deg, rgba(230,57,70,0.3), transparent 40%, rgba(244,162,1,0.2) 100%);
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
-            pointer-events: none;
-        }
-
-        /* ── CORNER MARKERS ── */
-        .corner-mark {
-            position: relative;
-        }
-        .corner-mark::before, .corner-mark::after {
-            content: '';
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            border-color: var(--red);
-            border-style: solid;
-        }
-        .corner-mark::before { top: 0; left: 0; border-width: 2px 0 0 2px; }
-        .corner-mark::after  { bottom: 0; right: 0; border-width: 0 2px 2px 0; }
-
-        /* ── TICKER LABEL ── */
-        .ticker-label {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 9px;
-            font-weight: 700;
-            letter-spacing: 0.25em;
-            text-transform: uppercase;
-            color: var(--dim);
-        }
-
-        /* ── BIG SCORE DISPLAY ── */
-        .score-mega {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: clamp(4rem, 10vw, 7rem);
-            line-height: 1;
-            letter-spacing: 0.02em;
-        }
-
-        /* ── BUTTONS ── */
-        .btn-primary {
-            background: linear-gradient(135deg, #b91c1c 0%, #e63946 50%, #b91c1c 100%);
-            border: 1px solid rgba(230,57,70,0.6);
-            color: #fff;
-            font-family: 'Bebas Neue', sans-serif;
-            letter-spacing: 0.12em;
-            font-size: 1.1rem;
-            transition: all 0.2s;
-            position: relative;
-            overflow: hidden;
-        }
-        .btn-primary::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-        .btn-primary:hover::after { opacity: 1; }
-        .btn-primary:hover { box-shadow: 0 0 20px rgba(230,57,70,0.5); }
-        .btn-primary:active { transform: scale(0.97); }
-
-        .btn-ghost {
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--dim);
-            font-family: 'Rajdhani', sans-serif;
-            font-weight: 700;
-            font-size: 0.75rem;
-            letter-spacing: 0.15em;
-            text-transform: uppercase;
-            transition: all 0.2s;
-        }
-        .btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
-        .btn-ghost:active { transform: scale(0.97); }
-
-        .btn-mode {
-            background: rgba(10,10,20,0.8);
-            border: 1px solid var(--border);
-            color: var(--dim);
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 1rem;
-            letter-spacing: 0.1em;
-            transition: all 0.25s;
-            position: relative;
-        }
-        .btn-mode:hover { border-color: rgba(230,57,70,0.5); color: var(--text); }
-        .btn-mode.active {
-            background: rgba(230,57,70,0.12);
-            border-color: var(--red);
-            color: var(--red);
-            box-shadow: inset 0 0 20px rgba(230,57,70,0.08), 0 0 12px rgba(230,57,70,0.2);
-        }
-
-        .btn-num {
-            background: rgba(15,17,23,0.9);
-            border: 1px solid #1e2030;
-            color: #c8d0e0;
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 1.6rem;
-            letter-spacing: 0.05em;
-            transition: all 0.12s;
-            border-radius: 3px;
-        }
-        .btn-num:hover { background: rgba(30,32,48,0.9); border-color: #334; color: #fff; }
-        .btn-num:active { transform: scale(0.93); background: rgba(50,52,70,0.9); }
-
-        /* ── PLAYER CARD ── */
-        .player-card {
-            background: linear-gradient(160deg, rgba(15,17,23,0.98) 0%, rgba(8,8,16,0.98) 100%);
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        .player-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--red), transparent);
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        .player-card.active::before { opacity: 1; }
-        .player-card.active {
-            border-color: rgba(230,57,70,0.4);
-            box-shadow: 0 0 30px rgba(230,57,70,0.12), 0 0 0 1px rgba(230,57,70,0.2);
-        }
-        .player-card .card-scan {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(180deg, transparent 0%, rgba(230,57,70,0.04) 50%, transparent 100%);
-            pointer-events: none;
-            animation: card-scan 3s ease-in-out infinite;
-            opacity: 0;
-        }
-        .player-card.active .card-scan { opacity: 1; }
-        @keyframes card-scan {
-            0%   { transform: translateY(-100%); }
-            100% { transform: translateY(100%); }
-        }
-
-        /* ── VOICE DOT ── */
-        @keyframes voice-ping {
-            0%   { transform: scale(1); opacity: 1; }
-            75%  { transform: scale(2.5); opacity: 0; }
-            100% { transform: scale(1); opacity: 0; }
-        }
-        .voice-ping::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: 50%;
-            background: inherit;
-            animation: voice-ping 1.2s ease-out infinite;
-        }
-        .voice-ping { position: relative; }
-
-        /* ── SCORE DISPLAY ── */
-        .score-display-box {
-            background: rgba(5,5,10,0.8);
-            border: 1px solid #1a1c28;
-            border-radius: 4px;
-            position: relative;
-        }
-        .score-display-box::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: repeating-linear-gradient(
-                90deg,
-                transparent,
-                transparent 3px,
-                rgba(255,255,255,0.008) 3px,
-                rgba(255,255,255,0.008) 4px
-            );
-            pointer-events: none;
-            border-radius: 4px;
-        }
-
-        /* ── CHECKOUT PILL ── */
-        .checkout-pill {
-            background: rgba(244,162,1,0.08);
-            border: 1px solid rgba(244,162,1,0.3);
-            color: var(--gold);
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.7rem;
-            font-weight: 700;
-            letter-spacing: 0.1em;
-            padding: 3px 10px;
-            border-radius: 2px;
-            display: inline-block;
-        }
-
-        /* ── LOG ── */
-        .log-entry { border-left: 2px solid transparent; padding-left: 8px; }
-        .log-entry:nth-child(1) { border-color: var(--red); }
-
-        /* ── ANIMATIONS ── */
-        @keyframes fade-up {
-            from { opacity: 0; transform: translateY(16px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-        .fade-up { animation: fade-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
-
-        @keyframes glitch {
-            0%   { clip-path: inset(0 0 95% 0); transform: translate(-2px); }
-            20%  { clip-path: inset(30% 0 60% 0); transform: translate(2px); }
-            40%  { clip-path: inset(70% 0 10% 0); transform: translate(-1px); }
-            60%  { clip-path: inset(5% 0 85% 0); transform: translate(1px); }
-            80%  { clip-path: inset(50% 0 40% 0); transform: translate(-2px); }
-            100% { clip-path: inset(0 0 0 0); transform: translate(0); }
-        }
-        @keyframes glitch2 {
-            0%   { clip-path: inset(80% 0 5% 0); transform: translate(2px); color: var(--green); }
-            50%  { clip-path: inset(20% 0 70% 0); transform: translate(-2px); color: var(--red); }
-            100% { clip-path: inset(0 0 0 0); transform: translate(0); color: inherit; }
-        }
-        .glitch-text {
-            position: relative;
-        }
-        .glitch-text::before,
-        .glitch-text::after {
-            content: attr(data-text);
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%;
-            height: 100%;
-            font-family: inherit;
-            font-size: inherit;
-            font-weight: inherit;
-            letter-spacing: inherit;
-        }
-        .glitch-text::before {
-            color: var(--red);
-            animation: glitch 4s infinite steps(1);
-            opacity: 0.5;
-        }
-        .glitch-text::after {
-            color: var(--green);
-            animation: glitch2 4s infinite steps(1) 0.1s;
-            opacity: 0.4;
-        }
-
-        @keyframes flicker {
-            0%, 95%, 100% { opacity: 1; }
-            96%  { opacity: 0.7; }
-            97%  { opacity: 1; }
-            98%  { opacity: 0.5; }
-            99%  { opacity: 1; }
-        }
-        .flicker { animation: flicker 8s infinite; }
-
-        @keyframes trophy-spin {
-            0%   { transform: rotateY(0deg) scale(1); }
-            50%  { transform: rotateY(180deg) scale(1.2); }
-            100% { transform: rotateY(360deg) scale(1); }
-        }
-        .trophy-spin { animation: trophy-spin 2.5s ease-in-out infinite; display: inline-block; }
-
-        @keyframes title-pulse {
-            0%, 100% { opacity: 1; }
-            50%       { opacity: 0.6; }
-        }
-        .title-pulse { animation: title-pulse 1.5s ease-in-out infinite; }
-
-        @keyframes screen-shake {
-            0%, 100% { transform: translate(0,0) rotate(0); }
-            20%       { transform: translate(-4px, 2px) rotate(-0.3deg); }
-            40%       { transform: translate(4px, -2px) rotate(0.3deg); }
-            60%       { transform: translate(-3px, 3px) rotate(-0.2deg); }
-            80%       { transform: translate(3px, -1px) rotate(0.2deg); }
-        }
-        .screen-shake { animation: screen-shake 0.5s ease; }
-
-        @keyframes golden-flash {
-            0%   { background-color: rgba(244,162,1,0); }
-            25%  { background-color: rgba(244,162,1,0.08); }
-            100% { background-color: rgba(244,162,1,0); }
-        }
-        .golden-flash { animation: golden-flash 1s ease; }
-
-        @keyframes checkout-glow-anim {
-            0%   { box-shadow: none; }
-            50%  { box-shadow: 0 0 60px rgba(57,255,20,0.4), inset 0 0 40px rgba(57,255,20,0.05); }
-            100% { box-shadow: none; }
-        }
-        .checkout-glow { animation: checkout-glow-anim 1s ease; }
-
-        /* ── COUNTDOWN RING ── */
-        .countdown-circle {
-            transform: rotate(-90deg);
-            transform-origin: 50% 50%;
-            transition: stroke-dashoffset 1s linear;
-        }
-
-        /* ── MODAL ── */
-        .modal-panel {
-            background: linear-gradient(135deg, #0c0e18 0%, #0a0c16 100%);
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            position: relative;
-        }
-        .modal-panel::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, var(--red), var(--gold), transparent);
-        }
-
-        /* ── TTS BUTTON ── */
-        .tts-muted {
-            border-color: rgba(230,57,70,0.5) !important;
-            color: var(--red) !important;
-        }
-
-        /* ── SELECT ── */
-        select {
-            background: rgba(5,5,10,0.9);
-            border: 1px solid var(--border);
-            color: var(--gold);
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.75rem;
-            outline: none;
-            cursor: pointer;
-            border-radius: 3px;
-        }
-        select:focus { border-color: var(--red); }
-
-        /* ── INPUT ── */
-        input[type="text"] {
-            background: rgba(5,5,10,0.9);
-            border: 1px solid var(--border);
-            color: #fff;
-            font-family: 'Rajdhani', sans-serif;
-            font-weight: 600;
-            font-size: 0.9rem;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        input[type="text"]:focus { border-color: var(--red); box-shadow: 0 0 12px rgba(230,57,70,0.15); }
-
-        /* ── SCROLLBAR ── */
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: rgba(10,10,20,0.5); }
-        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-        /* ── STAT ROW ── */
-        .stat-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 4px 0;
-            border-bottom: 1px solid rgba(30,32,48,0.5);
-        }
-        .stat-row:last-child { border-bottom: none; }
-
-        /* ── BADGE ── */
-        .badge {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.6rem;
-            font-weight: 700;
-            letter-spacing: 0.15em;
-            text-transform: uppercase;
-            padding: 2px 8px;
-            border-radius: 2px;
-        }
-
-        /* ── DIVIDER ── */
-        .divider {
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--border), transparent);
-        }
-
-        /* ── FIREWORKS CANVAS ── */
-        #fireworks-canvas {
-            position: absolute;
-            inset: 0;
-            width: 100%; height: 100%;
-            pointer-events: none;
-            z-index: 0;
-        }
-        .celebration-content { position: relative; z-index: 2; pointer-events: auto; }
-
-        /* ── ACTIVE PLAYER GLOW ── */
-        @keyframes active-border-glow {
-            0%, 100% { box-shadow: 0 0 10px rgba(230,57,70,0.1); }
-            50%       { box-shadow: 0 0 30px rgba(230,57,70,0.35), 0 0 60px rgba(230,57,70,0.1); }
-        }
-
-        /* ── DARTBOARD BG ROTATE ── */
-        @keyframes board-slow-rotate {
-            from { transform: rotate(0deg); }
-            to   { transform: rotate(360deg); }
-        }
-        #bg-board { animation: board-slow-rotate 120s linear infinite; transform-origin: center; }
-
-        /* ── NUMBER PAD ENTER BTN ── */
-        .btn-enter {
-            background: linear-gradient(135deg, rgba(230,57,70,0.2) 0%, rgba(230,57,70,0.1) 100%);
-            border: 1px solid rgba(230,57,70,0.4);
-            color: var(--red);
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 1rem;
-            letter-spacing: 0.1em;
-            transition: all 0.15s;
-            border-radius: 3px;
-        }
-        .btn-enter:hover { background: rgba(230,57,70,0.25); box-shadow: 0 0 15px rgba(230,57,70,0.3); }
-        .btn-enter:active { transform: scale(0.95); }
-
-        .btn-bust {
-            background: rgba(244,162,1,0.06);
-            border: 1px solid rgba(244,162,1,0.25);
-            color: var(--gold);
-            font-family: 'Rajdhani', sans-serif;
-            font-weight: 700;
-            font-size: 0.7rem;
-            letter-spacing: 0.15em;
-            text-transform: uppercase;
-            transition: all 0.15s;
-        }
-        .btn-bust:hover { background: rgba(244,162,1,0.12); box-shadow: 0 0 12px rgba(244,162,1,0.2); }
-        .btn-bust:active { transform: scale(0.97); }
-
-        /* ── TOAST ── */
-        .toast {
-            background: linear-gradient(135deg, #0c0e18, #0f1020);
-            border: 1px solid var(--border);
-            border-left: 3px solid var(--red);
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.7rem;
-        }
-        .toast.warn { border-left-color: var(--gold); }
-        .toast.err  { border-left-color: var(--red); }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="bg-[#070a13] text-slate-100 min-h-screen flex items-center justify-center font-sans selection:bg-sky-500 selection:text-white overflow-x-hidden p-4">
 
-<!-- ── SVG DARTBOARD BACKGROUND ── -->
-<svg id="bg-canvas" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
-    <g id="bg-board" transform="translate(250,250)">
-        <!-- outer black ring -->
-        <circle r="245" fill="#111" stroke="#222" stroke-width="1"/>
-        <!-- sector colors alternating -->
-        <g fill="none" stroke="#333" stroke-width="0.5">
-            <!-- 20 sectors, alternating colors -->
-            <path d="M0,0 L0,-245 A245,245 0 0,1 75.7,-233.8 Z" fill="#1a1a1a"/>
-            <path d="M0,0 L75.7,-233.8 A245,245 0 0,1 214.4,-119.6 Z" fill="#111"/>
-            <path d="M0,0 L214.4,-119.6 A245,245 0 0,1 245,0 Z" fill="#1a1a1a"/>
-            <path d="M0,0 L245,0 A245,245 0 0,1 214.4,119.6 Z" fill="#111"/>
-            <path d="M0,0 L214.4,119.6 A245,245 0 0,1 75.7,233.8 Z" fill="#1a1a1a"/>
-            <path d="M0,0 L75.7,233.8 A245,245 0 0,1 -75.7,233.8 Z" fill="#111"/>
-            <path d="M0,0 L-75.7,233.8 A245,245 0 0,1 -214.4,119.6 Z" fill="#1a1a1a"/>
-            <path d="M0,0 L-214.4,119.6 A245,245 0 0,1 -245,0 Z" fill="#111"/>
-            <path d="M0,0 L-245,0 A245,245 0 0,1 -214.4,-119.6 Z" fill="#1a1a1a"/>
-            <path d="M0,0 L-214.4,-119.6 A245,245 0 0,1 -75.7,-233.8 Z" fill="#111"/>
-            <path d="M0,0 L-75.7,-233.8 A245,245 0 0,1 0,-245 Z" fill="#1a1a1a"/>
-        </g>
-        <!-- rings -->
-        <circle r="200" fill="none" stroke="#e63946" stroke-width="18" stroke-dasharray="1256"/>
-        <circle r="160" fill="none" stroke="#333" stroke-width="2"/>
-        <circle r="107" fill="none" stroke="#e63946" stroke-width="10"/>
-        <circle r="60" fill="none" stroke="#333" stroke-width="1"/>
-        <circle r="20" fill="#e63946" opacity="0.7"/>
-        <circle r="10" fill="#39ff14" opacity="0.5"/>
-        <!-- crosshair lines -->
-        <line x1="0" y1="-245" x2="0" y2="245" stroke="#333" stroke-width="0.5"/>
-        <line x1="-245" y1="0" x2="245" y2="0" stroke="#333" stroke-width="0.5"/>
-    </g>
-</svg>
+    <div class="w-full max-w-6xl flex flex-col items-center justify-center min-h-[90vh] my-auto">
 
-<div class="relative z-10 w-full max-w-7xl mx-auto px-4 py-4 min-h-screen flex flex-col">
+        <!-- Toasty -->
+        <div id="toast-container" class="fixed top-4 z-50 w-full max-w-sm pointer-events-none left-1/2 -translate-x-1/2 flex flex-col gap-2 px-4"></div>
 
-    <!-- ── TOAST CONTAINER ── -->
-    <div id="toast-container" class="fixed top-4 right-4 z-[9999] flex flex-col gap-2 w-72 pointer-events-none"></div>
-
-    <!-- ══════════════════════════════════════════════
-         CELEBRATION OVERLAY
-    ══════════════════════════════════════════════ -->
-    <div id="celebration-overlay" class="hidden fixed inset-0 z-[500] flex flex-col items-center justify-center bg-black/92 backdrop-blur-md">
-        <canvas id="fireworks-canvas"></canvas>
-        <div class="celebration-content text-center flex flex-col items-center gap-6 px-6 max-w-lg w-full">
-            <div id="cel-trophy" class="text-8xl trophy-spin">🎯</div>
-            <div id="cel-title" class="f-display text-3xl neon-red title-pulse tracking-widest uppercase">LEG ZDOBYTY!</div>
-            <div id="cel-winner" class="f-display flicker" style="font-size:clamp(2.5rem,8vw,5rem); color:#fff; text-shadow:0 0 30px rgba(230,57,70,0.8), 0 0 60px rgba(230,57,70,0.4);">---</div>
-            <div id="cel-stats" class="panel p-4 text-left w-full max-w-xs f-mono text-xs text-gray-400 space-y-1"></div>
-            <!-- countdown ring -->
-            <div class="relative w-20 h-20 flex items-center justify-center">
-                <svg class="w-full h-full" viewBox="0 0 80 80">
-                    <circle cx="40" cy="40" r="34" fill="none" stroke="#1e2030" stroke-width="5"/>
-                    <circle id="countdown-ring" class="countdown-circle" cx="40" cy="40" r="34" fill="none"
-                            stroke="#e63946" stroke-width="5"
-                            stroke-dasharray="213.6" stroke-dashoffset="0"/>
-                </svg>
-                <span id="countdown-text" class="absolute f-display text-2xl" style="color:var(--red)">5</span>
-            </div>
-            <button onclick="closeCelebration()" class="btn-ghost px-8 py-2 rounded">Pomiń →</button>
-        </div>
-    </div>
-
-    <!-- ══════════════════════════════════════════════
-         CONFIRM MODAL
-    ══════════════════════════════════════════════ -->
-    <div id="confirm-modal" class="hidden fixed inset-0 z-[400] flex items-center justify-center bg-black/80 backdrop-blur-sm px-4">
-        <div class="modal-panel p-6 max-w-sm w-full text-center space-y-4">
-            <div class="f-display text-2xl neon-red" id="modal-title">RESET?</div>
-            <p id="modal-desc" class="f-ui text-sm text-gray-400">Aktualny postęp zostanie utracony.</p>
-            <div class="flex gap-3 pt-2">
-                <button onclick="closeConfirmModal(false)" class="flex-1 btn-ghost py-2.5 rounded">Anuluj</button>
-                <button onclick="closeConfirmModal(true)" class="flex-1 btn-primary py-2.5 rounded">Tak</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ══════════════════════════════════════════════
-         INSTRUCTIONS MODAL
-    ══════════════════════════════════════════════ -->
-    <div id="instructions-modal" class="hidden fixed inset-0 z-[400] flex items-center justify-center bg-black/85 backdrop-blur-md px-4 py-6 overflow-y-auto">
-        <div class="modal-panel p-6 max-w-2xl w-full rounded relative max-h-[90vh] overflow-y-auto">
-            <button onclick="toggleInstructions()" class="absolute top-4 right-4 btn-ghost px-3 py-1 rounded text-lg">✕</button>
-            <div class="f-display text-3xl neon-red mb-1">CENTRUM POMOCY</div>
-            <div class="ticker-label mb-5">DART MASTER PRO // SYSTEM GŁOSOWY v5.1</div>
-            <div class="divider mb-5"></div>
-            <div class="space-y-6 f-ui text-sm">
-                <div>
-                    <div class="ticker-label text-yellow-500 mb-3">⌨ SKRÓTY KLAWISZOWE</div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <div class="panel p-2.5 flex justify-between items-center"><span class="f-mono text-xs" style="color:var(--red)">[0–9]</span><span class="text-gray-400 text-xs">Wpisywanie punktów</span></div>
-                        <div class="panel p-2.5 flex justify-between items-center"><span class="f-mono text-xs" style="color:var(--red)">[Enter]</span><span class="text-gray-400 text-xs">Zatwierdź</span></div>
-                        <div class="panel p-2.5 flex justify-between items-center"><span class="f-mono text-xs" style="color:var(--red)">[Backspace]</span><span class="text-gray-400 text-xs">Kasuj</span></div>
-                        <div class="panel p-2.5 flex justify-between items-center"><span class="f-mono text-xs" style="color:var(--red)">[u / Ctrl+Z]</span><span class="text-gray-400 text-xs">Cofnij rzut</span></div>
-                        <div class="panel p-2.5 flex justify-between items-center"><span class="f-mono text-xs" style="color:var(--red)">[Space / b]</span><span class="text-gray-400 text-xs">Furaż (Bust)</span></div>
-                        <div class="panel p-2.5 flex justify-between items-center"><span class="f-mono text-xs" style="color:var(--red)">[c]</span><span class="text-gray-400 text-xs">Checkout</span></div>
-                        <div class="panel p-2.5 flex justify-between items-center"><span class="f-mono text-xs" style="color:var(--red)">[Esc]</span><span class="text-gray-400 text-xs">Reset meczu</span></div>
-                    </div>
-                </div>
-                <div>
-                    <div class="ticker-label mb-3" style="color:var(--green)">🎙 KOMENDY GŁOSOWE</div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <div class="panel p-2.5"><div style="color:var(--green)" class="f-mono text-xs">"45", "sto", "osiemdziesiąt"</div><div class="text-gray-500 text-xs mt-1">Wpisuje wynik 0–180</div></div>
-                        <div class="panel p-2.5"><div style="color:var(--green)" class="f-mono text-xs">"check", "czek", "zakończ"</div><div class="text-gray-500 text-xs mt-1">Próba checkoutu</div></div>
-                        <div class="panel p-2.5"><div style="color:var(--green)" class="f-mono text-xs">"cofnij"</div><div class="text-gray-500 text-xs mt-1">Cofa ostatni rzut</div></div>
-                        <div class="panel p-2.5"><div style="color:var(--green)" class="f-mono text-xs">"furaż", "błąd"</div><div class="text-gray-500 text-xs mt-1">Zapisuje 0 punktów</div></div>
-                    </div>
-                </div>
-                <div>
-                    <div class="ticker-label mb-3" style="color:var(--gold)">🎯 TRYBY GRY</div>
-                    <div class="space-y-2 text-xs text-gray-400">
-                        <div><span class="text-white font-bold">X01 —</span> Od wybranej wartości do 0. Wymagane zakończenie dublem.</div>
-                        <div><span class="text-white font-bold">Around the Clock —</span> Trafienie sektorów 1→20→Bull po kolei.</div>
-                        <div><span class="text-white font-bold">121 / Finch —</span> Zamknij 121 w 9 lotkach. Sukces = wyżej, porażka = reset.</div>
-                        <div><span class="text-white font-bold">Losowy Cel —</span> System losuje sektor. Wpisz ile lotek trafiło (0–3).</div>
-                    </div>
-                </div>
-            </div>
-            <div class="divider mt-5 mb-4"></div>
-            <div class="flex justify-end">
-                <button onclick="toggleInstructions()" class="btn-primary px-8 py-2 rounded">Zamknij</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ══════════════════════════════════════════════
-         LOBBY
-    ══════════════════════════════════════════════ -->
-    <div id="lobby" class="flex-1 flex flex-col fade-up">
-
-        <!-- HEADER -->
-        <header class="text-center py-8 relative">
-            <div class="ticker-label mb-2">// PROFESJONALNY SYSTEM DART //</div>
-            <h1 class="f-display glitch-text flicker" data-text="DART MASTER PRO"
-                style="font-size:clamp(3rem,10vw,7rem); color:#fff; text-shadow:0 0 40px rgba(230,57,70,0.5);">
-                DART MASTER PRO
-            </h1>
-            <div class="flex items-center justify-center gap-3 mt-3">
-                <span class="w-2 h-2 rounded-full voice-ping" style="background:var(--green)"></span>
-                <span class="ticker-label" style="color:var(--green)">SYSTEM GŁOSOWY AKTYWNY — v5.1</span>
-            </div>
-            <!-- decorative lines -->
-            <div class="absolute left-0 right-0 bottom-0 h-px" style="background:linear-gradient(90deg,transparent,var(--red),var(--gold),transparent)"></div>
-        </header>
-
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-6 flex-1">
-
-            <!-- LEFT: mode + config -->
-            <div class="lg:col-span-2 flex flex-col gap-4">
-
-                <!-- MODE SELECT -->
-                <div class="panel corner-mark p-5">
-                    <div class="flex justify-between items-center mb-4">
-                        <div>
-                            <div class="ticker-label" style="color:var(--red)">01 // TRYB ROZGRYWKI</div>
-                        </div>
-                        <button onclick="toggleInstructions()" class="btn-ghost px-4 py-1.5 rounded flex items-center gap-2">
-                            <span style="color:var(--gold)">?</span> Pomoc
-                        </button>
-                    </div>
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        <button onclick="selectGameMode('X01')" id="btn-X01" class="btn-mode active py-4 rounded">X01</button>
-                        <button onclick="selectGameMode('ATC')" id="btn-ATC" class="btn-mode py-4 rounded">Around<br>the Clock</button>
-                        <button onclick="selectGameMode('121')" id="btn-121" class="btn-mode py-4 rounded">121<br>Finch</button>
-                        <button onclick="selectGameMode('RND')" id="btn-RND" class="btn-mode py-4 rounded">Losowy<br>Cel</button>
-                    </div>
+        <!-- Ekran celebracji wygranej -->
+        <div id="celebration-overlay" class="hidden fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-950/95 backdrop-blur-lg">
+            <canvas id="fireworks-canvas"></canvas>
+            
+            <div class="celebration-content text-center space-y-6 max-w-lg px-6 flex flex-col items-center">
+                <div id="celebration-trophy" class="text-8xl trophy-spin">🏆</div>
+                
+                <div id="celebration-title" class="text-sky-400 font-black text-3xl tracking-widest uppercase title-pulse">LEG ZDOBYTY!</div>
+                <div id="celebration-winner" class="text-6xl font-black text-white italic uppercase tracking-tighter drop-shadow-[0_10px_25px_rgba(14,165,233,0.6)] font-digital">---</div>
+                
+                <div id="celebration-stats" class="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 text-sm text-slate-400 font-mono text-left space-y-1 w-full max-w-xs"></div>
+                
+                <div class="relative w-24 h-24 my-2 flex items-center justify-center">
+                    <svg class="w-full h-full">
+                        <circle cx="48" cy="48" r="40" stroke="#1e293b" stroke-width="6" fill="transparent" />
+                        <circle id="countdown-ring" class="countdown-circle" cx="48" cy="48" r="40" stroke="#0ea5e9" stroke-width="6" fill="transparent" stroke-dasharray="251.2" stroke-dashoffset="0" />
+                    </svg>
+                    <div id="countdown-text" class="absolute font-digital font-bold text-2xl text-sky-400">5</div>
                 </div>
 
-                <!-- CONFIG PANEL -->
-                <div class="panel p-5 flex-1">
-                    <div class="ticker-label mb-3" style="color:var(--red)">02 // KONFIGURACJA</div>
-
-                    <!-- X01 config -->
-                    <div id="config-X01" class="mode-config-panel space-y-3">
-                        <div class="f-ui text-xs text-gray-500 uppercase tracking-widest">Punkty startowe</div>
-                        <div class="grid grid-cols-3 gap-3">
-                            <button onclick="setX01Points(301)" id="btn-p301" class="btn-mode py-3 rounded f-display text-lg">301</button>
-                            <button onclick="setX01Points(501)" id="btn-p501" class="btn-mode active py-3 rounded f-display text-lg">501</button>
-                            <button onclick="setX01Points(701)" id="btn-p701" class="btn-mode py-3 rounded f-display text-lg">701</button>
-                        </div>
-                    </div>
-
-                    <!-- ATC config -->
-                    <div id="config-ATC" class="mode-config-panel hidden space-y-3">
-                        <div class="f-ui text-xs text-gray-500 uppercase tracking-widest">Typ Around the Clock</div>
-                        <div class="grid grid-cols-2 gap-3">
-                            <button onclick="setAtcType('singles')" id="btn-atc-singles" class="btn-mode active py-3 rounded text-sm">Single (1–20 + Bull)</button>
-                            <button onclick="setAtcType('doubles')" id="btn-atc-doubles" class="btn-mode py-3 rounded text-sm">Double (D1–D20 + DBull)</button>
-                        </div>
-                    </div>
-
-                    <!-- 121 config -->
-                    <div id="config-121" class="mode-config-panel hidden">
-                        <div class="f-ui text-xs text-gray-500 uppercase tracking-widest mb-2">Zasady trybu 121</div>
-                        <p class="text-xs text-gray-500 leading-relaxed">Masz 9 lotek (3 tury) na zamknięcie licznika. Sukces → wyżej. Porażka → reset do 121. Cel końcowy: 170.</p>
-                    </div>
-
-                    <!-- RND config -->
-                    <div id="config-RND" class="mode-config-panel hidden">
-                        <div class="f-ui text-xs text-gray-500 uppercase tracking-widest mb-2">Zasady losowego celu</div>
-                        <p class="text-xs text-gray-500 leading-relaxed">System losuje sektor (S/D/T). Wpisujesz ile lotek trafiło (0–3). Idealne ćwiczenie celności.</p>
-                    </div>
-
-                    <!-- MATCH LEGS -->
-                    <div class="mt-5 pt-4 divider"></div>
-                    <div class="mt-4">
-                        <div class="ticker-label mb-2" style="color:var(--gold)">03 // LIMIT LEGÓW</div>
-                        <div class="flex items-center gap-3">
-                            <select id="legs-to-win-selector" class="px-3 py-2">
-                                <option value="1">1 Leg — Błyskawiczna partia</option>
-                                <option value="3" selected>Best of 3 — Do 3 wygranych</option>
-                                <option value="5">Best of 5 — Do 5 wygranych</option>
-                                <option value="10">Best of 10 — Do 10 wygranych</option>
-                            </select>
-                            <span class="text-xs text-gray-600 f-ui">Pierwszy do limitu wygrywa mecz</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- RIGHT: players -->
-            <div class="panel corner-mark p-5 flex flex-col">
-                <div class="ticker-label mb-4" style="color:var(--red)">04 // LISTA STARTOWA</div>
-                <div id="player-inputs" class="flex-1 space-y-2.5 overflow-y-auto max-h-64 pr-1">
-                    <div class="flex gap-2 items-center">
-                        <input type="text" placeholder="Gracz 1" class="p-name flex-1 px-3 py-2.5 rounded">
-                        <div class="w-8 h-8 flex items-center justify-center f-mono text-xs text-gray-600 border border-dashed rounded" style="border-color:var(--border)">#1</div>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-2 mt-4">
-                    <button onclick="addPlayerInput()" class="btn-ghost py-2.5 rounded flex items-center justify-center gap-1">
-                        <span style="color:var(--red)">+</span> Gracz
-                    </button>
-                    <button onclick="addBotInput()" class="btn-ghost py-2.5 rounded flex items-center justify-center gap-1">
-                        <span style="color:var(--gold)">⚙</span> Bot
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- START BUTTON -->
-        <button onclick="startGame()" class="btn-primary w-full py-5 rounded mt-4 text-3xl tracking-widest relative overflow-hidden">
-            <span class="relative z-10">▶ URUCHOM MECZ</span>
-            <span class="absolute inset-0 opacity-10" style="background:repeating-linear-gradient(45deg,transparent,transparent 10px,rgba(255,255,255,0.1) 10px,rgba(255,255,255,0.1) 11px)"></span>
-        </button>
-
-        <div class="text-center mt-3 ticker-label">DART MASTER PRO © 2025 // PRESS ▶ TO START</div>
-    </div>
-
-    <!-- ══════════════════════════════════════════════
-         GAME BOARD
-    ══════════════════════════════════════════════ -->
-    <div id="game-board" class="hidden flex-1 flex flex-col gap-4 fade-up">
-
-        <!-- TOP BAR -->
-        <div class="flex items-center justify-between flex-wrap gap-3 py-2">
-            <button onclick="triggerExitRoute()" class="btn-ghost px-4 py-1.5 rounded flex items-center gap-2">
-                ← EXIT
-            </button>
-
-            <div class="flex items-center gap-2 flex-wrap">
-                <div class="badge" style="background:rgba(230,57,70,0.1);border:1px solid rgba(230,57,70,0.3);color:var(--red);" id="game-info-badge">X01 — 501</div>
-                <div class="badge" style="background:rgba(244,162,1,0.08);border:1px solid rgba(244,162,1,0.25);color:var(--gold);" id="match-limit-badge">MECZ DO: 3</div>
-                <button onclick="toggleTTS()" id="tts-toggle-btn" class="badge tts-muted" style="cursor:pointer;background:rgba(230,57,70,0.08);border:1px solid rgba(230,57,70,0.3);">
-                    <span id="tts-icon">🔇</span> <span id="tts-text">TTS OFF</span>
+                <button onclick="closeCelebration()" class="bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 font-bold py-2.5 px-6 rounded-xl text-xs uppercase tracking-wider transition-all">
+                    Pomiń i kontynuuj teraz
                 </button>
             </div>
-
-            <button onclick="openResetConfirm()" class="btn-ghost px-4 py-1.5 rounded" style="color:var(--red);border-color:rgba(230,57,70,0.3);">RESET</button>
         </div>
 
-        <!-- PLAYER CARDS -->
-        <div id="players-display" class="flex flex-wrap items-stretch justify-center gap-4 w-full"></div>
+        <!-- Modal potwierdzenia akcji (Reset / Wyjście) -->
+        <div id="confirm-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm px-4">
+            <div class="bg-slate-900 border border-slate-800 p-6 max-w-sm w-full text-center space-y-5 rounded-2xl shadow-2xl">
+                <h3 id="modal-title" class="text-lg font-bold text-white">Czy na pewno chcesz zresetować grę?</h3>
+                <p id="modal-desc" class="text-xs text-slate-400">Aktualny postęp w tym legu zostanie utracony.</p>
+                <div class="flex gap-3 pt-2">
+                    <button onclick="closeConfirmModal(false)" class="flex-1 bg-slate-800 hover:bg-slate-700 py-3 rounded-xl text-xs uppercase font-bold tracking-wider text-slate-300">Anuluj</button>
+                    <button onclick="closeConfirmModal(true)" id="modal-confirm-btn" class="flex-1 bg-rose-600 hover:bg-rose-500 py-3 rounded-xl text-xs uppercase font-bold tracking-wider text-white shadow-lg shadow-rose-900/30">Tak, zresetuj</button>
+                </div>
+            </div>
+        </div>
 
-        <!-- MAIN GAME AREA -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
-
-            <!-- VOICE / STATUS BOX -->
-            <div class="lg:col-span-8 panel corner-mark p-5 flex flex-col justify-between min-h-[200px]">
-                <div class="flex justify-between items-start">
-                    <div class="flex items-center gap-3">
-                        <span id="voice-dot" class="w-3 h-3 rounded-full voice-ping" style="background:var(--green)"></span>
-                        <div>
-                            <div id="voice-status" class="f-display text-sm tracking-wider" style="color:var(--green)">SYSTEM AKTYWNY</div>
-                            <div id="current-player-label" class="ticker-label mt-0.5">TURA: ---</div>
+        <!-- Okno Instrukcji i Pomocy -->
+        <div id="instructions-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md px-4 py-6 overflow-y-auto">
+            <div class="bg-slate-900 border border-slate-800 p-6 max-w-2xl w-full rounded-2xl shadow-2xl relative max-h-[90vh] overflow-y-auto">
+                <button onclick="toggleInstructions()" class="absolute top-4 right-4 text-slate-400 hover:text-white font-bold text-2xl transition-all">&times;</button>
+                <h3 class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-indigo-500 font-digital uppercase tracking-widest mb-4">Centrum Pomocy i Skrótów</h3>
+                
+                <div class="space-y-6 text-sm text-slate-300">
+                    <div>
+                        <h4 class="font-bold text-sky-400 uppercase tracking-wider mb-2">⌨️ Skróty Klawiszowe (Szybka obsługa)</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 font-mono text-xs">
+                            <div class="bg-slate-950 p-2.5 rounded border border-slate-800/80 flex justify-between"><span class="text-sky-400">[0-9]</span> <span>Wpisywanie punktów tury</span></div>
+                            <div class="bg-slate-950 p-2.5 rounded border border-slate-800/80 flex justify-between"><span class="text-sky-400">[Enter]</span> <span>Zatwierdzenie i wpisanie</span></div>
+                            <div class="bg-slate-950 p-2.5 rounded border border-slate-800/80 flex justify-between"><span class="text-sky-400">[Backspace / Del]</span> <span>Kasowanie wpisywanej cyfry</span></div>
+                            <div class="bg-slate-950 p-2.5 rounded border border-slate-800/80 flex justify-between"><span class="text-sky-400">[u] lub [Ctrl+Z]</span> <span>Cofnięcie rzutu (Undo)</span></div>
+                            <div class="bg-slate-950 p-2.5 rounded border border-slate-800/80 flex justify-between"><span class="text-sky-400">[Space] lub [b]</span> <span>Zgłoszenie Furażu (Bust - 0)</span></div>
+                            <div class="bg-slate-950 p-2.5 rounded border border-slate-800/80 flex justify-between"><span class="text-sky-400">[c]</span> <span>Szybki Checkout (Check)</span></div>
+                            <div class="bg-slate-950 p-2.5 rounded border border-slate-800/80 flex justify-between"><span class="text-sky-400">[Esc]</span> <span>Zarządzanie resetem</span></div>
                         </div>
                     </div>
-                    <div class="ticker-label text-right" style="max-width:160px">"cofnij" · "furaż" · "check"</div>
-                </div>
 
-                <!-- BIG SCORE -->
-                <div class="text-center py-4">
-                    <div id="voice-display" class="f-display flicker" style="font-size:clamp(5rem,15vw,9rem);color:#fff;line-height:1;text-shadow:0 0 40px rgba(255,255,255,0.1);">---</div>
-                    <div id="checkout-suggestion" class="f-display text-lg mt-1" style="color:var(--gold);min-height:28px;"></div>
-                    <div id="checkout-hint" class="hidden mt-1">
-                        <span class="checkout-pill">✦ CHECKOUT DOSTĘPNY — POWIEDZ "CHECK"</span>
+                    <div>
+                        <h4 class="font-bold text-emerald-400 uppercase tracking-wider mb-2">🎙️ System Głosowy (Słowa kluczowe)</h4>
+                        <p class="text-xs text-slate-400 mb-2 leading-relaxed">Gdy system nasłuchuje (turze żywego gracza), możesz wypowiedzieć:</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 font-mono text-xs">
+                            <div class="bg-slate-950 p-2.5 rounded border border-slate-800/80 flex flex-col"><span class="text-emerald-400">"Wartość" (np. 45, sto, osiemdziesiąt)</span> <span class="text-[10px] text-slate-500">Zatwierdza punkty (0-180)</span></div>
+                            <div class="bg-slate-950 p-2.5 rounded border border-slate-800/80 flex flex-col"><span class="text-emerald-400">"check", "czek", "zakończ"</span> <span class="text-[10px] text-slate-500">Próba skończenia aktualnym sugerowanym dublem</span></div>
+                            <div class="bg-slate-950 p-2.5 rounded border border-slate-800/80 flex flex-col"><span class="text-emerald-400">"cofnij"</span> <span class="text-[10px] text-slate-500">Cofa ostatni zapisany rzut</span></div>
+                            <div class="bg-slate-950 p-2.5 rounded border border-slate-800/80 flex flex-col"><span class="text-emerald-400">"furaż", "błąd", "spudłować"</span> <span class="text-[10px] text-slate-500">Zapisuje brak trafień (0 pkt)</span></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="font-bold text-pink-400 uppercase tracking-wider mb-2">🎯 Informacje o trybach i zasadach</h4>
+                        <ul class="list-disc pl-5 space-y-1.5 text-xs text-slate-400">
+                            <li><strong class="text-slate-300">X01:</strong> Tradycyjna gra od wybranej wartości do 0 z Double-Out (wymóg zakończenia dublem).</li>
+                            <li><strong class="text-slate-300">Around the Clock:</strong> Trening rzucania w segmenty od 1 do 20, kończony środkiem (Bullseye).</li>
+                            <li><strong class="text-slate-300">121 / Finch:</strong> Dynamiczna walka o zamknięcie wartości 121 w 9 lotkach. Sukces zwiększa cel, porażka resetuje postęp.</li>
+                            <li><strong class="text-slate-300">Losowy Cel:</strong> Rzuty w wyznaczane dynamicznie sektory (np. T20, D16, S5) i wpisywanie liczby udanych trafień (0-3).</li>
+                        </ul>
                     </div>
                 </div>
 
-                <!-- TRAINING CONTROLS -->
-                <div id="training-controls" class="hidden border-t pt-3 mt-2" style="border-color:var(--border)">
-                    <div id="rnd-actions" class="hidden grid grid-cols-4 gap-2">
-                        <button onclick="submitTrainingHits(0)" class="btn-ghost py-2.5 rounded text-xs">✕ 0</button>
-                        <button onclick="submitTrainingHits(1)" class="btn-ghost py-2.5 rounded text-xs" style="border-color:rgba(230,57,70,0.3);color:var(--red)">● 1</button>
-                        <button onclick="submitTrainingHits(2)" class="btn-ghost py-2.5 rounded text-xs" style="border-color:rgba(244,162,1,0.3);color:var(--gold)">●● 2</button>
-                        <button onclick="submitTrainingHits(3)" class="btn-ghost py-2.5 rounded text-xs" style="border-color:rgba(57,255,20,0.3);color:var(--green)">●●● 3</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- NUMPAD -->
-            <div class="lg:col-span-4 panel p-4">
-                <div class="ticker-label mb-3" style="color:var(--dim)">// KLAWIATURA</div>
-                <div class="grid grid-cols-3 gap-2">
-                    <button onclick="appendNum(1)" class="btn-num h-14 rounded">1</button>
-                    <button onclick="appendNum(2)" class="btn-num h-14 rounded">2</button>
-                    <button onclick="appendNum(3)" class="btn-num h-14 rounded">3</button>
-                    <button onclick="appendNum(4)" class="btn-num h-14 rounded">4</button>
-                    <button onclick="appendNum(5)" class="btn-num h-14 rounded">5</button>
-                    <button onclick="appendNum(6)" class="btn-num h-14 rounded">6</button>
-                    <button onclick="appendNum(7)" class="btn-num h-14 rounded">7</button>
-                    <button onclick="appendNum(8)" class="btn-num h-14 rounded">8</button>
-                    <button onclick="appendNum(9)" class="btn-num h-14 rounded">9</button>
-                    <button onclick="clearManualInput()" class="btn-bust h-14 rounded f-ui text-xs">CLR</button>
-                    <button onclick="appendNum(0)" class="btn-num h-14 rounded">0</button>
-                    <button onclick="submitManualScore()" class="btn-enter h-14 rounded f-display text-base">OK</button>
-                    <input type="hidden" id="manual-score-input" value="">
+                <div class="pt-4 border-t border-slate-800/60 mt-6 flex justify-end">
+                    <button onclick="toggleInstructions()" class="bg-sky-600 hover:bg-sky-500 text-white font-bold py-2 px-6 rounded-xl text-xs uppercase tracking-wider transition-all">Zamknij</button>
                 </div>
             </div>
         </div>
 
-        <!-- BOTTOM: log + controls -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <!-- LOG -->
-            <div class="md:col-span-2 panel p-4">
-                <div class="flex justify-between items-center mb-2">
-                    <div class="ticker-label" style="color:var(--dim)">// HISTORIA RZUTÓW</div>
-                    <div id="total-legs-counter" class="badge" style="background:rgba(230,57,70,0.08);border:1px solid rgba(230,57,70,0.2);color:var(--red)">LEG #1</div>
+        <!-- Lobby (Ekran przygotowania rozgrywki) -->
+        <div id="lobby" class="w-full space-y-6 animate-fade-in">
+            <header class="text-center py-4">
+                <h1 class="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-indigo-400 to-sky-400 italic uppercase tracking-tighter font-digital">DART MASTER</h1>
+                <p class="text-slate-500 tracking-[0.3em] text-xs uppercase font-bold mt-2 flex items-center justify-center gap-2">
+                    <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Inteligentny System Głosowy v5.0
+                </p>
+            </header>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 space-y-4">
+                    <section class="bg-slate-900/60 p-5 border border-slate-800/80 rounded-2xl backdrop-blur-md">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xs font-bold text-sky-400 uppercase tracking-widest flex items-center gap-2">
+                                <span class="w-1.5 h-3 bg-sky-500 rounded-sm"></span> 1. Wybierz Tryb Rozgrywki
+                            </h2>
+                            <button onclick="toggleInstructions()" class="bg-slate-800/80 hover:bg-slate-700 text-sky-400 hover:text-sky-300 font-bold text-[10px] px-3 py-1.5 rounded-lg border border-slate-700/60 transition-all uppercase tracking-wider flex items-center gap-1.5">
+                                📖 Pomoc i Skróty
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            <button onclick="selectGameMode('X01')" id="btn-X01" class="game-opt p-4 rounded-xl bg-slate-800 border border-sky-500 font-black text-sm transition-all text-white">X01</button>
+                            <button onclick="selectGameMode('ATC')" id="btn-ATC" class="game-opt p-4 rounded-xl bg-slate-900/40 border border-slate-800 font-bold text-sm text-slate-400 hover:text-slate-200 transition-all">Around the Clock</button>
+                            <button onclick="selectGameMode('121')" id="btn-121" class="game-opt p-4 rounded-xl bg-slate-900/40 border border-slate-800 font-bold text-sm text-slate-400 hover:text-slate-200 transition-all">121 / Finch</button>
+                            <button onclick="selectGameMode('RND')" id="btn-RND" class="game-opt p-4 rounded-xl bg-slate-900/40 border border-slate-800 font-bold text-sm text-slate-400 hover:text-slate-200 transition-all">Losowy Cel</button>
+                        </div>
+                    </section>
+
+                    <section id="mode-configs" class="bg-slate-900/60 p-5 border border-slate-800/80 rounded-2xl backdrop-blur-md min-h-[110px]">
+                        <div id="config-X01" class="mode-config-panel space-y-3">
+                            <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Ustawienia Punktów X01</h2>
+                            <div class="grid grid-cols-3 gap-3 text-xs font-bold">
+                                <button onclick="setX01Points(301)" id="btn-p301" class="x01-pts p-3 bg-slate-900/40 border border-slate-800 hover:border-slate-700 rounded-xl transition-all text-slate-400">301</button>
+                                <button onclick="setX01Points(501)" id="btn-p501" class="x01-pts p-3 bg-slate-800 border border-sky-500 rounded-xl transition-all text-white">501</button>
+                                <button onclick="setX01Points(701)" id="btn-p701" class="x01-pts p-3 bg-slate-900/40 border border-slate-800 hover:border-slate-700 rounded-xl transition-all text-slate-400">701</button>
+                            </div>
+                        </div>
+                        <div id="config-ATC" class="mode-config-panel hidden space-y-3">
+                            <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Ustawienia Around the Clock</h2>
+                            <div class="grid grid-cols-2 gap-3 text-xs font-bold">
+                                <button onclick="setAtcType('singles')" id="btn-atc-singles" class="atc-type p-3 bg-slate-800 border border-sky-500 rounded-xl text-white">Tylko Single (1-20 + Bull)</button>
+                                <button onclick="setAtcType('doubles')" id="btn-atc-doubles" class="atc-type p-3 bg-slate-900/40 border border-slate-800 rounded-xl text-slate-400">Tylko Duble (D1-D20 + DBull)</button>
+                            </div>
+                        </div>
+                        <div id="config-121" class="mode-config-panel hidden space-y-2">
+                            <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Zasady Trybu 121</h2>
+                            <p class="text-xs text-slate-400 leading-relaxed">Masz 9 lotek (3 tury) na zamknięcie licznika. Jeśli zamkniesz, przechodzisz do wartości o 1 wyższej. Jeśli nie – wracasz na start (121) lub zostajesz na bezpiecznym progu. Gra kończy się sukcesem przy zamknięciu 170.</p>
+                        </div>
+                        <div id="config-RND" class="mode-config-panel hidden space-y-2">
+                            <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Zasady Losowego Celu</h2>
+                            <p class="text-xs text-slate-400 leading-relaxed">System losuje dla Ciebie segment na tarczy (S, D lub T). Wpisujesz ile lotek z trzech trafiło dany cel. Idealny trening celności i skupienia.</p>
+                        </div>
+
+                        <div class="mt-4 pt-3 border-t border-slate-800/50">
+                            <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Limit legów do wygrania meczu</h2>
+                            <div class="flex items-center gap-3">
+                                <select id="legs-to-win-selector" class="bg-slate-950 border border-slate-800 text-sky-400 p-2.5 rounded-xl text-xs font-bold outline-none focus:border-sky-500 transition-all">
+                                    <option value="1">1 Leg (Szybka gra)</option>
+                                    <option value="3" selected>Do 3 wygranych legów</option>
+                                    <option value="5">Do 5 wygranych legów</option>
+                                    <option value="10">Do 10 wygranych legów</option>
+                                </select>
+                                <span class="text-[11px] text-slate-500 font-medium">Pierwszy gracz, który osiągnie tę liczbę, wygrywa cały mecz.</span>
+                            </div>
+                        </div>
+                    </section>
                 </div>
-                <div id="game-log" class="h-24 overflow-y-auto f-mono text-xs text-gray-500 space-y-1.5 pr-1">
-                    <div class="text-gray-700">Oczekiwanie na pierwszy rzut...</div>
+
+                <div class="space-y-4">
+                    <section class="bg-slate-900/60 p-5 border border-slate-800/80 rounded-2xl flex flex-col h-full backdrop-blur-md">
+                        <h2 class="text-xs font-bold mb-4 uppercase tracking-widest text-sky-400 flex items-center gap-2">
+                            <span class="w-1.5 h-3 bg-sky-500 rounded-sm"></span> 2. Lista Startowa
+                        </h2>
+                        
+                        <div id="player-inputs" class="space-y-2.5 max-h-[220px] overflow-y-auto pr-1 flex-grow">
+                            <div class="flex gap-2 items-center">
+                                <input type="text" placeholder="Nazwa gracza" class="p-name flex-grow bg-slate-950 border border-slate-800 p-3 rounded-xl text-sm font-semibold focus:border-sky-500 focus:outline-none transition-all">
+                                <div class="w-10 h-10 flex items-center justify-center text-slate-600 font-bold text-xs bg-slate-900 rounded-xl">#1</div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 mt-4">
+                            <button onclick="addPlayerInput()" class="bg-slate-950 hover:bg-slate-800 text-sky-400 text-xs py-3 font-bold rounded-xl border border-slate-800 uppercase tracking-wider transition-all">+ Gracz</button>
+                            <button onclick="addBotInput()" class="bg-slate-950 hover:bg-slate-800 text-amber-500 text-xs py-3 font-bold rounded-xl border border-slate-800 uppercase tracking-wider transition-all">+ Dodaj Bota</button>
+                        </div>
+                    </section>
                 </div>
             </div>
 
-            <!-- CONTROLS -->
-            <div class="panel p-4 flex flex-col gap-3 justify-between">
-                <div class="ticker-label" style="color:var(--dim)">// AKCJE</div>
-                <button onclick="setBustManual()" class="btn-bust w-full py-2.5 rounded f-ui text-sm">⊘ FURAŻ (BUST)</button>
-                <button onclick="undoLastMove()" class="btn-ghost w-full py-2.5 rounded f-ui text-sm">↺ COFNIJ TURĘ</button>
+            <button onclick="startGame()" class="w-full bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-black py-4 rounded-2xl text-xl uppercase italic tracking-wider transition-all shadow-xl shadow-indigo-950/40 active:scale-[0.99]">
+                Zatwierdź i Uruchom Maszynę
+            </button>
+        </div>
+
+        <!-- Ekran Rozgrywki (Game Board) -->
+        <div id="game-board" class="hidden w-full space-y-4 animate-fade-in">
+            <div class="flex justify-between items-center py-2 px-1 text-xs font-bold flex-wrap gap-2">
+                <button onclick="triggerExitRoute()" class="text-slate-400 hover:text-white uppercase tracking-widest transition-all flex items-center gap-1">← Wyjdź do Menu</button>
+                <div class="flex items-center gap-2 flex-wrap justify-center">
+                    <span class="px-3 py-1 bg-slate-900 border border-slate-800 rounded-full font-digital text-sky-400 uppercase tracking-widest text-[10px]" id="game-info-badge">X01 - 501</span>
+                    <span class="px-3 py-1 bg-slate-900 border border-slate-800 rounded-full font-mono text-amber-500 uppercase text-[10px]" id="match-limit-badge">Mecz do: 3 wygranych</span>
+                    <!-- Lektor TTS domyślnie wyciszony (Klasy wyciszenia dodane w kodzie HTML) -->
+                    <button onclick="toggleTTS()" id="tts-toggle-btn" class="muted-indicator px-3 py-1 bg-slate-900 border border-rose-500 rounded-full text-slate-400 hover:text-white uppercase tracking-widest text-[10px] transition-all flex items-center gap-1">
+                        <span id="tts-icon">🔇</span> <span id="tts-text" class="text-rose-400">TTS OFF</span>
+                    </button>
+                </div>
+                <button onclick="openResetConfirm()" class="text-slate-400 hover:text-rose-400 uppercase tracking-widest transition-all">Reset Meczu</button>
+            </div>
+
+            <!-- Karty graczy z osobnymi statystykami per-gracz -->
+            <div id="players-display" class="flex flex-wrap items-stretch justify-center gap-5 w-full py-2"></div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 w-full">
+                <!-- Główny status głosowy -->
+                <div class="lg:col-span-8 bg-slate-900/80 p-5 border border-slate-800 rounded-3xl flex flex-col justify-between relative overflow-hidden backdrop-blur-md min-h-[180px]">
+                    <div class="flex justify-between items-start w-full">
+                        <div class="flex items-center">
+                            <span id="voice-dot" class="w-3 h-3 rounded-full mr-3 bg-emerald-500 animate-pulse"></span>
+                            <div>
+                                <div id="voice-status" class="text-emerald-400 text-xs font-black uppercase tracking-widest transition-all">System Aktywny</div>
+                                <div id="current-player-label" class="text-slate-400 text-[10px] font-mono uppercase mt-0.5">Tura: ---</div>
+                            </div>
+                        </div>
+                        <div class="text-[10px] font-mono text-slate-500 bg-slate-950/80 px-2 py-1 rounded border border-slate-900">
+                            Komendy: "cofnij", "furaż", "check" (oraz cyfry)
+                        </div>
+                    </div>
+
+                    <div class="text-center my-2">
+                        <div id="voice-display" class="text-7xl font-black text-white italic tracking-tighter font-digital drop-shadow-md">---</div>
+                        <div id="checkout-suggestion" class="text-amber-400 font-bold text-sm tracking-wide uppercase h-5 mt-1 font-digital"></div>
+                        <div id="checkout-hint" class="text-emerald-400 text-xs font-bold mt-1 hidden">✨ Powiedz lub kliknij "CHECK" aby zakończyć!</div>
+                    </div>
+
+                    <div id="training-controls" class="hidden w-full border-t border-slate-800/60 pt-3 mt-2">
+                        <div id="rnd-actions" class="hidden grid grid-cols-4 gap-2">
+                            <button onclick="submitTrainingHits(0)" class="bg-slate-950 border border-slate-800 p-2.5 rounded-xl font-bold text-xs hover:bg-slate-900 transition-all">0 Trafień</button>
+                            <button onclick="submitTrainingHits(1)" class="bg-sky-950/40 border border-sky-900/60 text-sky-400 p-2.5 rounded-xl font-bold text-xs hover:bg-sky-950/80 transition-all">1 Trafienie</button>
+                            <button onclick="submitTrainingHits(2)" class="bg-indigo-950/40 border border-indigo-900/60 text-indigo-400 p-2.5 rounded-xl font-bold text-xs hover:bg-indigo-950/80 transition-all">2 Trafienia</button>
+                            <button onclick="submitTrainingHits(3)" class="bg-emerald-950/40 border border-emerald-900/60 text-emerald-400 p-2.5 rounded-xl font-bold text-xs hover:bg-emerald-950/80 transition-all">3 Trafienia!</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Klawiatura numeryczna -->
+                <div class="lg:col-span-4 bg-slate-900/40 p-4 border border-slate-800/80 rounded-3xl backdrop-blur-md">
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="appendNum(1)" class="num-btn bg-slate-900 hover:bg-slate-800 active:bg-slate-950 h-14 rounded-xl text-xl font-bold border border-slate-800/40 font-digital text-white">1</button>
+                        <button onclick="appendNum(2)" class="num-btn bg-slate-900 hover:bg-slate-800 active:bg-slate-950 h-14 rounded-xl text-xl font-bold border border-slate-800/40 font-digital text-white">2</button>
+                        <button onclick="appendNum(3)" class="num-btn bg-slate-900 hover:bg-slate-800 active:bg-slate-950 h-14 rounded-xl text-xl font-bold border border-slate-800/40 font-digital text-white">3</button>
+                        <button onclick="appendNum(4)" class="num-btn bg-slate-900 hover:bg-slate-800 active:bg-slate-950 h-14 rounded-xl text-xl font-bold border border-slate-800/40 font-digital text-white">4</button>
+                        <button onclick="appendNum(5)" class="num-btn bg-slate-900 hover:bg-slate-800 active:bg-slate-950 h-14 rounded-xl text-xl font-bold border border-slate-800/40 font-digital text-white">5</button>
+                        <button onclick="appendNum(6)" class="num-btn bg-slate-900 hover:bg-slate-800 active:bg-slate-950 h-14 rounded-xl text-xl font-bold border border-slate-800/40 font-digital text-white">6</button>
+                        <button onclick="appendNum(7)" class="num-btn bg-slate-900 hover:bg-slate-800 active:bg-slate-950 h-14 rounded-xl text-xl font-bold border border-slate-800/40 font-digital text-white">7</button>
+                        <button onclick="appendNum(8)" class="num-btn bg-slate-900 hover:bg-slate-800 active:bg-slate-950 h-14 rounded-xl text-xl font-bold border border-slate-800/40 font-digital text-white">8</button>
+                        <button onclick="appendNum(9)" class="num-btn bg-slate-900 hover:bg-slate-800 active:bg-slate-950 h-14 rounded-xl text-xl font-bold border border-slate-800/40 font-digital text-white">9</button>
+                        <button onclick="clearManualInput()" class="num-btn bg-rose-950/30 text-rose-400 hover:bg-rose-950/50 rounded-xl font-bold text-xs uppercase tracking-wider border border-rose-900/40">Reset</button>
+                        <button onclick="appendNum(0)" class="num-btn bg-slate-900 hover:bg-slate-800 active:bg-slate-950 h-14 rounded-xl text-xl font-bold border border-slate-800/40 font-digital text-white">0</button>
+                        <button onclick="submitManualScore()" class="num-btn bg-sky-600 text-white hover:bg-sky-500 font-bold rounded-xl text-xs uppercase tracking-wider shadow-md shadow-sky-950/50">Wpisz</button>
+                        <input type="hidden" id="manual-score-input" value="">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sekcja dolna: logi i zarządzanie stanem -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
+                <div class="md:col-span-2 bg-slate-950/60 border border-slate-900 rounded-2xl p-4 flex flex-col justify-between">
+                    <div class="text-[10px] uppercase font-bold text-slate-500 tracking-widest mb-2 flex justify-between">
+                        <span>Historia rzutów (Bieżący mecz)</span>
+                        <span id="total-legs-counter" class="text-sky-500">Mecz trwa</span>
+                    </div>
+                    <div id="game-log" class="h-24 overflow-y-auto font-mono text-[11px] text-slate-400 space-y-1.5 pr-2">
+                        <div class="text-slate-600 italic">Oczekiwanie na pierwszy rzut...</div>
+                    </div>
+                </div>
+                
+                <div class="bg-slate-950/40 border border-slate-900 rounded-2xl p-4 flex flex-col justify-between items-end">
+                    <div class="w-full text-left text-[10px] uppercase font-bold text-slate-500 tracking-widest mb-1">
+                        Zarządzanie stanem
+                    </div>
+                    <div class="w-full space-y-2">
+                        <button onclick="setBustManual()" id="btn-bust-manual" class="w-full py-2 bg-amber-950/20 text-amber-500 hover:bg-amber-950/40 border border-amber-900/30 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all">Zgłoś Furaż (Bust)</button>
+                        <button onclick="undoLastMove()" class="w-full py-2 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all border border-slate-800">↺ Cofnij Ostatnią Turę</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-</div>
+    <script>
+        // ============================================
+        // 🔊 SYNTEZATOR EFEKTÓW DŹWIĘKOWYCH (Web Audio API)
+        // ============================================
+        const SoundEffects = {
+            ctx: null,
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            },
+            play(type) {
+                try {
+                    this.init();
+                    if (this.ctx.state === 'suspended') {
+                        this.ctx.resume();
+                    }
+                    const now = this.ctx.currentTime;
+                    
+                    if (type === 'click') {
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.connect(gain);
+                        gain.connect(this.ctx.destination);
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(800, now);
+                        osc.frequency.exponentialRampToValueAtTime(150, now + 0.08);
+                        gain.gain.setValueAtTime(0.08, now);
+                        gain.gain.linearRampToValueAtTime(0.001, now + 0.08);
+                        osc.start(now);
+                        osc.stop(now + 0.08);
+                    } else if (type === 'key') {
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.connect(gain);
+                        gain.connect(this.ctx.destination);
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(1000, now);
+                        osc.frequency.linearRampToValueAtTime(600, now + 0.05);
+                        gain.gain.setValueAtTime(0.05, now);
+                        gain.gain.linearRampToValueAtTime(0.001, now + 0.05);
+                        osc.start(now);
+                        osc.stop(now + 0.05);
+                    } else if (type === 'success') {
+                        const osc1 = this.ctx.createOscillator();
+                        const osc2 = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc1.connect(gain);
+                        osc2.connect(gain);
+                        gain.connect(this.ctx.destination);
+                        osc1.type = 'sine';
+                        osc2.type = 'sine';
+                        osc1.frequency.setValueAtTime(523.25, now); 
+                        osc1.frequency.setValueAtTime(659.25, now + 0.08); 
+                        osc2.frequency.setValueAtTime(783.99, now + 0.16); 
+                        gain.gain.setValueAtTime(0.08, now);
+                        gain.gain.linearRampToValueAtTime(0.001, now + 0.3);
+                        osc1.start(now);
+                        osc1.stop(now + 0.3);
+                        osc2.start(now + 0.08);
+                        osc2.stop(now + 0.3);
+                    } else if (type === 'bust') {
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.connect(gain);
+                        gain.connect(this.ctx.destination);
+                        osc.type = 'sawtooth';
+                        osc.frequency.setValueAtTime(130, now);
+                        osc.frequency.linearRampToValueAtTime(90, now + 0.35);
+                        gain.gain.setValueAtTime(0.12, now);
+                        gain.gain.linearRampToValueAtTime(0.001, now + 0.35);
+                        osc.start(now);
+                        osc.stop(now + 0.35);
+                    } else if (type === 'win') {
+                        const notes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99, 1046.50];
+                        notes.forEach((freq, i) => {
+                            const osc = this.ctx.createOscillator();
+                            const gain = this.ctx.createGain();
+                            osc.connect(gain);
+                            gain.connect(this.ctx.destination);
+                            osc.type = 'sine';
+                            osc.frequency.setValueAtTime(freq, now + i * 0.08);
+                            gain.gain.setValueAtTime(0.06, now + i * 0.08);
+                            gain.gain.linearRampToValueAtTime(0.001, now + i * 0.08 + 0.2);
+                            osc.start(now + i * 0.08);
+                            osc.stop(now + i * 0.08 + 0.2);
+                        });
+                    }
+                } catch (e) {
+                    console.error("Audio Synthesis Error: ", e);
+                }
+            }
+        };
 
-<script>
-// ════════════════════════════════════════════════════════
-//  🔊 WEB AUDIO — EFEKTY DŹWIĘKOWE
-// ════════════════════════════════════════════════════════
-const SoundEffects = {
-    ctx: null,
-    init() {
-        if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-    },
-    play(type) {
-        try {
-            this.init();
-            if (this.ctx.state === 'suspended') this.ctx.resume();
-            const now = this.ctx.currentTime;
+        // Konfiguracja rozgrywki i stan
+        let gameMode = 'X01'; 
+        let x01TargetPoints = 501;
+        let atcType = 'singles'; 
+        let players = [];
+        let currentPlayerIndex = 0;
+        let turnHistory = [];
+        let isCelebrating = false;
+        let shouldBeListening = false;
+        let currentTrainingTarget = 0; 
+        let currentTrainingTargetType = 'S'; 
+        let legCount = 1;
+        let legsToWinMatch = 3; 
+        let isMatchFinished = false;
+        let ttsMuted = true; // Domyślnie zmutowany lektor (TTS) [ZMIANA]
+        let checkoutAttempts = 0;
+        let successfulCheckouts = 0;
+        let highestScore = 0;
+        let count180s = 0;
+        
+        let countdownTimer = null;
+        let countdownSecondsLeft = 5;
+        const totalCircleLength = 251.2;
 
-            if (type === 'click') {
-                const osc = this.ctx.createOscillator(), g = this.ctx.createGain();
-                osc.connect(g); g.connect(this.ctx.destination);
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(900, now);
-                osc.frequency.exponentialRampToValueAtTime(200, now + 0.08);
-                g.gain.setValueAtTime(0.07, now);
-                g.gain.linearRampToValueAtTime(0.001, now + 0.08);
-                osc.start(now); osc.stop(now + 0.08);
-            } else if (type === 'key') {
-                const osc = this.ctx.createOscillator(), g = this.ctx.createGain();
-                osc.connect(g); g.connect(this.ctx.destination);
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(1100, now);
-                osc.frequency.linearRampToValueAtTime(700, now + 0.04);
-                g.gain.setValueAtTime(0.04, now);
-                g.gain.linearRampToValueAtTime(0.001, now + 0.04);
-                osc.start(now); osc.stop(now + 0.04);
-            } else if (type === 'success') {
-                [523.25, 659.25, 783.99].forEach((f, i) => {
-                    const osc = this.ctx.createOscillator(), g = this.ctx.createGain();
-                    osc.connect(g); g.connect(this.ctx.destination);
-                    osc.type = 'sine'; osc.frequency.value = f;
-                    g.gain.setValueAtTime(0.06, now + i * 0.09);
-                    g.gain.linearRampToValueAtTime(0.001, now + i * 0.09 + 0.2);
-                    osc.start(now + i * 0.09); osc.stop(now + i * 0.09 + 0.2);
+        const bogeyNumbers = [159, 162, 163, 165, 166, 168, 169];
+        const checkoutTable = {
+            2: "D1", 3: "S1, D1", 4: "D2", 5: "S1, D2", 6: "D3", 7: "S3, D2", 8: "D4", 9: "S1, D4", 10: "D5",
+            11: "S3, D4", 12: "D6", 13: "S5, D4", 14: "D7", 15: "S7, D4", 16: "D8", 17: "S1, D8", 18: "D9",
+            19: "S3, D8", 20: "D10", 21: "S5, D8", 22: "D11", 23: "S7, D8", 24: "D12", 25: "S9, D8", 26: "D13",
+            27: "S11, D8", 28: "D14", 29: "S13, D8", 30: "D15", 31: "S15, D8", 32: "D16", 33: "S1, D16", 34: "D17",
+            35: "S3, D16", 36: "D18", 37: "S5, D16", 38: "D19", 39: "S7, D16", 40: "D20", 41: "S9, D16", 42: "S10, D16",
+            43: "S11, D16", 44: "S12, D16", 45: "S13, D16", 46: "S14, D16", 47: "S15, D16", 48: "D16, D16", 49: "S17, D16", 50: "BULL",
+            51: "S19, D16", 52: "D26", 53: "S21, D16", 54: "D27", 55: "S15, D20", 56: "D28", 57: "S17, D20", 58: "D29",
+            59: "S19, D20", 60: "S20, D20", 61: "T15, D8", 62: "T10, D16", 63: "T13, D12", 64: "T16, D8", 65: "T19, D4",
+            66: "T14, D12", 67: "T17, D8", 68: "T20, D4", 69: "T19, D6", 70: "T13, D16", 71: "T13, D16", 72: "T16, D12",
+            73: "T19, D8", 74: "T14, D16", 75: "T17, D12", 76: "T20, D8", 77: "T19, D10", 78: "T18, D12", 79: "T19, D11",
+            80: "T20, D10", 81: "T19, D12", 82: "Bull, D16", 83: "T17, D16", 84: "T20, D16", 85: "T15, D20", 86: "T18, D16",
+            87: "T17, D18", 88: "T20, D14", 89: "T19, D16", 90: "T20, D15", 91: "T17, D20", 92: "T20, D16", 93: "T19, D18",
+            94: "T18, D20", 95: "T20, D19", 96: "T20, D18", 97: "T19, D20", 98: "T20, D19", 99: "T20, D20", 100: "T20, D20",
+            101: "T17, T10, D10", 102: "T20, T10, D6", 103: "T19, T10, D8", 104: "T20, T14, D11", 105: "T19, T16, D5",
+            106: "T20, T10, D8", 107: "T19, T10, D10", 108: "T20, T16, D0", 109: "T20, T13, D5", 110: "T20, T10, D10",
+            111: "T20, T13, D6", 112: "T20, T12, D8", 113: "T19, T12, D10", 114: "T20, T14, D6", 115: "T20, T15, D5",
+            116: "T20, T16, D4", 117: "T20, T17, D3", 118: "T20, T18, D2", 119: "T19, T10, D16", 120: "T20, T20, D0",
+            121: "T20, T11, D14", 122: "T18, T18, Bull", 123: "T19, T16, Bull", 124: "T20, T14, Bull", 125: "T19, T17, Bull",
+            126: "T19, T19, Bull", 127: "T20, T17, Bull", 128: "S18, T20, Bull", 129: "T20, T20, Bull", 130: "T20, T13, D16",
+            131: "S25, T19, Bull", 132: "T19, T9, D8", 133: "T20, T14, D16", 134: "T20, T15, Bull", 135: "T20, T20, D10",
+            136: "T19, T8, D12", 137: "T19, T14, D20", 138: "T20, T20, D10", 139: "T20, T17, D18", 140: "T20, T19, D16",
+            141: "T20, T18, D20", 142: "T20, T17, D20", 143: "T20, T19, D19", 144: "T20, T18, D20", 145: "T20, T17, D20",
+            146: "T20, T19, D20", 147: "T20, T20, D19", 148: "T20, T19, D20", 149: "T20, T20, D20", 150: "T20, T18, Bull",
+            151: "T20, T17, Bull", 152: "T20, T18, Bull", 153: "T20, T19, Bull", 154: "T20, T18, Bull", 155: "T20, T19, Bull",
+            156: "T20, T20, Bull", 157: "T20, T19, Bull", 158: "T20, T20, Bull", 160: "T20, T20, Bull", 161: "T20, T17, Bull",
+            164: "T20, T18, Bull", 167: "T20, T19, Bull", 170: "T20, T20, BULL"
+        };
+
+        // Instrukcje - przełączanie modala
+        function toggleInstructions() {
+            SoundEffects.play('click');
+            const instModal = document.getElementById('instructions-modal');
+            if (instModal.classList.contains('hidden')) {
+                instModal.classList.remove('hidden');
+            } else {
+                instModal.classList.add('hidden');
+            }
+        }
+
+        // ============================================
+        // 🗣️ SYSTEM TTS (TEXT-TO-SPEECH)
+        // ============================================
+        let speechSynthesis = window.speechSynthesis;
+        let ttsEnabled = true;
+        let ttsQueue = [];
+        let isSpeaking = false;
+
+        function toggleTTS() {
+            SoundEffects.play('click');
+            ttsMuted = !ttsMuted;
+            const btn = document.getElementById('tts-toggle-btn');
+            const icon = document.getElementById('tts-icon');
+            const text = document.getElementById('tts-text');
+            
+            if (ttsMuted) {
+                btn.classList.add('muted-indicator', 'border-rose-500');
+                btn.classList.remove('border-slate-800');
+                icon.innerText = '🔇';
+                text.innerText = 'TTS OFF';
+                text.classList.add('text-rose-400');
+                text.classList.remove('text-slate-400');
+                speechSynthesis.cancel();
+                ttsQueue = [];
+            } else {
+                btn.classList.remove('muted-indicator', 'border-rose-500');
+                btn.classList.add('border-slate-800');
+                icon.innerText = '🔊';
+                text.innerText = 'TTS ON';
+                text.classList.remove('text-rose-400');
+                text.classList.add('text-slate-400');
+            }
+        }
+
+        function speak(text, priority = 'normal') {
+            if (ttsMuted || !ttsEnabled || !speechSynthesis) return;
+            
+            if (priority === 'high') {
+                speechSynthesis.cancel();
+                ttsQueue = [];
+            }
+            
+            ttsQueue.push(text);
+            processTTSQueue();
+        }
+
+        function processTTSQueue() {
+            if (isSpeaking || ttsQueue.length === 0) return;
+            
+            isSpeaking = true;
+            const text = ttsQueue.shift();
+            const utterance = new SpeechSynthesisUtterance(text);
+            
+            utterance.lang = 'pl-PL';
+            utterance.rate = 0.95;
+            utterance.pitch = 1.0;
+            utterance.volume = 0.85;
+            
+            const voices = speechSynthesis.getVoices();
+            const polishVoice = voices.find(voice => voice.lang.includes('pl'));
+            if (polishVoice) {
+                utterance.voice = polishVoice;
+            }
+            
+            utterance.onend = () => {
+                isSpeaking = false;
+                processTTSQueue();
+            };
+            
+            utterance.onerror = () => {
+                isSpeaking = false;
+                processTTSQueue();
+            };
+            
+            speechSynthesis.speak(utterance);
+        }
+
+        if (speechSynthesis) {
+            if (speechSynthesis.onvoiceschanged !== undefined) {
+                speechSynthesis.onvoiceschanged = () => {
+                    speechSynthesis.getVoices();
+                };
+            }
+        }
+
+        // ============================================
+        // 🎆 SYSTEM FAJERWERKÓW (CANVAS)
+        // ============================================
+        class Particle {
+            constructor(x, y, color, velocity, size, type = 'spark') {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.velocity = velocity;
+                this.size = size;
+                this.type = type;
+                this.alpha = 1;
+                this.decay = Math.random() * 0.015 + 0.008;
+                this.gravity = 0.08;
+                this.friction = 0.98;
+                this.trail = [];
+                this.maxTrail = type === 'rocket' ? 8 : 4;
+                this.rotation = Math.random() * Math.PI * 2;
+                this.rotationSpeed = (Math.random() - 0.5) * 0.2;
+            }
+
+            update() {
+                this.trail.push({ x: this.x, y: this.y, alpha: this.alpha });
+                if (this.trail.length > this.maxTrail) this.trail.shift();
+
+                this.velocity.x *= this.friction;
+                this.velocity.y *= this.friction;
+                this.velocity.y += this.gravity;
+                
+                this.x += this.velocity.x;
+                this.y += this.velocity.y;
+                
+                this.alpha -= this.decay;
+                this.rotation += this.rotationSpeed;
+            }
+
+            draw(ctx) {
+                if (this.trail.length > 1) {
+                    ctx.save();
+                    for (let i = 0; i < this.trail.length - 1; i++) {
+                        const t = this.trail[i];
+                        const progress = i / this.trail.length;
+                        ctx.globalAlpha = t.alpha * progress * 0.5;
+                        ctx.fillStyle = this.color;
+                        ctx.beginPath();
+                        ctx.arc(t.x, t.y, this.size * progress, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    ctx.restore();
+                }
+
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation);
+                
+                if (this.type === 'spark') {
+                    const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, this.size * 3);
+                    gradient.addColorStop(0, this.color);
+                    gradient.addColorStop(0.4, this.color);
+                    gradient.addColorStop(1, 'transparent');
+                    ctx.fillStyle = gradient;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.size * 3, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.size * 0.6, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (this.type === 'rocket') {
+                    ctx.fillStyle = this.color;
+                    ctx.shadowBlur = 15;
+                    ctx.shadowColor = this.color;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (this.type === 'glitter') {
+                    ctx.fillStyle = this.color;
+                    ctx.fillRect(-this.size/2, -this.size/2, this.size, this.size);
+                }
+
+                ctx.restore();
+            }
+
+            isAlive() {
+                return this.alpha > 0.01;
+            }
+        }
+
+        class Firework {
+            constructor(canvas, startX, startY, targetX, targetY, colorPalette) {
+                this.canvas = canvas;
+                this.startX = startX;
+                this.startY = startY;
+                this.targetX = targetX;
+                this.targetY = targetY;
+                this.colorPalette = colorPalette;
+                
+                this.particles = [];
+                this.rocket = null;
+                this.exploded = false;
+                this.done = false;
+                
+                this.createRocket();
+            }
+
+            createRocket() {
+                const angle = Math.atan2(this.targetY - this.startY, this.targetX - this.startX);
+                const speed = 12 + Math.random() * 3;
+                this.rocket = new Particle(
+                    this.startX,
+                    this.startY,
+                    this.colorPalette[0],
+                    {
+                        x: Math.cos(angle) * speed,
+                        y: Math.sin(angle) * speed
+                    },
+                    3,
+                    'rocket'
+                );
+                this.rocket.gravity = 0;
+                this.rocket.friction = 1;
+                this.rocket.decay = 0;
+                this.distanceToTarget = Math.hypot(this.targetX - this.startX, this.targetY - this.startY);
+                this.distanceTraveled = 0;
+                this.prevX = this.startX;
+                this.prevY = this.startY;
+            }
+
+            explode() {
+                this.exploded = true;
+                this.rocket = null;
+                
+                const particleCount = 80 + Math.floor(Math.random() * 60);
+                const explosionType = Math.floor(Math.random() * 4);
+                
+                for (let i = 0; i < particleCount; i++) {
+                    const color = this.colorPalette[Math.floor(Math.random() * this.colorPalette.length)];
+                    let angle, speed, size;
+                    
+                    if (explosionType === 0) {
+                        angle = (Math.PI * 2 / particleCount) * i + (Math.random() - 0.5) * 0.2;
+                        speed = 4 + Math.random() * 5;
+                        size = Math.random() * 2 + 1.5;
+                    } else if (explosionType === 1) {
+                        angle = (Math.PI * 2 / particleCount) * i;
+                        speed = i % 2 === 0 ? 6 + Math.random() * 2 : 3 + Math.random() * 2;
+                        size = Math.random() * 2 + 1;
+                    } else if (explosionType === 2) {
+                        angle = Math.random() * Math.PI * 2;
+                        speed = Math.random() * 8 + 1;
+                        size = Math.random() * 2.5 + 0.5;
+                    } else {
+                        angle = (Math.PI * 2 / particleCount) * i;
+                        const arm = i % 5;
+                        speed = arm === 0 ? 8 : 3 + Math.random() * 3;
+                        size = Math.random() * 2 + 1;
+                    }
+                    
+                    this.particles.push(new Particle(
+                        this.targetX,
+                        this.targetY,
+                        color,
+                        {
+                            x: Math.cos(angle) * speed,
+                            y: Math.sin(angle) * speed
+                        },
+                        size,
+                        'spark'
+                    ));
+                }
+
+                const glitterCount = 30;
+                for (let i = 0; i < glitterCount; i++) {
+                    const color = this.colorPalette[Math.floor(Math.random() * this.colorPalette.length)];
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = Math.random() * 3 + 0.5;
+                    const p = new Particle(
+                        this.targetX,
+                        this.targetY,
+                        color,
+                        { x: Math.cos(angle) * speed, y: Math.sin(angle) * speed },
+                        Math.random() * 1.5 + 0.5,
+                        'glitter'
+                    );
+                    p.gravity = 0.05;
+                    p.decay = 0.005;
+                    this.particles.push(p);
+                }
+            }
+
+            update() {
+                if (!this.exploded && this.rocket) {
+                    const dx = this.targetX - this.rocket.x;
+                    const dy = this.targetY - this.rocket.y;
+                    const distance = Math.hypot(dx, dy);
+                    
+                    if (distance < 15) {
+                        this.explode();
+                    } else {
+                        this.rocket.update();
+                    }
+                }
+
+                for (let i = this.particles.length - 1; i >= 0; i--) {
+                    this.particles[i].update();
+                    if (!this.particles[i].isAlive()) {
+                        this.particles.splice(i, 1);
+                    }
+                }
+
+                if (this.exploded && this.particles.length === 0) {
+                    this.done = true;
+                }
+            }
+
+            draw(ctx) {
+                if (this.rocket && !this.exploded) {
+                    this.rocket.draw(ctx);
+                }
+                this.particles.forEach(p => p.draw(ctx));
+            }
+
+            isDone() {
+                return this.done;
+            }
+        }
+
+        class FireworksSystem {
+            constructor(canvasId) {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext('2d');
+                this.fireworks = [];
+                this.running = false;
+                this.animationId = null;
+                this.autoLaunchInterval = null;
+                
+                this.palettes = [
+                    ['#0ea5e9', '#38bdf8', '#7dd3fc', '#bae6fd', '#ffffff'],
+                    ['#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe', '#ffffff'],
+                    ['#a855f7', '#c084fc', '#d8b4fe', '#e9d5ff', '#ffffff'],
+                    ['#10b981', '#34d399', '#6ee7b7', '#a7f3d0', '#ffffff'],
+                    ['#f43f5e', '#fb7185', '#fda4af', '#fecdd3', '#ffffff'],
+                    ['#fbbf24', '#0ea5e9', '#a855f7', '#10b981', '#ffffff'],
+                ];
+                
+                this.resize();
+                window.addEventListener('resize', () => this.resize());
+            }
+
+            resize() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+            }
+
+            launchFirework(x = null, y = null) {
+                const startX = x || (Math.random() * this.canvas.width * 0.8 + this.canvas.width * 0.1);
+                const startY = this.canvas.height;
+                const targetX = x || (Math.random() * this.canvas.width * 0.8 + this.canvas.width * 0.1);
+                const targetY = y || (Math.random() * this.canvas.height * 0.5 + this.canvas.height * 0.1);
+                const palette = this.palettes[Math.floor(Math.random() * this.palettes.length)];
+                
+                this.fireworks.push(new Firework(this.canvas, startX, startY, targetX, targetY, palette));
+            }
+
+            start() {
+                if (this.running) return;
+                this.running = true;
+                this.fireworks = [];
+                
+                this.animate();
+                
+                let launchCount = 0;
+                const maxLaunches = 14;
+                this.autoLaunchInterval = setInterval(() => {
+                    if (launchCount >= maxLaunches) {
+                        clearInterval(this.autoLaunchInterval);
+                        return;
+                    }
+                    const count = Math.random() < 0.3 ? 2 : 1;
+                    for (let i = 0; i < count; i++) {
+                        this.launchFirework();
+                    }
+                    launchCount++;
+                }, 350);
+            }
+
+            stop() {
+                this.running = false;
+                if (this.autoLaunchInterval) {
+                    clearInterval(this.autoLaunchInterval);
+                    this.autoLaunchInterval = null;
+                }
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                    this.animationId = null;
+                }
+                this.fireworks = [];
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            }
+
+            animate() {
+                if (!this.running) return;
+                
+                this.ctx.fillStyle = 'rgba(7, 10, 19, 0.2)';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                for (let i = this.fireworks.length - 1; i >= 0; i--) {
+                    this.fireworks[i].update();
+                    this.fireworks[i].draw(this.ctx);
+                    
+                    if (this.fireworks[i].isDone()) {
+                        this.fireworks.splice(i, 1);
+                    }
+                }
+                
+                this.animationId = requestAnimationFrame(() => this.animate());
+            }
+        }
+
+        let fireworksSystem = null;
+
+        function initFireworksSystem() {
+            if (!fireworksSystem) {
+                fireworksSystem = new FireworksSystem('fireworks-canvas');
+                
+                const overlay = document.getElementById('celebration-overlay');
+                overlay.addEventListener('click', (e) => {
+                    if (fireworksSystem && fireworksSystem.running) {
+                        fireworksSystem.launchFirework(e.clientX, e.clientY);
+                    }
                 });
-            } else if (type === 'bust') {
-                const osc = this.ctx.createOscillator(), g = this.ctx.createGain();
-                osc.connect(g); g.connect(this.ctx.destination);
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(150, now);
-                osc.frequency.linearRampToValueAtTime(80, now + 0.4);
-                g.gain.setValueAtTime(0.12, now);
-                g.gain.linearRampToValueAtTime(0.001, now + 0.4);
-                osc.start(now); osc.stop(now + 0.4);
-            } else if (type === 'win') {
-                [261.63,329.63,392,523.25,659.25,783.99,1046.5].forEach((f,i) => {
-                    const osc = this.ctx.createOscillator(), g = this.ctx.createGain();
-                    osc.connect(g); g.connect(this.ctx.destination);
-                    osc.type = 'sine'; osc.frequency.value = f;
-                    g.gain.setValueAtTime(0.06, now + i * 0.08);
-                    g.gain.linearRampToValueAtTime(0.001, now + i * 0.08 + 0.25);
-                    osc.start(now + i * 0.08); osc.stop(now + i * 0.08 + 0.25);
-                });
             }
-        } catch(e) { console.error(e); }
-    }
-};
-
-// ════════════════════════════════════════════════════════
-//  STATE
-// ════════════════════════════════════════════════════════
-let gameMode = 'X01';
-let x01TargetPoints = 501;
-let atcType = 'singles';
-let players = [];
-let currentPlayerIndex = 0;
-let turnHistory = [];
-let isCelebrating = false;
-let shouldBeListening = false;
-let currentTrainingTarget = 0;
-let currentTrainingTargetType = 'S';
-let legCount = 1;
-let legsToWinMatch = 3;
-let isMatchFinished = false;
-let ttsMuted = true;
-let checkoutAttempts = 0;
-let successfulCheckouts = 0;
-let highestScore = 0;
-let count180s = 0;
-let countdownTimer = null;
-let countdownSecondsLeft = 5;
-const totalCircleLength = 213.6;
-
-const bogeyNumbers = [159,162,163,165,166,168,169];
-const checkoutTable = {
-    2:"D1",3:"S1,D1",4:"D2",5:"S1,D2",6:"D3",7:"S3,D2",8:"D4",9:"S1,D4",10:"D5",
-    11:"S3,D4",12:"D6",13:"S5,D4",14:"D7",15:"S7,D4",16:"D8",17:"S1,D8",18:"D9",
-    19:"S3,D8",20:"D10",21:"S5,D8",22:"D11",23:"S7,D8",24:"D12",25:"S9,D8",26:"D13",
-    27:"S11,D8",28:"D14",29:"S13,D8",30:"D15",31:"S15,D8",32:"D16",33:"S1,D16",34:"D17",
-    35:"S3,D16",36:"D18",37:"S5,D16",38:"D19",39:"S7,D16",40:"D20",41:"S9,D16",42:"S10,D16",
-    43:"S11,D16",44:"S12,D16",45:"S13,D16",46:"S14,D16",47:"S15,D16",48:"D16,D16",49:"S17,D16",50:"BULL",
-    51:"S19,D16",52:"D26",53:"S21,D16",54:"D27",55:"S15,D20",56:"D28",57:"S17,D20",58:"D29",
-    59:"S19,D20",60:"S20,D20",61:"T15,D8",62:"T10,D16",63:"T13,D12",64:"T16,D8",65:"T19,D4",
-    66:"T14,D12",67:"T17,D8",68:"T20,D4",69:"T19,D6",70:"T13,D16",71:"T13,D16",72:"T16,D12",
-    73:"T19,D8",74:"T14,D16",75:"T17,D12",76:"T20,D8",77:"T19,D10",78:"T18,D12",79:"T19,D11",
-    80:"T20,D10",81:"T19,D12",82:"Bull,D16",83:"T17,D16",84:"T20,D16",85:"T15,D20",86:"T18,D16",
-    87:"T17,D18",88:"T20,D14",89:"T19,D16",90:"T20,D15",91:"T17,D20",92:"T20,D16",93:"T19,D18",
-    94:"T18,D20",95:"T20,D19",96:"T20,D18",97:"T19,D20",98:"T20,D19",99:"T20,D20",100:"T20,D20",
-    101:"T17,T10,D10",102:"T20,T10,D6",103:"T19,T10,D8",104:"T20,T14,D11",105:"T19,T16,D5",
-    106:"T20,T10,D8",107:"T19,T10,D10",108:"T20,T16,D0",109:"T20,T13,D5",110:"T20,T10,D10",
-    111:"T20,T13,D6",112:"T20,T12,D8",113:"T19,T12,D10",114:"T20,T14,D6",115:"T20,T15,D5",
-    116:"T20,T16,D4",117:"T20,T17,D3",118:"T20,T18,D2",119:"T19,T10,D16",120:"T20,T20,D0",
-    121:"T20,T11,D14",122:"T18,T18,Bull",123:"T19,T16,Bull",124:"T20,T14,Bull",125:"T19,T17,Bull",
-    126:"T19,T19,Bull",127:"T20,T17,Bull",128:"S18,T20,Bull",129:"T20,T20,Bull",130:"T20,T13,D16",
-    131:"S25,T19,Bull",132:"T19,T9,D8",133:"T20,T14,D16",134:"T20,T15,Bull",135:"T20,T20,D10",
-    136:"T19,T8,D12",137:"T19,T14,D20",138:"T20,T20,D10",139:"T20,T17,D18",140:"T20,T19,D16",
-    141:"T20,T18,D20",142:"T20,T17,D20",143:"T20,T19,D19",144:"T20,T18,D20",145:"T20,T17,D20",
-    146:"T20,T19,D20",147:"T20,T20,D19",148:"T20,T19,D20",149:"T20,T20,D20",150:"T20,T18,Bull",
-    151:"T20,T17,Bull",152:"T20,T18,Bull",153:"T20,T19,Bull",154:"T20,T18,Bull",155:"T20,T19,Bull",
-    156:"T20,T20,Bull",157:"T20,T19,Bull",158:"T20,T20,Bull",160:"T20,T20,Bull",161:"T20,T17,Bull",
-    164:"T20,T18,Bull",167:"T20,T19,Bull",170:"T20,T20,BULL"
-};
-
-// ════════════════════════════════════════════════════════
-//  TTS
-// ════════════════════════════════════════════════════════
-let speechSynthesis = window.speechSynthesis;
-let ttsQueue = [];
-let isSpeaking = false;
-
-function toggleTTS() {
-    SoundEffects.play('click');
-    ttsMuted = !ttsMuted;
-    const btn = document.getElementById('tts-toggle-btn');
-    const icon = document.getElementById('tts-icon');
-    const text = document.getElementById('tts-text');
-    if (ttsMuted) {
-        btn.classList.add('tts-muted');
-        icon.innerText = '🔇'; text.innerText = 'TTS OFF';
-        speechSynthesis.cancel(); ttsQueue = [];
-    } else {
-        btn.classList.remove('tts-muted');
-        btn.style.cssText = 'cursor:pointer;background:rgba(57,255,20,0.06);border:1px solid rgba(57,255,20,0.25);color:#39ff14;';
-        icon.innerText = '🔊'; text.innerText = 'TTS ON';
-    }
-}
-
-function speak(text, priority = 'normal') {
-    if (ttsMuted || !speechSynthesis) return;
-    if (priority === 'high') { speechSynthesis.cancel(); ttsQueue = []; }
-    ttsQueue.push(text);
-    processTTSQueue();
-}
-
-function processTTSQueue() {
-    if (isSpeaking || ttsQueue.length === 0) return;
-    isSpeaking = true;
-    const text = ttsQueue.shift();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'pl-PL'; u.rate = 0.95; u.pitch = 1.0; u.volume = 0.85;
-    const voices = speechSynthesis.getVoices();
-    const pl = voices.find(v => v.lang.includes('pl'));
-    if (pl) u.voice = pl;
-    u.onend = () => { isSpeaking = false; processTTSQueue(); };
-    u.onerror = () => { isSpeaking = false; processTTSQueue(); };
-    speechSynthesis.speak(u);
-}
-
-if (speechSynthesis?.onvoiceschanged !== undefined) {
-    speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
-}
-
-// ════════════════════════════════════════════════════════
-//  🎆 FIREWORKS SYSTEM
-// ════════════════════════════════════════════════════════
-class Particle {
-    constructor(x,y,color,velocity,size,type='spark'){
-        this.x=x;this.y=y;this.color=color;this.velocity=velocity;
-        this.size=size;this.type=type;this.alpha=1;
-        this.decay=Math.random()*0.015+0.008;
-        this.gravity=0.08;this.friction=0.98;
-        this.trail=[];this.maxTrail=type==='rocket'?8:4;
-        this.rotation=Math.random()*Math.PI*2;
-        this.rotationSpeed=(Math.random()-0.5)*0.2;
-    }
-    update(){
-        this.trail.push({x:this.x,y:this.y,alpha:this.alpha});
-        if(this.trail.length>this.maxTrail)this.trail.shift();
-        this.velocity.x*=this.friction;this.velocity.y*=this.friction;
-        this.velocity.y+=this.gravity;
-        this.x+=this.velocity.x;this.y+=this.velocity.y;
-        this.alpha-=this.decay;this.rotation+=this.rotationSpeed;
-    }
-    draw(ctx){
-        if(this.trail.length>1){
-            ctx.save();
-            for(let i=0;i<this.trail.length-1;i++){
-                const t=this.trail[i],p=i/this.trail.length;
-                ctx.globalAlpha=t.alpha*p*0.5;ctx.fillStyle=this.color;
-                ctx.beginPath();ctx.arc(t.x,t.y,this.size*p,0,Math.PI*2);ctx.fill();
-            }
-            ctx.restore();
         }
-        ctx.save();ctx.globalAlpha=this.alpha;
-        ctx.translate(this.x,this.y);ctx.rotate(this.rotation);
-        if(this.type==='spark'){
-            const g=ctx.createRadialGradient(0,0,0,0,0,this.size*3);
-            g.addColorStop(0,this.color);g.addColorStop(0.4,this.color);g.addColorStop(1,'transparent');
-            ctx.fillStyle=g;ctx.beginPath();ctx.arc(0,0,this.size*3,0,Math.PI*2);ctx.fill();
-            ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(0,0,this.size*0.6,0,Math.PI*2);ctx.fill();
-        } else if(this.type==='rocket'){
-            ctx.fillStyle=this.color;ctx.shadowBlur=15;ctx.shadowColor=this.color;
-            ctx.beginPath();ctx.arc(0,0,this.size,0,Math.PI*2);ctx.fill();
+
+        // Voice API setup
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition = null;
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.lang = 'pl-PL';
+            recognition.continuous = false;
+            recognition.interimResults = false;
         } else {
-            ctx.fillStyle=this.color;
-            ctx.fillRect(-this.size/2,-this.size/2,this.size,this.size);
-        }
-        ctx.restore();
-    }
-    isAlive(){return this.alpha>0.01;}
-}
-
-class Firework {
-    constructor(canvas,sx,sy,tx,ty,palette){
-        this.canvas=canvas;this.targetX=tx;this.targetY=ty;this.colorPalette=palette;
-        this.particles=[];this.rocket=null;this.exploded=false;this.done=false;
-        const angle=Math.atan2(ty-sy,tx-sx),speed=12+Math.random()*3;
-        this.rocket=new Particle(sx,sy,palette[0],{x:Math.cos(angle)*speed,y:Math.sin(angle)*speed},3,'rocket');
-        this.rocket.gravity=0;this.rocket.friction=1;this.rocket.decay=0;
-    }
-    explode(){
-        this.exploded=true;this.rocket=null;
-        const cnt=80+Math.floor(Math.random()*60),etype=Math.floor(Math.random()*4);
-        for(let i=0;i<cnt;i++){
-            const c=this.colorPalette[Math.floor(Math.random()*this.colorPalette.length)];
-            let angle,speed,size;
-            if(etype===0){angle=(Math.PI*2/cnt)*i+(Math.random()-0.5)*0.2;speed=4+Math.random()*5;size=Math.random()*2+1.5;}
-            else if(etype===1){angle=(Math.PI*2/cnt)*i;speed=i%2===0?6+Math.random()*2:3+Math.random()*2;size=Math.random()*2+1;}
-            else if(etype===2){angle=Math.random()*Math.PI*2;speed=Math.random()*8+1;size=Math.random()*2.5+0.5;}
-            else{angle=(Math.PI*2/cnt)*i;speed=i%5===0?8:3+Math.random()*3;size=Math.random()*2+1;}
-            this.particles.push(new Particle(this.targetX,this.targetY,c,{x:Math.cos(angle)*speed,y:Math.sin(angle)*speed},size,'spark'));
-        }
-        for(let i=0;i<30;i++){
-            const c=this.colorPalette[Math.floor(Math.random()*this.colorPalette.length)];
-            const angle=Math.random()*Math.PI*2,speed=Math.random()*3+0.5;
-            const p=new Particle(this.targetX,this.targetY,c,{x:Math.cos(angle)*speed,y:Math.sin(angle)*speed},Math.random()*1.5+0.5,'glitter');
-            p.gravity=0.05;p.decay=0.005;this.particles.push(p);
-        }
-    }
-    update(){
-        if(!this.exploded&&this.rocket){
-            const dx=this.targetX-this.rocket.x,dy=this.targetY-this.rocket.y;
-            if(Math.hypot(dx,dy)<15)this.explode();else this.rocket.update();
-        }
-        for(let i=this.particles.length-1;i>=0;i--){
-            this.particles[i].update();
-            if(!this.particles[i].isAlive())this.particles.splice(i,1);
-        }
-        if(this.exploded&&this.particles.length===0)this.done=true;
-    }
-    draw(ctx){
-        if(this.rocket&&!this.exploded)this.rocket.draw(ctx);
-        this.particles.forEach(p=>p.draw(ctx));
-    }
-    isDone(){return this.done;}
-}
-
-class FireworksSystem {
-    constructor(id){
-        this.canvas=document.getElementById(id);this.ctx=this.canvas.getContext('2d');
-        this.fireworks=[];this.running=false;this.animId=null;this.interval=null;
-        this.palettes=[
-            ['#e63946','#ff6b7a','#ffb3b8','#fff'],
-            ['#f4a201','#ffd166','#ffe8a0','#fff'],
-            ['#39ff14','#7fff7f','#c0ffc0','#fff'],
-            ['#0ea5e9','#7dd3fc','#bae6fd','#fff'],
-            ['#a855f7','#d8b4fe','#ede9fe','#fff'],
-        ];
-        this.resize();
-        window.addEventListener('resize',()=>this.resize());
-    }
-    resize(){this.canvas.width=window.innerWidth;this.canvas.height=window.innerHeight;}
-    launch(x,y){
-        const sx=x||(Math.random()*this.canvas.width*0.8+this.canvas.width*0.1);
-        const ty=y||(Math.random()*this.canvas.height*0.5+this.canvas.height*0.1);
-        const tx=x||(Math.random()*this.canvas.width*0.8+this.canvas.width*0.1);
-        this.fireworks.push(new Firework(this.canvas,sx,this.canvas.height,tx,ty,this.palettes[Math.floor(Math.random()*this.palettes.length)]));
-    }
-    start(){
-        if(this.running)return;this.running=true;this.fireworks=[];this.animate();
-        let n=0;
-        this.interval=setInterval(()=>{
-            if(n++>=14){clearInterval(this.interval);return;}
-            this.launch();if(Math.random()<0.3)this.launch();
-        },350);
-    }
-    stop(){
-        this.running=false;
-        if(this.interval)clearInterval(this.interval);
-        if(this.animId)cancelAnimationFrame(this.animId);
-        this.fireworks=[];this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
-    }
-    animate(){
-        if(!this.running)return;
-        this.ctx.fillStyle='rgba(0,0,0,0.18)';this.ctx.fillRect(0,0,this.canvas.width,this.canvas.height);
-        for(let i=this.fireworks.length-1;i>=0;i--){
-            this.fireworks[i].update();this.fireworks[i].draw(this.ctx);
-            if(this.fireworks[i].isDone())this.fireworks.splice(i,1);
-        }
-        this.animId=requestAnimationFrame(()=>this.animate());
-    }
-}
-
-let fw=null;
-function initFW(){
-    if(!fw){
-        fw=new FireworksSystem('fireworks-canvas');
-        document.getElementById('celebration-overlay').addEventListener('click',(e)=>{
-            if(fw&&fw.running)fw.launch(e.clientX,e.clientY);
-        });
-    }
-}
-
-// ════════════════════════════════════════════════════════
-//  SPEECH RECOGNITION
-// ════════════════════════════════════════════════════════
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-let recognition = null;
-if(SpeechRecognition){
-    recognition = new SpeechRecognition();
-    recognition.lang='pl-PL';recognition.continuous=false;recognition.interimResults=false;
-} else {
-    showToast("System głosowy niedostępny","err");
-}
-
-// ════════════════════════════════════════════════════════
-//  UI HELPERS
-// ════════════════════════════════════════════════════════
-function toggleInstructions(){
-    SoundEffects.play('click');
-    const m=document.getElementById('instructions-modal');
-    m.classList.toggle('hidden');
-}
-
-function selectGameMode(mode){
-    SoundEffects.play('click');
-    gameMode=mode;
-    document.querySelectorAll('.btn-mode').forEach(b=>{
-        if(b.id&&b.id.startsWith('btn-')&&['btn-X01','btn-ATC','btn-121','btn-RND'].includes(b.id)){
-            b.classList.remove('active');
-        }
-    });
-    const ab=document.getElementById(`btn-${mode}`);
-    if(ab)ab.classList.add('active');
-    document.querySelectorAll('.mode-config-panel').forEach(p=>p.classList.add('hidden'));
-    const cp=document.getElementById(`config-${mode}`);
-    if(cp)cp.classList.remove('hidden');
-}
-
-function setX01Points(pts){
-    SoundEffects.play('click');
-    x01TargetPoints=pts;
-    ['301','501','701'].forEach(v=>{
-        const b=document.getElementById(`btn-p${v}`);
-        if(b)b.classList.toggle('active',parseInt(v)===pts);
-    });
-}
-
-function setAtcType(type){
-    SoundEffects.play('click');
-    atcType=type;
-    ['singles','doubles'].forEach(v=>{
-        const b=document.getElementById(`btn-atc-${v}`);
-        if(b)b.classList.toggle('active',v===type);
-    });
-}
-
-function addPlayerInput(){
-    SoundEffects.play('click');
-    const c=document.getElementById('player-inputs');
-    const cnt=c.children.length+1;
-    const d=document.createElement('div');
-    d.className='flex gap-2 items-center';
-    d.innerHTML=`<input type="text" placeholder="Gracz ${cnt}" class="p-name flex-1 px-3 py-2.5 rounded">
-        <button onclick="SoundEffects.play('click');this.parentElement.remove()" class="w-8 h-8 flex items-center justify-center f-mono text-xs rounded" style="background:rgba(230,57,70,0.08);border:1px solid rgba(230,57,70,0.2);color:var(--red)">✕</button>`;
-    c.appendChild(d);
-}
-
-function addBotInput(){
-    SoundEffects.play('click');
-    const c=document.getElementById('player-inputs');
-    const d=document.createElement('div');
-    d.className='bot-entry flex justify-between items-center px-3 py-2.5 rounded';
-    d.style.cssText='background:rgba(244,162,1,0.04);border:1px solid rgba(244,162,1,0.15);';
-    d.innerHTML=`<select class="p-bot-range bg-transparent border-0 px-0 py-0" style="color:var(--gold)">
-            <option value="40-45">Amator (40–45 avg)</option>
-            <option value="50-55">Średniak (50–55 avg)</option>
-            <option value="70-80">Wirtuoz (70–80 avg)</option>
-        </select>
-        <button onclick="SoundEffects.play('click');this.parentElement.remove()" class="f-mono text-xs" style="color:var(--red)">✕</button>`;
-    c.appendChild(d);
-}
-
-// ════════════════════════════════════════════════════════
-//  GAME INIT
-// ════════════════════════════════════════════════════════
-function startGame(){
-    SoundEffects.play('success');
-    const c=document.getElementById('player-inputs');
-    players=[];let hc=0;isMatchFinished=false;
-    checkoutAttempts=0;successfulCheckouts=0;highestScore=0;count180s=0;
-    legsToWinMatch=parseInt(document.getElementById('legs-to-win-selector').value)||3;
-    document.getElementById('match-limit-badge').innerText=`MECZ DO: ${legsToWinMatch}`;
-
-    Array.from(c.children).forEach(el=>{
-        if(el.querySelector('.p-name')){
-            const v=el.querySelector('.p-name').value.trim();
-            hc++;
-            players.push({name:v||`Gracz ${hc}`,score:0,isBot:false,matchPoints:0,matchThrows:0,legs:0,
-                atcNext:1,history:[],turnsTotal:0,totalPoints:0,totalThrows:0,lastScore:'-',count180s:0});
-        } else if(el.classList.contains('bot-entry')){
-            const range=el.querySelector('select').value.split('-').map(Number);
-            players.push({name:`BOT ${range[0]}-${range[1]}`,score:0,isBot:true,botMin:range[0],botMax:range[1],
-                matchPoints:0,matchThrows:0,legs:0,atcNext:1,history:[],turnsTotal:0,
-                totalPoints:0,totalThrows:0,lastScore:'-',count180s:0});
-        }
-    });
-
-    if(players.length===0)players.push({name:'Gracz 1',score:0,isBot:false,matchPoints:0,matchThrows:0,
-        legs:0,atcNext:1,history:[],turnsTotal:0,totalPoints:0,totalThrows:0,lastScore:'-',count180s:0});
-
-    legCount=1;
-    initNewLegData();
-    document.getElementById('lobby').classList.add('hidden');
-    document.getElementById('game-board').classList.remove('hidden');
-
-    const tp=document.getElementById('training-controls');
-    const ra=document.getElementById('rnd-actions');
-    if(gameMode==='RND'){tp.classList.remove('hidden');ra.classList.remove('hidden');generateNextTrainingTarget();}
-    else if(gameMode==='ATC'||gameMode==='121'){
-        tp.classList.remove('hidden');ra.classList.add('hidden');
-        if(gameMode==='ATC')updateAtcTargetDisplay();
-        if(gameMode==='121')update121TargetDisplay();
-    } else {tp.classList.add('hidden');}
-
-    updateBadgeInfo();render();checkAndPropagateTurn();
-    speak(`Rozpoczynamy mecz. Tryb ${gameMode}. ${players.length} graczy.`,'high');
-}
-
-function initNewLegData(){
-    players.forEach(p=>{
-        if(gameMode==='X01')p.score=x01TargetPoints;
-        else if(gameMode==='121')p.score=121;
-        else if(gameMode==='ATC')p.score=1;
-        else p.score=0;
-        p.matchPoints=0;p.matchThrows=0;p.turnsTotal=0;
-    });
-    currentPlayerIndex=0;
-    document.getElementById('game-log').innerHTML=`<div style="color:var(--red);font-weight:700;">=== LEG #${legCount} START ===</div>`;
-}
-
-function updateBadgeInfo(){
-    let label=gameMode;
-    if(gameMode==='X01')label+=` — ${x01TargetPoints}`;
-    if(gameMode==='ATC')label+=` (${atcType==='singles'?'S':'D'})`;
-    document.getElementById('game-info-badge').innerText=label;
-    document.getElementById('total-legs-counter').innerText=`LEG #${legCount}`;
-}
-
-// ════════════════════════════════════════════════════════
-//  RENDER
-// ════════════════════════════════════════════════════════
-function render(){
-    const display=document.getElementById('players-display');
-    display.innerHTML=players.map((p,idx)=>{
-        const isActive=idx===currentPlayerIndex;
-        let mainValue=p.score,targetLabel='SCORE';
-
-        if(gameMode==='ATC'){
-            mainValue=p.score===21?(atcType==='singles'?'BULL':'D-BULL'):`${atcType==='singles'?'':'D'}${p.score}`;
-            targetLabel='TARGET';
-        } else if(gameMode==='RND'){
-            mainValue=p.history.reduce((a,b)=>a+b,0);targetLabel='HITS';
-        } else if(gameMode==='121'){
-            targetLabel=`TUR ${p.turnsTotal%3+1}/3`;
+            showToast("System głosowy nie jest wspierany przez tę przeglądarkę.", "error");
         }
 
-        const darts=p.matchThrows*3;
-        const avg=p.totalThrows>0?(p.totalPoints/p.totalThrows).toFixed(2):'0.00';
-        const last=p.lastScore!==undefined?p.lastScore:'-';
-
-        let checkoutHtml='<div style="height:28px"></div>';
-        if(gameMode==='X01'&&p.score<=170&&!bogeyNumbers.includes(p.score)&&p.score>=2){
-            const route=checkoutTable[p.score]||'DUBEL';
-            checkoutHtml=`<div class="checkout-pill mt-2">${route}</div>`;
-        }
-
-        const borderStyle=isActive
-            ?'border:2px solid rgba(230,57,70,0.5);box-shadow:0 0 30px rgba(230,57,70,0.15),0 0 60px rgba(230,57,70,0.05);'
-            :'border:1px solid #1e2030;opacity:0.6;';
-
-        return `<div class="player-card ${isActive?'active':''}" style="width:280px;padding:20px;${borderStyle}">
-            <div class="card-scan"></div>
-            <!-- header -->
-            <div class="flex justify-between items-center mb-3">
-                <div class="flex items-center gap-2 overflow-hidden">
-                    <div class="w-8 h-8 rounded-full flex items-center justify-center f-display text-sm shrink-0"
-                         style="background:rgba(230,57,70,0.1);border:1px solid rgba(230,57,70,0.3);color:var(--red);">
-                        ${p.name.charAt(0).toUpperCase()}
-                    </div>
-                    <span class="f-ui text-sm font-bold uppercase tracking-wider truncate" style="color:${isActive?'#fff':'#8090a0'}">${p.name}</span>
-                </div>
-                <div class="f-mono text-xs px-2 py-1 rounded" style="background:rgba(244,162,1,0.08);border:1px solid rgba(244,162,1,0.2);color:var(--gold);">
-                    ${p.legs} LEG
-                </div>
-            </div>
-
-            <!-- SCORE -->
-            <div class="text-center my-2">
-                <div class="f-display" style="font-size:clamp(3.5rem,9vw,5.5rem);line-height:1;color:${isActive?'#fff':'#5a6a7a'};${isActive?'text-shadow:0 0 30px rgba(255,255,255,0.15)':''}">
-                    ${mainValue}
-                </div>
-                <div class="ticker-label mt-1">${targetLabel}</div>
-                <div class="flex justify-center mt-1">${checkoutHtml}</div>
-            </div>
-
-            <!-- STATS -->
-            <div class="mt-3 pt-3" style="border-top:1px solid rgba(30,32,48,0.8)">
-                <div class="stat-row">
-                    <span class="ticker-label">3-DART AVG</span>
-                    <span class="f-mono text-sm" style="color:${isActive?'var(--gold)':'#4a5268'}">${avg}</span>
-                </div>
-                <div class="stat-row">
-                    <span class="ticker-label">LAST SCORE</span>
-                    <span class="f-mono text-sm" style="color:${isActive?'#fff':'#4a5268'}">${last}</span>
-                </div>
-                <div class="stat-row">
-                    <span class="ticker-label">DARTS THROWN</span>
-                    <span class="f-mono text-sm" style="color:${isActive?'var(--green)':'#4a5268'}">${darts}</span>
-                </div>
-                <div class="stat-row">
-                    <span class="ticker-label">180s</span>
-                    <span class="f-mono text-sm" style="color:${isActive?'var(--red)':'#4a5268'}">${p.count180s||0}</span>
-                </div>
-            </div>
-        </div>`;
-    }).join('');
-
-    const ap=players[currentPlayerIndex];
-    document.getElementById('current-player-label').innerText=`TURA: ${ap.name}${ap.isBot?' [BOT]':''}`;
-
-    const hint=document.getElementById('checkout-hint');
-    if(gameMode==='X01'&&ap.score<=170&&!bogeyNumbers.includes(ap.score)&&ap.score>=2){
-        hint.classList.remove('hidden');
-    } else {
-        hint.classList.add('hidden');
-    }
-    document.getElementById('checkout-suggestion').innerText='';
-}
-
-// ════════════════════════════════════════════════════════
-//  BOT AI (skillRatio-based checkout probability)
-// ════════════════════════════════════════════════════════
-function executeBotAI(bot){
-    if(isCelebrating||isMatchFinished)return;
-
-    const rangeSpan=bot.botMax-bot.botMin;
-    const currentAverage=bot.totalThrows>0?(bot.totalPoints/bot.totalThrows):bot.botMin;
-    const skillRatio=rangeSpan>0?Math.max(0,Math.min(1,(currentAverage-bot.botMin)/rangeSpan)):0.5;
-
-    let finalTurnScore=0;
-
-    if(gameMode==='X01'){
-        if(bot.score<=170&&bot.score>=2&&!bogeyNumbers.includes(bot.score)){
-            let baseCheckoutChance;
-            if(bot.score<=40&&bot.score%2===0)baseCheckoutChance=bot.botMax/135;
-            else if(bot.score<=100)baseCheckoutChance=bot.botMax/400;
-            else baseCheckoutChance=bot.botMax/900;
-
-            const checkoutProbability=baseCheckoutChance*skillRatio;
-
-            if(Math.random()<checkoutProbability){
-                finalTurnScore=bot.score;
-            } else {
-                finalTurnScore=bot.score>40?Math.floor(Math.random()*25)+15:0;
+        function selectGameMode(mode) {
+            SoundEffects.play('click');
+            gameMode = mode;
+            document.querySelectorAll('.game-opt').forEach(btn => {
+                btn.classList.remove('bg-slate-800', 'border-sky-500', 'text-white');
+                btn.classList.add('bg-slate-900/40', 'border-slate-800', 'text-slate-400');
+            });
+            const activeBtn = document.getElementById(`btn-${mode}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('bg-slate-900/40', 'border-slate-800', 'text-slate-400');
+                activeBtn.classList.add('bg-slate-800', 'border-sky-500', 'text-white');
             }
-        } else {
-            const dice=Math.random()*100;
-            if(bot.botMin===40){
-                if(skillRatio>0.7){
-                    if(dice>88)finalTurnScore=100;
-                    else if(dice>65)finalTurnScore=60;
-                    else if(dice>38)finalTurnScore=45;
-                    else if(dice>14)finalTurnScore=41;
-                    else finalTurnScore=26;
-                } else if(skillRatio>0.3){
-                    if(dice>92)finalTurnScore=60;
-                    else if(dice>58)finalTurnScore=45;
-                    else if(dice>28)finalTurnScore=41;
-                    else finalTurnScore=26;
-                } else {
-                    if(dice>85)finalTurnScore=45;
-                    else if(dice>45)finalTurnScore=26;
-                    else finalTurnScore=11;
-                }
-            } else if(bot.botMin===50){
-                if(skillRatio>0.6){
-                    if(dice>80)finalTurnScore=140;
-                    else if(dice>50)finalTurnScore=100;
-                    else if(dice>22)finalTurnScore=60;
-                    else finalTurnScore=45;
-                } else {
-                    if(dice>88)finalTurnScore=100;
-                    else if(dice>50)finalTurnScore=60;
-                    else if(dice>20)finalTurnScore=45;
-                    else finalTurnScore=26;
-                }
-            } else {
-                if(skillRatio>0.6){
-                    if(dice>65)finalTurnScore=180;
-                    else if(dice>30)finalTurnScore=140;
-                    else if(dice>8)finalTurnScore=100;
-                    else finalTurnScore=60;
-                } else {
-                    if(dice>80)finalTurnScore=140;
-                    else if(dice>40)finalTurnScore=100;
-                    else if(dice>10)finalTurnScore=60;
-                    else finalTurnScore=41;
-                }
+
+            document.querySelectorAll('.mode-config-panel').forEach(panel => panel.classList.add('hidden'));
+            document.getElementById(`config-${mode}`).classList.remove('hidden');
+        }
+
+        function setX01Points(pts) {
+            SoundEffects.play('click');
+            x01TargetPoints = pts;
+            
+            document.querySelectorAll('.x01-pts').forEach(btn => {
+                btn.classList.remove('bg-slate-800', 'border-sky-500', 'text-white');
+                btn.classList.add('bg-slate-900/40', 'border-slate-800', 'text-slate-400');
+            });
+            
+            const activeBtn = document.getElementById(`btn-p${pts}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('bg-slate-900/40', 'border-slate-800', 'text-slate-400');
+                activeBtn.classList.add('bg-slate-800', 'border-sky-500', 'text-white');
             }
         }
 
-        if(bot.score-finalTurnScore<0||bot.score-finalTurnScore===1)finalTurnScore=0;
-        setTimeout(()=>processScoreSubmission(finalTurnScore),1400);
-
-    } else if(gameMode==='ATC'){
-        const baseHit=bot.botMax/160;
-        const hit=baseHit*(0.5+0.5*skillRatio);
-        let hits=0;for(let i=0;i<3;i++)if(Math.random()<hit)hits++;
-        setTimeout(()=>{
-            bot.matchThrows++;bot.totalThrows++;bot.lastScore=hits;
-            if(hits>0){bot.score+=hits;if(bot.score>21)bot.score=21;}
-            logTurn(bot.name,`Trafił ${hits}x (${bot.score}/21)`);
-            if(bot.score===21)triggerWinCelebration(bot);else nextPlayer();
-        },1400);
-    } else if(gameMode==='RND'){
-        const baseHit=bot.botMax/170;
-        const hit=baseHit*(0.5+0.5*skillRatio);
-        let hits=0;for(let i=0;i<3;i++)if(Math.random()<hit)hits++;
-        setTimeout(()=>{
-            bot.matchThrows++;bot.totalThrows++;bot.lastScore=hits;
-            bot.history.push(hits);logTurn(bot.name,`Losowy cel: trafiono ${hits}x`);nextPlayer();
-        },1400);
-    } else if(gameMode==='121'){
-        const baseSuc=bot.botMax/220;
-        const suc=baseSuc*(0.4+0.6*skillRatio);
-        const closed=Math.random()<suc;
-        bot.turnsTotal++;
-        setTimeout(()=>{
-            bot.matchThrows++;bot.totalThrows++;bot.lastScore=closed?3:0;
-            if(closed){
-                logTurn(bot.name,`ZAMKNĄŁ ${bot.score}! Awans.`);
-                bot.score++;bot.turnsTotal=0;
-                if(bot.score>170)triggerWinCelebration(bot);else nextPlayer();
-            } else if(bot.turnsTotal%3===0){
-                logTurn(bot.name,`Nie zamknął ${bot.score}. Reset.`);
-                bot.score=121;bot.turnsTotal=0;nextPlayer();
-            } else {
-                logTurn(bot.name,`Tur ${bot.turnsTotal%3}/3 nieudana.`);nextPlayer();
+        function setAtcType(type) {
+            SoundEffects.play('click');
+            atcType = type;
+            document.querySelectorAll('.atc-type').forEach(btn => {
+                btn.classList.remove('bg-slate-800', 'border-sky-500', 'text-white');
+                btn.classList.add('bg-slate-900/40', 'border-slate-800', 'text-slate-400');
+            });
+            const activeBtn = document.getElementById(`btn-atc-${type}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('bg-slate-900/40', 'border-slate-800', 'text-slate-400');
+                activeBtn.classList.add('bg-slate-800', 'border-sky-500', 'text-white');
             }
-        },1400);
-    }
-}
+        }
 
-// ════════════════════════════════════════════════════════
-//  SCORE PROCESSING
-// ════════════════════════════════════════════════════════
-function processScoreSubmission(score,isCheckout=false){
-    if(isCelebrating||isMatchFinished)return;
-    turnHistory.push(JSON.parse(JSON.stringify(players)));
-    const ap=players[currentPlayerIndex];
+        function addPlayerInput() {
+            SoundEffects.play('click');
+            const container = document.getElementById('player-inputs');
+            const div = document.createElement('div');
+            div.className = "flex gap-2 items-center animate-fade-in";
+            div.innerHTML = `
+                <input type="text" placeholder="Nazwa gracza" class="p-name flex-grow bg-slate-950 border border-slate-800 p-3 rounded-xl text-sm font-semibold focus:border-sky-500 focus:outline-none transition-all">
+                <button onclick="SoundEffects.play('click'); this.parentElement.remove()" class="w-10 h-10 flex items-center justify-center bg-rose-950/20 text-rose-500 border border-rose-900/30 font-bold rounded-xl text-xs hover:bg-rose-950/50 transition-all">X</button>
+            `;
+            container.appendChild(div);
+        }
 
-    if(isCheckout&&score===ap.score)ap.score=0;
-    else ap.score-=score;
+        function addBotInput() {
+            SoundEffects.play('click');
+            const container = document.getElementById('player-inputs');
+            const div = document.createElement('div');
+            div.className = "bot-entry bg-slate-950 p-3 rounded-xl border border-amber-900/20 flex justify-between items-center animate-fade-in";
+            div.innerHTML = `
+                <select class="p-bot-range bg-transparent text-amber-500 font-bold text-xs outline-none uppercase cursor-pointer">
+                    <option value="40-45" class="bg-slate-950">Amator (40-45 AVG)</option>
+                    <option value="50-55" class="bg-slate-950">Średniak (50-55 AVG)</option>
+                    <option value="70-80" class="bg-slate-950">Wirtuoz (70-80 AVG)</option>
+                </select>
+                <button onclick="SoundEffects.play('click'); this.parentElement.remove()" class="text-rose-500 text-[10px] font-bold uppercase tracking-wider bg-rose-950/10 px-2 py-1 rounded border border-rose-900/20 hover:bg-rose-950/30">Usuń</button>
+            `;
+            container.appendChild(div);
+        }
 
-    ap.matchPoints+=score;ap.totalPoints+=score;
-    ap.matchThrows++;ap.totalThrows++;ap.lastScore=score;
-
-    if(score===180){ap.count180s=(ap.count180s||0)+1;count180s++;}
-    if(score>highestScore)highestScore=score;
-
-    document.getElementById('voice-display').innerText=score===0?'FURAŻ':score;
-    logTurn(ap.name,`${score} pkt → zostaje ${ap.score}`);
-
-    if(isCheckout){
-        successfulCheckouts++;SoundEffects.play('win');
-        document.getElementById('game-board').classList.add('checkout-glow');
-        setTimeout(()=>document.getElementById('game-board').classList.remove('checkout-glow'),1000);
-    }
-
-    if(score===0&&!isCheckout){
-        SoundEffects.play('bust');speak(`${ap.name} furaż`,'high');
-    } else if(!isCheckout){
-        SoundEffects.play('success');speak(`${ap.name} ${score} punktów zostaje ${ap.score}`,'normal');
-    }
-
-    if(ap.score===0)triggerWinCelebration(ap);else nextPlayer();
-}
-
-function setBustManual(){
-    if(isCelebrating||isMatchFinished)return;
-    if(gameMode!=='X01'||players[currentPlayerIndex].isBot)return;
-    SoundEffects.play('bust');processScoreSubmission(0);showToast('Furaż zgłoszony','warn');
-}
-
-function nextPlayer(){
-    currentPlayerIndex=(currentPlayerIndex+1)%players.length;
-    if(gameMode==='ATC')updateAtcTargetDisplay();
-    if(gameMode==='121'){if(!players[currentPlayerIndex].isBot)players[currentPlayerIndex].turnsTotal++;update121TargetDisplay();}
-    if(gameMode==='RND')generateNextTrainingTarget();
-    render();checkAndPropagateTurn();
-}
-
-function checkAndPropagateTurn(){
-    if(isCelebrating||isMatchFinished)return;
-    const p=players[currentPlayerIndex];
-    const dot=document.getElementById('voice-dot');
-    const status=document.getElementById('voice-status');
-
-    if(p.isBot){
-        deactivateVoiceRecognition();
-        dot.style.background='var(--gold)';
-        status.style.color='var(--gold)';status.innerText='BOT ANALIZUJE...';
-        executeBotAI(p);
-    } else {
-        dot.style.background='var(--green)';
-        status.style.color='var(--green)';status.innerText='SŁUCHAM WYNIKÓW...';
-        activateVoiceRecognition();speak(`Tura gracza ${p.name}`,'normal');
-    }
-}
-
-function generateNextTrainingTarget(){
-    if(players[currentPlayerIndex].isBot)return;
-    const sectors=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,25];
-    const types=['S','D','T'];
-    currentTrainingTarget=sectors[Math.floor(Math.random()*sectors.length)];
-    currentTrainingTargetType=currentTrainingTarget===25?'S':types[Math.floor(Math.random()*types.length)];
-    if(currentTrainingTarget===25&&currentTrainingTargetType==='D')currentTrainingTargetType='S';
-    document.getElementById('checkout-suggestion').innerText=`CELUJ → ${currentTrainingTargetType}${currentTrainingTarget===25?'BULL':currentTrainingTarget}`;
-}
-
-function updateAtcTargetDisplay(){
-    const p=players[currentPlayerIndex];
-    const t=p.score===21?'BULLSEYE':`${atcType==='singles'?'Single':'Double'} ${p.score}`;
-    document.getElementById('checkout-suggestion').innerText=`ATC CEL → ${t}`;
-}
-
-function update121TargetDisplay(){
-    const p=players[currentPlayerIndex];
-    document.getElementById('checkout-suggestion').innerText=`ZAMKNIJ → ${p.score}`;
-}
-
-function submitTrainingHits(hits){
-    const p=players[currentPlayerIndex];
-    turnHistory.push(JSON.parse(JSON.stringify(players)));
-    p.matchThrows++;p.totalThrows++;p.lastScore=hits;
-
-    if(gameMode==='RND'){
-        SoundEffects.play('success');p.history.push(hits);
-        logTurn(p.name,`RND: trafiono ${hits}x`);nextPlayer();
-    } else if(gameMode==='ATC'){
-        SoundEffects.play('success');
-        if(hits>0){p.score+=hits;if(p.score>21)p.score=21;}
-        logTurn(p.name,`ATC: trafiono ${hits}x → cel ${p.score}`);
-        if(p.score===21)triggerWinCelebration(p);else nextPlayer();
-    } else if(gameMode==='121'){
-        if(hits===3){
+        function startGame() {
             SoundEffects.play('success');
-            logTurn(p.name,`ZAMKNIĘTE ${p.score}!`);
-            p.score++;p.turnsTotal=0;
-            if(p.score>170)triggerWinCelebration(p);else nextPlayer();
-        } else {
-            SoundEffects.play('bust');
-            if(p.turnsTotal>=3){logTurn(p.name,`Koniec prób. Reset do 121.`);p.score=121;p.turnsTotal=0;}
-            else logTurn(p.name,`Próba ${p.turnsTotal}/3 nieudana.`);
-            nextPlayer();
-        }
-    }
-}
+            const container = document.getElementById('player-inputs');
+            players = [];
+            let humanCount = 0;
+            isMatchFinished = false;
+            
+            checkoutAttempts = 0;
+            successfulCheckouts = 0;
+            highestScore = 0;
+            count180s = 0;
 
-function activateVoiceRecognition(){
-    shouldBeListening=true;
-    if(!recognition||isCelebrating||isMatchFinished)return;
-    try{recognition.start();}catch(e){}
-}
+            legsToWinMatch = parseInt(document.getElementById('legs-to-win-selector').value) || 3;
+            document.getElementById('match-limit-badge').innerText = `Mecz do: ${legsToWinMatch} wygranych`;
 
-function deactivateVoiceRecognition(){
-    shouldBeListening=false;
-    if(!recognition)return;
-    try{recognition.stop();}catch(e){}
-}
+            Array.from(container.children).forEach((el) => {
+                if (el.querySelector('.p-name')) {
+                    const val = el.querySelector('.p-name').value.trim();
+                    humanCount++;
+                    const playerName = val || `Gracz ${humanCount}`;
+                    players.push({
+                        name: playerName,
+                        score: 0, isBot: false, matchPoints: 0, matchThrows: 0, legs: 0,
+                        atcNext: 1, history: [], turnsTotal: 0,
+                        totalPoints: 0, totalThrows: 0, lastScore: "-", count180s: 0
+                    });
+                } else if (el.classList.contains('bot-entry')) {
+                    const range = el.querySelector('select').value.split('-').map(Number);
+                    const botName = `BOT ${range[0]}-${range[1]}`;
+                    players.push({
+                        name: botName,
+                        score: 0, isBot: true, botMin: range[0], botMax: range[1],
+                        matchPoints: 0, matchThrows: 0, legs: 0, atcNext: 1, history: [], turnsTotal: 0,
+                        totalPoints: 0, totalThrows: 0, lastScore: "-", count180s: 0
+                    });
+                }
+            });
 
-if(recognition){
-    recognition.onresult=(e)=>{
-        const t=e.results[0][0].transcript.toLowerCase().trim();
-        document.getElementById('voice-status').innerText=`"${t}"`;
-
-        if(t.includes('cofnij')){undoLastMove();return;}
-        if(t.includes('furaż')||t.includes('błąd')||t.includes('zero')||t.includes('spudłować')){
-            if(gameMode==='X01')processScoreSubmission(0);return;
-        }
-
-        if(gameMode==='X01'){
-            const ap=players[currentPlayerIndex];
-            const checkWords=['czek','check','checkout','koniec','finish','zakończ','zamknij','out','double'];
-            if(checkWords.some(w=>t.includes(w))){
-                if(ap.score<=170&&ap.score>=2&&!bogeyNumbers.includes(ap.score)){
-                    checkoutAttempts++;speak(`Checkout! ${checkoutTable[ap.score]}`,'high');
-                    processScoreSubmission(ap.score,true);
-                } else {showToast('Nie możesz zakończyć!','err');speak('Nie można zakończyć','high');}
-                return;
+            if (players.length === 0) {
+                players.push({ 
+                    name: "Gracz 1", score: 0, isBot: false, matchPoints: 0, matchThrows: 0, legs: 0, atcNext: 1, history: [], turnsTotal: 0,
+                    totalPoints: 0, totalThrows: 0, lastScore: "-", count180s: 0 
+                });
             }
-            const n=parseInt(t.replace(/\D/g,''));
-            if(!isNaN(n)&&n<=180)processScoreSubmission(n);
-            else showToast(`Błędna wartość: ${t}`,'err');
-        } else {
-            if(t.includes('zero')||t.includes('0'))submitTrainingHits(0);
-            else if(t.includes('jeden')||t.includes('raz')||t.includes('1'))submitTrainingHits(1);
-            else if(t.includes('dwa')||t.includes('2'))submitTrainingHits(2);
-            else if(t.includes('trzy')||t.includes('3'))submitTrainingHits(3);
+
+            legCount = 1;
+            initNewLegData();
+
+            document.getElementById('lobby').classList.add('hidden');
+            document.getElementById('game-board').classList.remove('hidden');
+            
+            const trainingPanel = document.getElementById('training-controls');
+            const rndActions = document.getElementById('rnd-actions');
+            
+            if (gameMode === 'RND') {
+                trainingPanel.classList.remove('hidden');
+                rndActions.classList.remove('hidden');
+                generateNextTrainingTarget();
+            } else if (gameMode === 'ATC' || gameMode === '121') {
+                trainingPanel.classList.remove('hidden');
+                rndActions.classList.add('hidden');
+                if (gameMode === 'ATC') updateAtcTargetDisplay();
+                if (gameMode === '121') update121TargetDisplay();
+            } else {
+                trainingPanel.classList.add('hidden');
+            }
+
+            updateBadgeInfo();
+            render();
+            checkAndPropagateTurn();
+            
+            speak(`Rozpoczynamy mecz. Tryb ${gameMode}. ${players.length} graczy.`, 'high');
         }
-    };
-    recognition.onend=()=>{
-        if(shouldBeListening&&!isCelebrating&&!isMatchFinished)try{recognition.start();}catch(e){}
-    };
-}
 
-function appendNum(n){
-    const inp=document.getElementById('manual-score-input');
-    if(inp.value.length<3){inp.value+=n;SoundEffects.play('key');}
-    const v=inp.value;
-    document.getElementById('voice-display').innerText=v||'---';
-}
-
-function clearManualInput(){
-    SoundEffects.play('click');
-    document.getElementById('manual-score-input').value='';
-    document.getElementById('voice-display').innerText='---';
-}
-
-function submitManualScore(){
-    const inp=document.getElementById('manual-score-input');
-    const v=parseInt(inp.value);
-    if(isNaN(v))return;
-    if(gameMode==='X01'){
-        if(v<=180)processScoreSubmission(v);
-        else{SoundEffects.play('bust');showToast('Max wynik tury to 180!','err');}
-    } else {
-        if(v<=3)submitTrainingHits(v);
-        else{SoundEffects.play('bust');showToast('Wpisz 0–3 trafienia','warn');}
-    }
-    clearManualInput();
-}
-
-function undoLastMove(){
-    if(turnHistory.length>0){
-        SoundEffects.play('click');
-        players=turnHistory.pop();
-        currentPlayerIndex=(currentPlayerIndex-1+players.length)%players.length;
-        logTurn('SYSTEM','↺ Cofnięto turę');
-        render();checkAndPropagateTurn();showToast('Cofnięto rzut','warn');speak('Cofnięto','high');
-    } else {showToast('Brak rzutów do cofnięcia','err');}
-}
-
-function logTurn(name,action){
-    const log=document.getElementById('game-log');
-    log.innerHTML=`<div class="log-entry"><span style="color:var(--dim)">[${new Date().toLocaleTimeString()}]</span> <span style="color:#8090a0;font-weight:700">${name}</span>: ${action}</div>`+log.innerHTML;
-}
-
-// ════════════════════════════════════════════════════════
-//  CELEBRATION
-// ════════════════════════════════════════════════════════
-function triggerWinCelebration(player){
-    isCelebrating=true;deactivateVoiceRecognition();SoundEffects.play('win');
-    player.legs++;
-
-    if(player.legs>=legsToWinMatch){
-        isMatchFinished=true;
-        document.getElementById('cel-title').innerText='🏆 MECZ ZAKOŃCZONY!';
-        speak(`Mecz zakończony! Wygrywa ${player.name}!`,'high');
-    } else {
-        document.getElementById('cel-title').innerText='🎯 LEG ZDOBYTY!';
-        speak(`Leg zdobyty przez ${player.name}!`,'high');
-    }
-
-    document.getElementById('cel-winner').innerText=player.name;
-    const avg=player.matchThrows>0?(player.matchPoints/player.matchThrows).toFixed(2):'0.00';
-    document.getElementById('cel-stats').innerHTML=`
-        <div>Tryb: ${gameMode}</div>
-        <div>Lotki w legu: ${player.matchThrows*3}</div>
-        <div>Średnia: ${avg}</div>
-        <div style="color:var(--gold);font-weight:700;margin-top:4px">Legi: ${player.legs} / ${legsToWinMatch}</div>`;
-
-    document.getElementById('celebration-overlay').classList.remove('hidden');
-    initFW();if(fw)fw.start();
-
-    const ov=document.getElementById('celebration-overlay');
-    ov.classList.add('screen-shake');setTimeout(()=>ov.classList.remove('screen-shake'),500);
-    ov.classList.add('golden-flash');setTimeout(()=>ov.classList.remove('golden-flash'),1000);
-
-    countdownSecondsLeft=5;
-    const ring=document.getElementById('countdown-ring');
-    const txt=document.getElementById('countdown-text');
-    ring.style.strokeDashoffset=0;txt.innerText=5;
-    if(countdownTimer)clearInterval(countdownTimer);
-    countdownTimer=setInterval(()=>{
-        countdownSecondsLeft--;
-        if(countdownSecondsLeft<=0){clearInterval(countdownTimer);closeCelebration();}
-        else{
-            txt.innerText=countdownSecondsLeft;
-            ring.style.strokeDashoffset=totalCircleLength-(totalCircleLength*(countdownSecondsLeft/5));
+        function initNewLegData() {
+            players.forEach(p => {
+                if (gameMode === 'X01') p.score = x01TargetPoints;
+                else if (gameMode === '121') p.score = 121;
+                else if (gameMode === 'ATC') p.score = 1; 
+                else p.score = 0; 
+                
+                p.matchPoints = 0;
+                p.matchThrows = 0; 
+                p.turnsTotal = 0;
+            });
+            currentPlayerIndex = 0;
+            document.getElementById('game-log').innerHTML = `<div class="text-sky-500 font-bold">=== Początek Legu #${legCount} ===</div>`;
         }
-    },1000);
-}
 
-function closeCelebration(){
-    SoundEffects.play('click');
-    if(countdownTimer)clearInterval(countdownTimer);
-    if(fw)fw.stop();
-    document.getElementById('celebration-overlay').classList.add('hidden');
-    isCelebrating=false;
-    if(isMatchFinished){
-        document.getElementById('game-board').classList.add('hidden');
-        document.getElementById('lobby').classList.remove('hidden');
-        speak('Powrót do menu','normal');
-    } else {
-        legCount++;initNewLegData();updateBadgeInfo();render();checkAndPropagateTurn();
-        speak(`Leg numer ${legCount}`,'normal');
-    }
-}
+        function updateBadgeInfo() {
+            let label = gameMode;
+            if (gameMode === 'X01') label += ` - ${x01TargetPoints}`;
+            if (gameMode === 'ATC') label += ` (${atcType === 'singles' ? 'Single' : 'Duble'})`;
+            document.getElementById('game-info-badge').innerText = label;
+            document.getElementById('total-legs-counter').innerText = `Leg #${legCount}`;
+        }
 
-// ════════════════════════════════════════════════════════
-//  MODALS
-// ════════════════════════════════════════════════════════
-let modalActionType='';
+        // Renderowanie kart zawodników wraz z dużym, widocznym licznikiem punktów (text-7xl)
+        function render() {
+            const display = document.getElementById('players-display');
+            
+            display.innerHTML = players.map((p, idx) => {
+                const isActive = idx === currentPlayerIndex;
+                let mainValue = p.score;
+                let targetLabel = "SCORE";
 
-function openResetConfirm(){
-    SoundEffects.play('click');modalActionType='RESET';
-    document.getElementById('modal-title').innerText='RESET MECZU?';
-    document.getElementById('modal-desc').innerText='Wszystkie legi i statystyki zostaną wyzerowane.';
-    document.getElementById('confirm-modal').classList.remove('hidden');
-}
+                if (gameMode === 'ATC') {
+                    const targetName = p.score === 21 ? (atcType === 'singles' ? 'BULL' : 'D-BULL') : `${atcType === 'singles' ? '' : 'D'}${p.score}`;
+                    mainValue = targetName;
+                    targetLabel = "TARGET";
+                } else if (gameMode === 'RND') {
+                    mainValue = p.history.reduce((a, b) => a + b, 0); 
+                    targetLabel = "HITS";
+                } else if (gameMode === '121') {
+                    targetLabel = `TURA ${p.turnsTotal % 3 + 1}/3`;
+                }
 
-function triggerExitRoute(){
-    SoundEffects.play('click');modalActionType='EXIT';
-    document.getElementById('modal-title').innerText='WYJŚĆ Z GRY?';
-    document.getElementById('modal-desc').innerText='Postęp meczu zostanie utracony.';
-    document.getElementById('confirm-modal').classList.remove('hidden');
-}
+                // Ograniczenie "Darts thrown" wyłącznie do bieżącego lega (matchThrows * 3)
+                const dartsThrown = p.matchThrows * 3;
+                const computedAvg = p.totalThrows > 0 ? (p.totalPoints / p.totalThrows).toFixed(2) : "0.00";
+                const lastScoreVal = p.lastScore !== undefined ? p.lastScore : "-";
 
-function closeConfirmModal(confirm){
-    SoundEffects.play('click');
-    document.getElementById('confirm-modal').classList.add('hidden');
-    if(confirm){
-        if(modalActionType==='RESET'){
-            legCount=1;
-            players.forEach(p=>{p.legs=0;p.totalPoints=0;p.totalThrows=0;p.lastScore='-';p.count180s=0;});
-            initNewLegData();updateBadgeInfo();render();checkAndPropagateTurn();
-            showToast('Mecz zresetowany','warn');speak('Mecz zresetowany','high');
-        } else if(modalActionType==='EXIT'){
+                // Kapsuła z podpowiedzią checkoutu (Jak na zdjęciu Dorian - wycentrowana, bezpośrednio pod wynikiem)
+                let checkoutPillHtml = '<div class="h-8 mt-2"></div>'; // stabilizator wysokości layoutu
+                if (gameMode === 'X01') {
+                    if (p.score <= 170 && !bogeyNumbers.includes(p.score) && p.score >= 2) {
+                        const checkoutRoute = checkoutTable[p.score] || "DUBEL";
+                        checkoutPillHtml = `
+                            <div class="mt-2 inline-block bg-slate-950 text-sky-400 font-digital font-black text-sm px-4 py-1.5 rounded-lg border border-slate-800 shadow-inner tracking-wider uppercase">
+                                ${checkoutRoute}
+                            </div>
+                        `;
+                    }
+                }
+
+                return `
+                    <div class="relative w-72 rounded-3xl p-6 transition-all duration-300 flex flex-col justify-between ${
+                        isActive 
+                        ? 'bg-gradient-to-br from-sky-600 via-sky-700 to-indigo-900 text-white active-player-card scale-[1.04] z-10 shadow-2xl shadow-sky-950/50' 
+                        : 'bg-[#0c1220]/90 border border-slate-800 text-slate-300 opacity-60'
+                    }">
+                        <!-- Górna linia: awatar inicjału, nazwa i mała plakietka legów -->
+                        <div class="flex justify-between items-center w-full mb-3">
+                            <div class="flex items-center gap-3 truncate">
+                                <div class="w-9 h-9 rounded-full bg-slate-950/80 border border-slate-800 flex items-center justify-center font-bold text-sm text-sky-400 font-digital uppercase shrink-0">
+                                    ${p.name.charAt(0)}
+                                </div>
+                                <div class="text-xs font-bold uppercase tracking-wider truncate max-w-[120px]">${p.name}</div>
+                            </div>
+                            
+                            <!-- Mała plakietka z liczbą wygranych legów -->
+                            <div class="bg-slate-950/90 text-amber-500 font-digital font-black text-xs px-2.5 py-1 rounded-lg border border-slate-800/80 shadow-inner">
+                                ${p.legs}
+                            </div>
+                        </div>
+
+                        <!-- Wielki wskaźnik wyniku (zwiększony do text-7xl font-extrabold dla maksymalnej widoczności) -->
+                        <div class="text-center my-3">
+                            <div class="text-7xl font-extrabold font-digital tracking-tighter drop-shadow-md">
+                                ${mainValue}
+                            </div>
+                            <div class="text-[9px] opacity-60 tracking-widest uppercase font-bold mt-1">${targetLabel}</div>
+                            <div class="flex justify-center items-center">
+                                ${checkoutPillHtml}
+                            </div>
+                        </div>
+
+                        <!-- Osobna tabela statystyk (Dorian layout zintegrowany z nową paletą) -->
+                        <div class="border-t border-white/10 pt-4 mt-2 space-y-2 text-xs font-semibold">
+                            <div class="flex justify-between items-center">
+                                <span class="${isActive ? 'text-sky-100/70' : 'text-slate-500'}">3-dart avg.</span>
+                                <span class="font-digital text-sm ${isActive ? 'text-white' : 'text-sky-400 font-bold'}">${computedAvg}</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="${isActive ? 'text-sky-100/70' : 'text-slate-500'}">Last score</span>
+                                <span class="font-digital text-sm ${isActive ? 'text-white' : 'text-amber-500 font-bold'}">${lastScoreVal}</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="${isActive ? 'text-sky-100/70' : 'text-slate-500'}">Darts thrown</span>
+                                <span class="font-digital text-sm ${isActive ? 'text-white' : 'text-emerald-400 font-bold'}">${dartsThrown}</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="${isActive ? 'text-sky-100/70' : 'text-slate-500'}">180s</span>
+                                <span class="font-digital text-sm ${isActive ? 'text-white' : 'text-rose-400 font-bold'}">${p.count180s || 0}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            const activePlayer = players[currentPlayerIndex];
+            document.getElementById('current-player-label').innerText = `Tura: ${activePlayer.name} ${activePlayer.isBot ? '[BOT]' : ''}`;
+
+            const summ = document.getElementById('checkout-suggestion');
+            const hint = document.getElementById('checkout-hint');
+            
+            if (gameMode === 'X01') {
+                summ.innerText = "";
+                if (activePlayer.score <= 170 && !bogeyNumbers.includes(activePlayer.score) && activePlayer.score >= 2) {
+                    hint.classList.remove('hidden');
+                } else {
+                    hint.classList.add('hidden');
+                }
+            } else {
+                hint.classList.add('hidden');
+            }
+        }
+
+        function executeBotAI(bot) {
+            if (isCelebrating || isMatchFinished) return;
+
+            const targetAverage = (bot.botMin + bot.botMax) / 2;
+            const currentAverage = bot.totalThrows > 0 ? (bot.totalPoints / bot.totalThrows) : targetAverage;
+            let finalTurnScore = 0;
+
+            if (gameMode === 'X01') {
+                if (bot.score <= 170 && bot.score >= 2) {
+                    let checkoutProbability = 0.03; 
+
+                    if (bot.score <= 40 && bot.score % 2 === 0) {
+                        checkoutProbability = (targetAverage / 135); 
+                        if (currentAverage > bot.botMax) checkoutProbability *= 0.4; 
+                    } else if (bot.score > 100) {
+                        checkoutProbability = 0.008; 
+                    }
+
+                    if (Math.random() < checkoutProbability) {
+                        finalTurnScore = bot.score;
+                    } else {
+                        finalTurnScore = bot.score > 40 ? Math.floor(Math.random() * 25) + 15 : 0;
+                    }
+                } 
+                else {
+                    let dice = Math.random() * 100;
+                    let isOverperforming = currentAverage > (bot.botMax + 1);
+
+                    if (bot.botMin === 40) { 
+                        if (isOverperforming) {
+                            if (dice > 85) finalTurnScore = 45;
+                            else if (dice > 45) finalTurnScore = 26;
+                            else finalTurnScore = 11;
+                        } else {
+                            if (dice > 94) finalTurnScore = 100;
+                            else if (dice > 75) finalTurnScore = 60;
+                            else if (dice > 40) finalTurnScore = 45;
+                            else if (dice > 15) finalTurnScore = 41;
+                            else finalTurnScore = 26;
+                        }
+                    } else if (bot.botMin === 50) { 
+                        if (dice > 88) finalTurnScore = 100;
+                        else if (dice > 50) finalTurnScore = 60;
+                        else if (dice > 20) finalTurnScore = 45;
+                        else finalTurnScore = 26;
+                    } else { 
+                        if (dice > 80) finalTurnScore = 140;
+                        else if (dice > 40) finalTurnScore = 100;
+                        else if (dice > 10) finalTurnScore = 60;
+                        else finalTurnScore = 41;
+                    }
+                }
+
+                if (bot.score - finalTurnScore < 0 || bot.score - finalTurnScore === 1) {
+                    finalTurnScore = 0;
+                }
+                setTimeout(() => processScoreSubmission(finalTurnScore), 1400);
+            } 
+            else if (gameMode === 'ATC') {
+                let hitChance = (targetAverage / 160);
+                let hits = 0;
+                for (let i = 0; i < 3; i++) { if (Math.random() < hitChance) hits++; }
+                setTimeout(() => {
+                    bot.matchThrows++;
+                    bot.totalThrows++;
+                    bot.lastScore = hits;
+                    if (hits > 0) {
+                        bot.score += hits;
+                        if (bot.score > 21) bot.score = 21;
+                    }
+                    logTurn(bot.name, `Trafił cel ${hits}x (Postęp: ${bot.score}/21)`);
+                    if (bot.score === 21) triggerWinCelebration(bot);
+                    else nextPlayer();
+                }, 1400);
+            } else if (gameMode === 'RND') {
+                let hitChance = (targetAverage / 170);
+                let hits = 0;
+                for (let i = 0; i < 3; i++) { if (Math.random() < hitChance) hits++; }
+                setTimeout(() => {
+                    bot.matchThrows++;
+                    bot.totalThrows++;
+                    bot.lastScore = hits;
+                    bot.history.push(hits);
+                    logTurn(bot.name, `Rzucał w losowy cel: trafione ${hits}x`);
+                    nextPlayer();
+                }, 1400);
+            } else if (gameMode === '121') {
+                let successChance = (targetAverage / 220);
+                bot.turnsTotal++;
+                let closed = Math.random() < successChance;
+                setTimeout(() => {
+                    bot.matchThrows++;
+                    bot.totalThrows++;
+                    bot.lastScore = closed ? 3 : 0;
+                    if (closed) {
+                        logTurn(bot.name, `ZAMKNĄŁ ${bot.score}! Awans.`);
+                        bot.score += 1;
+                        bot.turnsTotal = 0;
+                        if (bot.score > 170) triggerWinCelebration(bot);
+                    } else if (bot.turnsTotal % 3 === 0) {
+                        logTurn(bot.name, `Nie zamknął ${bot.score} w 9 lotkach. Reset.`);
+                        bot.score = 121; 
+                        bot.turnsTotal = 0;
+                    } else {
+                        logTurn(bot.name, `Tur ${bot.turnsTotal % 3}/3 nieudana dla ${bot.score}`);
+                    }
+                    nextPlayer();
+                }, 1400);
+            }
+        }
+
+        function processScoreSubmission(score, isCheckout = false) {
+            if (isCelebrating || isMatchFinished) return;
+
+            turnHistory.push(JSON.parse(JSON.stringify(players)));
+            const activePlayer = players[currentPlayerIndex];
+
+            if (isCheckout && score === activePlayer.score) {
+                activePlayer.score = 0;
+            } else {
+                activePlayer.score -= score;
+            }
+            
+            // Zapis do statystyk per gracz
+            activePlayer.matchPoints += score;
+            activePlayer.totalPoints += score;
+            activePlayer.matchThrows++;
+            activePlayer.totalThrows++;
+            activePlayer.lastScore = score;
+
+            if (score === 180) {
+                activePlayer.count180s = (activePlayer.count180s || 0) + 1;
+                count180s++;
+            }
+            if (score > highestScore) {
+                highestScore = score;
+            }
+
+            document.getElementById('voice-display').innerText = score;
+            logTurn(activePlayer.name, `${score} pkt (Zostaje: ${activePlayer.score})`);
+            
+            if (isCheckout) {
+                successfulCheckouts++;
+                SoundEffects.play('win');
+                const board = document.getElementById('game-board');
+                if (board) board.classList.add('checkout-glow');
+                setTimeout(() => { if (board) board.classList.remove('checkout-glow'); }, 1000);
+            }
+            
+            if (score === 0 && !isCheckout) {
+                SoundEffects.play('bust');
+                speak(`${activePlayer.name} - furaż`, 'high');
+            } else if (!isCheckout) {
+                SoundEffects.play('success');
+                speak(`${activePlayer.name} - ${score} punktów. Zostaje ${activePlayer.score}`, 'normal');
+            }
+
+            if (activePlayer.score === 0) {
+                triggerWinCelebration(activePlayer);
+            } else {
+                nextPlayer();
+            }
+        }
+
+        function setBustManual() {
+            if (isCelebrating || isMatchFinished) return;
+            if (gameMode !== 'X01' || players[currentPlayerIndex].isBot) return;
+            SoundEffects.play('bust');
+            processScoreSubmission(0);
+            showToast("Zgłoszono furaż (0 punktów)", "warning");
+        }
+
+        function nextPlayer() {
+            currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+            
+            if (gameMode === 'ATC') updateAtcTargetDisplay();
+            if (gameMode === '121') {
+                if (!players[currentPlayerIndex].isBot) players[currentPlayerIndex].turnsTotal++;
+                update121TargetDisplay();
+            }
+            if (gameMode === 'RND') generateNextTrainingTarget();
+
+            render();
+            checkAndPropagateTurn();
+        }
+
+        function checkAndPropagateTurn() {
+            if (isCelebrating || isMatchFinished) return;
+            const p = players[currentPlayerIndex];
+            const dot = document.getElementById('voice-dot');
+            const status = document.getElementById('voice-status');
+
+            if (p.isBot) {
+                deactivateVoiceRecognition();
+                dot.className = "w-3 h-3 rounded-full mr-3 bg-amber-500 animate-pulse";
+                status.innerText = "Bot analizuje tarczę...";
+                status.className = "text-amber-500 text-xs font-black uppercase tracking-widest";
+                executeBotAI(p);
+            } else {
+                dot.className = "w-3 h-3 rounded-full mr-3 bg-emerald-500 animate-ping";
+                status.innerText = "Słucham wyników...";
+                status.className = "text-emerald-400 text-xs font-black uppercase tracking-widest";
+                activateVoiceRecognition();
+                speak(`Tura gracza: ${p.name}`, 'normal');
+            }
+        }
+
+        function generateNextTrainingTarget() {
+            if (players[currentPlayerIndex].isBot) return;
+            const sectors = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,25];
+            const types = ['S', 'D', 'T'];
+            
+            currentTrainingTarget = sectors[Math.floor(Math.random() * sectors.length)];
+            currentTrainingTargetType = currentTrainingTarget === 25 ? 'S' : types[Math.floor(Math.random() * types.length)];
+            
+            if (currentTrainingTarget === 25 && currentTrainingTargetType === 'D') currentTrainingTargetType = 'S'; 
+
+            document.getElementById('checkout-suggestion').innerText = `Celuj w: ${currentTrainingTargetType}${currentTrainingTarget === 25 ? 'BULL' : currentTrainingTarget}`;
+        }
+
+        function updateAtcTargetDisplay() {
+            const p = players[currentPlayerIndex];
+            const tName = p.score === 21 ? "BULLSEYE" : `${atcType === 'singles' ? 'Single' : 'Double'} ${p.score}`;
+            document.getElementById('checkout-suggestion').innerText = `Aktualny cel ATC: ${tName}`;
+        }
+
+        function update121TargetDisplay() {
+            const p = players[currentPlayerIndex];
+            document.getElementById('checkout-suggestion').innerText = `Zamknij licznik: ${p.score}`;
+        }
+
+        function submitTrainingHits(hits) {
+            const p = players[currentPlayerIndex];
+            turnHistory.push(JSON.parse(JSON.stringify(players)));
+
+            p.matchThrows++;
+            p.totalThrows++;
+            p.lastScore = hits;
+
+            if (gameMode === 'RND') {
+                SoundEffects.play('success');
+                p.history.push(hits);
+                logTurn(p.name, `Trening RND: Trafiono ${hits}x cel`);
+                nextPlayer();
+            } else if (gameMode === 'ATC') {
+                SoundEffects.play('success');
+                if (hits > 0) {
+                    p.score += hits;
+                    if (p.score > 21) p.score = 21;
+                }
+                logTurn(p.name, `Trening ATC: Trafiono ${hits}x -> Cel: ${p.score}`);
+                if (p.score === 21) triggerWinCelebration(p);
+                else nextPlayer();
+            } else if (gameMode === '121') {
+                if (hits === 3) { 
+                    SoundEffects.play('success');
+                    logTurn(p.name, `ZAMKNIĘTE ${p.score}! Wyższy poziom.`);
+                    p.score++;
+                    p.turnsTotal = 0;
+                    if (p.score > 170) triggerWinCelebration(p);
+                    else nextPlayer();
+                } else {
+                    SoundEffects.play('bust');
+                    if (p.turnsTotal >= 3) {
+                        logTurn(p.name, `Koniec prób na ${p.score}. Spadek do 121.`);
+                        p.score = 121;
+                        p.turnsTotal = 0;
+                    } else {
+                        logTurn(p.name, `Próba ${p.turnsTotal}/3 nieudana.`);
+                    }
+                    nextPlayer();
+                }
+            }
+        }
+
+        function activateVoiceRecognition() {
+            shouldBeListening = true;
+            if (!recognition || isCelebrating || isMatchFinished) return;
+            try { recognition.start(); } catch (e) {}
+        }
+
+        function deactivateVoiceRecognition() {
+            shouldBeListening = false;
+            if (!recognition) return;
+            try { recognition.stop(); } catch (e) {}
+        }
+
+        if (recognition) {
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript.toLowerCase().trim();
+                document.getElementById('voice-status').innerText = `Usłyszałem: "${transcript}"`;
+                
+                if (transcript.includes("cofnij")) {
+                    undoLastMove();
+                    return;
+                }
+                if (transcript.includes("furaż") || transcript.includes("błąd") || transcript.includes("zero") || transcript.includes("spudłować")) {
+                    if (gameMode === 'X01') processScoreSubmission(0);
+                    return;
+                }
+
+                if (gameMode === 'X01') {
+                    const activePlayer = players[currentPlayerIndex];
+                    const checkoutWords = ['czek', 'check', 'checkout', 'koniec', 'finish', 'zakończ', 'zamknij', 'out', 'double'];
+                    
+                    if (checkoutWords.some(word => transcript.includes(word))) {
+                        if (activePlayer.score <= 170 && activePlayer.score >= 2 && !bogeyNumbers.includes(activePlayer.score)) {
+                            checkoutAttempts++;
+                            const checkoutScore = activePlayer.score;
+                            speak(`Checkout! ${checkoutTable[checkoutScore]}`, 'high');
+                            processScoreSubmission(checkoutScore, true);
+                            return;
+                        } else {
+                            showToast("Nie możesz zakończyć - nieprawidłowy wynik!", "error");
+                            speak("Nie można zakończyć", 'high');
+                            return;
+                        }
+                    }
+
+                    const parsedNumber = parseInt(transcript.replace(/\D/g, ''));
+                    if (!isNaN(parsedNumber) && parsedNumber <= 180) {
+                        processScoreSubmission(parsedNumber);
+                    } else {
+                        showToast(`Niepoprawna wartość punktowa: ${transcript}`, "error");
+                    }
+                } 
+                else {
+                    if (transcript.includes("zero") || transcript.includes("0")) submitTrainingHits(0);
+                    else if (transcript.includes("jeden") || transcript.includes("raz") || transcript.includes("1")) submitTrainingHits(1);
+                    else if (transcript.includes("dwa") || transcript.includes("2")) submitTrainingHits(2);
+                    else if (transcript.includes("trzy") || transcript.includes("3")) submitTrainingHits(3);
+                }
+            };
+
+            recognition.onend = () => {
+                if (shouldBeListening && !isCelebrating && !isMatchFinished) {
+                    try { recognition.start(); } catch (e) {}
+                }
+            };
+        }
+
+        function appendNum(num) {
+            const input = document.getElementById('manual-score-input');
+            if (input.value.length < 3) {
+                input.value += num;
+                SoundEffects.play('key');
+            }
+            document.getElementById('voice-display').innerText = input.value;
+        }
+
+        function clearManualInput() {
+            SoundEffects.play('click');
+            document.getElementById('manual-score-input').value = "";
+            document.getElementById('voice-display').innerText = "---";
+        }
+
+        function submitManualScore() {
+            const input = document.getElementById('manual-score-input');
+            const val = parseInt(input.value);
+
+            if (isNaN(val)) return;
+
+            if (gameMode === 'X01') {
+                if (val <= 180) {
+                    processScoreSubmission(val);
+                } else {
+                    SoundEffects.play('bust');
+                    showToast("Maksymalny wynik tury to 180!", "error");
+                }
+            } else {
+                if (val <= 3) {
+                    submitTrainingHits(val);
+                } else {
+                    SoundEffects.play('bust');
+                    showToast("Wpisz trafienia w zakresie od 0 do 3", "warning");
+                }
+            }
+            clearManualInput();
+        }
+
+        function undoLastMove() {
+            if (turnHistory.length > 0) {
+                SoundEffects.play('click');
+                players = turnHistory.pop();
+                currentPlayerIndex = (currentPlayerIndex - 1 + players.length) % players.length;
+                
+                const log = document.getElementById('game-log');
+                log.innerHTML = `<div class="text-rose-400 font-bold">↺ Cofnięto ostatnią turę rozkazem systemowym</div>` + log.innerHTML;
+                
+                render();
+                checkAndPropagateTurn();
+                showToast("Cofnięto rzut", "warning");
+                speak("Cofnięto ostatni rzut", 'high');
+            } else {
+                showToast("Brak rzutów do cofnięcia", "error");
+            }
+        }
+
+        function logTurn(name, action) {
+            const log = document.getElementById('game-log');
+            log.innerHTML = `<div><span class="text-slate-500">[${new Date().toLocaleTimeString()}]</span> <strong class="text-slate-300">${name}</strong>: ${action}</div>` + log.innerHTML;
+        }
+
+        // ============================================
+        // 🎇 CELEBRACJA WYGRANEJ / FAJERWERKI
+        // ============================================
+        function triggerWinCelebration(player) {
+            isCelebrating = true;
             deactivateVoiceRecognition();
-            document.getElementById('game-board').classList.add('hidden');
-            document.getElementById('lobby').classList.remove('hidden');
-            speak('Powrót do menu','normal');
+            SoundEffects.play('win');
+            
+            player.legs++; 
+            
+            if (player.legs >= legsToWinMatch) {
+                isMatchFinished = true;
+                document.getElementById('celebration-title').innerText = "🏆 MECZ ZAKOŃCZONY! ZWYCIĘSTWO! 🏆";
+                speak(`Mecz zakończony! Wygrywa ${player.name}!`, 'high');
+            } else {
+                document.getElementById('celebration-title').innerText = "LEG ZDOBYTY!";
+                speak(`Leg zdobyty przez ${player.name}!`, 'high');
+            }
+
+            document.getElementById('celebration-winner').innerText = player.name;
+            
+            const totalDarts = player.matchThrows * 3;
+            const computedAvg = player.matchThrows > 0 ? (player.matchPoints / player.matchThrows).toFixed(2) : "0.00";
+            
+            document.getElementById('celebration-stats').innerHTML = `
+                <div>• Tryb gry: ${gameMode}</div>
+                <div>• Wykorzystane lotki w legu: ${totalDarts}</div>
+                <div>• Średnia meczowa: ${computedAvg}</div>
+                <div class="text-sky-400 font-bold mt-2">• Stan legów w meczu: ${player.legs} / ${legsToWinMatch}</div>
+            `;
+            
+            document.getElementById('celebration-overlay').classList.remove('hidden');
+
+            initFireworksSystem();
+            if (fireworksSystem) {
+                fireworksSystem.start();
+            }
+
+            const overlay = document.getElementById('celebration-overlay');
+            overlay.classList.add('screen-shake');
+            setTimeout(() => overlay.classList.remove('screen-shake'), 500);
+
+            overlay.classList.add('golden-flash');
+            setTimeout(() => overlay.classList.remove('golden-flash'), 1000);
+
+            countdownSecondsLeft = 5;
+            const ring = document.getElementById('countdown-ring');
+            const textDisplay = document.getElementById('countdown-text');
+            
+            ring.style.strokeDashoffset = 0;
+            textDisplay.innerText = countdownSecondsLeft;
+
+            if (countdownTimer) clearInterval(countdownTimer);
+            
+            countdownTimer = setInterval(() => {
+                countdownSecondsLeft--;
+                if (countdownSecondsLeft <= 0) {
+                    clearInterval(countdownTimer);
+                    closeCelebration();
+                } else {
+                    textDisplay.innerText = countdownSecondsLeft;
+                    const offset = totalCircleLength - (totalCircleLength * (countdownSecondsLeft / 5));
+                    ring.style.strokeDashoffset = offset;
+                }
+            }, 1000);
         }
-    }
-}
 
-// ════════════════════════════════════════════════════════
-//  TOAST
-// ════════════════════════════════════════════════════════
-function showToast(msg,type='info'){
-    const c=document.getElementById('toast-container');
-    const t=document.createElement('div');
-    t.className=`toast ${type} p-3 rounded text-xs transition-all duration-300 translate-x-4 opacity-0`;
-    t.style.cssText='pointer-events:none;';
-    t.innerText=msg;
-    c.appendChild(t);
-    setTimeout(()=>{ t.classList.remove('translate-x-4','opacity-0'); },10);
-    setTimeout(()=>{
-        t.classList.add('opacity-0','translate-x-4');
-        setTimeout(()=>t.remove(),300);
-    },3000);
-}
-
-// ════════════════════════════════════════════════════════
-//  KEYBOARD SHORTCUTS
-// ════════════════════════════════════════════════════════
-window.addEventListener('keydown',e=>{
-    if(document.activeElement?.tagName==='INPUT')return;
-    const k=e.key;
-    if(k>='0'&&k<='9'){e.preventDefault();appendNum(parseInt(k));}
-    else if(k==='Enter'){e.preventDefault();submitManualScore();}
-    else if(k==='Backspace'||k==='Delete'){e.preventDefault();clearManualInput();}
-    else if((k==='z'&&e.ctrlKey)||k==='u'||k==='U'){e.preventDefault();undoLastMove();}
-    else if(k===' '||k==='b'||k==='B'){e.preventDefault();setBustManual();}
-    else if(k==='Escape'){e.preventDefault();openResetConfirm();}
-    else if(k==='c'||k==='C'){
-        e.preventDefault();
-        const ap=players[currentPlayerIndex];
-        if(gameMode==='X01'&&ap&&ap.score<=170&&ap.score>=2&&!bogeyNumbers.includes(ap.score)){
-            checkoutAttempts++;speak(`Checkout! ${checkoutTable[ap.score]}`,'high');
-            processScoreSubmission(ap.score,true);
+        function closeCelebration() {
+            SoundEffects.play('click');
+            if (countdownTimer) clearInterval(countdownTimer);
+            
+            if (fireworksSystem) {
+                fireworksSystem.stop();
+            }
+            
+            document.getElementById('celebration-overlay').classList.add('hidden');
+            isCelebrating = false;
+            
+            if (isMatchFinished) {
+                document.getElementById('game-board').classList.add('hidden');
+                document.getElementById('lobby').classList.remove('hidden');
+                speak("Powrót do menu głównego", 'normal');
+            } else {
+                legCount++;
+                initNewLegData();
+                updateBadgeInfo();
+                render();
+                checkAndPropagateTurn();
+                speak(`Rozpoczynamy leg numer ${legCount}`, 'normal');
+            }
         }
-    }
-});
 
-// ════════════════════════════════════════════════════════
-//  INIT
-// ════════════════════════════════════════════════════════
-selectGameMode('X01');
-setX01Points(501);
-</script>
+        let modalActionType = '';
+
+        function openResetConfirm() {
+            SoundEffects.play('click');
+            modalActionType = 'RESET';
+            document.getElementById('modal-title').innerText = "Czy na pewno chcesz zresetować cały mecz?";
+            document.getElementById('modal-desc').innerText = "Wszystkie ugrane legi oraz statystyki zostaną całkowicie wyzerowane.";
+            document.getElementById('confirm-modal').classList.remove('hidden');
+        }
+
+        function triggerExitRoute() {
+            SoundEffects.play('click');
+            modalActionType = 'EXIT';
+            document.getElementById('modal-title').innerText = "Czy chcesz zakończyć mecz?";
+            document.getElementById('modal-desc').innerText = "Spowoduje to natychmiastowe wyjście z gry i utratę punktów.";
+            document.getElementById('confirm-modal').classList.remove('hidden');
+        }
+
+        function closeConfirmModal(confirm) {
+            SoundEffects.play('click');
+            document.getElementById('confirm-modal').classList.add('hidden');
+            if (confirm) {
+                if (modalActionType === 'RESET') {
+                    legCount = 1;
+                    players.forEach(p => {
+                        p.legs = 0;
+                        p.totalPoints = 0;
+                        p.totalThrows = 0;
+                        p.lastScore = "-";
+                        p.count180s = 0;
+                    });
+                    initNewLegData();
+                    updateBadgeInfo();
+                    render();
+                    checkAndPropagateTurn();
+                    showToast("Zresetowano konfigurację meczu", "info");
+                    speak("Mecz zresetowany", 'high');
+                } else if (modalActionType === 'EXIT') {
+                    deactivateVoiceRecognition();
+                    document.getElementById('game-board').classList.add('hidden');
+                    document.getElementById('lobby').classList.remove('hidden');
+                    speak("Powrót do menu", 'normal');
+                }
+            }
+        }
+
+        function showToast(msg, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            let bg = 'bg-slate-900 border-slate-800 text-white';
+            if (type === 'error') bg = 'bg-rose-950/90 border-rose-800 text-rose-300';
+            if (type === 'warning') bg = 'bg-amber-950/90 border-amber-800 text-amber-300';
+            
+            toast.className = `${bg} p-3 rounded-xl border text-xs font-semibold shadow-2xl transition-all duration-300 translate-y-2 opacity-0 flex items-center justify-between`;
+            toast.innerHTML = `<span>${msg}</span>`;
+            
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y--2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        // ============================================
+        // ⌨️ OBSŁUGA SKRÓTÓW KLAWIATUROWYCH
+        // ============================================
+        window.addEventListener('keydown', (e) => {
+            if (document.activeElement && document.activeElement.tagName === 'INPUT') {
+                return; 
+            }
+            
+            const key = e.key;
+
+            if (key >= '0' && key <= '9') {
+                e.preventDefault();
+                appendNum(parseInt(key));
+            }
+            else if (key === 'Enter') {
+                e.preventDefault();
+                submitManualScore();
+            }
+            else if (key === 'Backspace' || key === 'Delete') {
+                e.preventDefault();
+                clearManualInput();
+            }
+            else if ((key === 'z' && e.ctrlKey) || key === 'u' || key === 'U') {
+                e.preventDefault();
+                undoLastMove();
+            }
+            else if (key === ' ' || key === 'b' || key === 'B') {
+                e.preventDefault();
+                setBustManual();
+            }
+            else if (key === 'Escape') {
+                e.preventDefault();
+                openResetConfirm();
+            }
+            else if (key === 'c' || key === 'C') {
+                e.preventDefault();
+                const activePlayer = players[currentPlayerIndex];
+                if (gameMode === 'X01' && activePlayer.score <= 170 && activePlayer.score >= 2 && !bogeyNumbers.includes(activePlayer.score)) {
+                    checkoutAttempts++;
+                    const checkoutScore = activePlayer.score;
+                    speak(`Checkout! ${checkoutTable[checkoutScore]}`, 'high');
+                    processScoreSubmission(checkoutScore, true);
+                }
+            }
+        });
+
+        // Inicjalizacja domyślnego trybu
+        selectGameMode('X01');
+        setX01Points(501);
+    </script>
 </body>
 </html>
